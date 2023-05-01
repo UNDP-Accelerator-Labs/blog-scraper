@@ -8,5 +8,5 @@ module.exports = async function (context, myTimer) {
         context.log('Blog scrapper is running late!');
     }
     context.log('Blog scrapper started! ', timeStamp);   
-    extractBlogUrl()
+    // extractBlogUrl()
 };
