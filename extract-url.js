@@ -10,9 +10,9 @@ const { checkUrlQuery, saveQuery } = require('./query');
 const extractAndSaveData = require('./saveToDb');
 const { extractLanguageFromUrl } = require('./utils');
 
-const { 
-  production
-} = process.env;
+// const { 
+  const production = true;
+// } = process.env;
 
 // Set up the Chrome options
 const options = new chrome.Options();

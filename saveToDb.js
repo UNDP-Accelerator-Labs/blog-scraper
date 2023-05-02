@@ -8,9 +8,9 @@ const { saveQuery, saveAsArrayQuery } = require('./query');
 const getPdfMetadataFromUrl = require('./pdf');
 const getWordDocumentMetadataFromUrl = require('./docx');
 
-const { 
-  production
-} = process.env;
+// const { 
+  const production = true;
+// } = process.env;
 
 // Set up the Chrome options
 const options = new chrome.Options();
