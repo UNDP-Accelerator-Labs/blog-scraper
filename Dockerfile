@@ -23,4 +23,4 @@ ENV PORT=80
 ENV DB_PORT=5432
 
 # Start the application
-CMD ["npm", "start"]
+CMD ["func", "start"]
