@@ -46,6 +46,9 @@ RUN LATEST=$(wget -q -O - http://chromedriver.storage.googleapis.com/LATEST_RELE
 
 ENV PATH="/usr/local/bin/chromedriver:${PATH}"
 
+# 3. Install selenium in Python
+RUN pip install -U selenium
+
 # Set the working directory to /app
 WORKDIR /app
 
