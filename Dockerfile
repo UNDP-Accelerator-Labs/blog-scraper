@@ -28,29 +28,27 @@ RUN apt-get update \
         unixodbc-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# 1. Install Chrome (root image is debian)
-# See https://stackoverflow.com/questions/49132615/installing-chrome-in-docker-file
-ARG CHROME_VERSION="google-chrome-stable"
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-  && echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
-  && apt-get update -qqy \
-  && apt-get -qqy install \
-    ${CHROME_VERSION:-google-chrome-stable} \
-  && rm /etc/apt/sources.list.d/google-chrome.list \
-  && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+# 2) Install latest stable Chrome
+# https://gerg.dev/2021/06/making-chromedriver-and-chrome-versions-match-in-a-docker-image/
+RUN echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | \
+    tee -a /etc/apt/sources.list.d/google.list && \
+    wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | \
+    apt-key add - && \
+    apt-get update && \
+    apt-get install -y google-chrome-stable libxss1
 
-# 2. Install Chrome driver used by Selenium
-RUN LATEST=$(wget -q -O - http://chromedriver.storage.googleapis.com/LATEST_RELEASE) && \
-    wget http://chromedriver.storage.googleapis.com/$LATEST/chromedriver_linux64.zip && \
-    unzip chromedriver_linux64.zip && ln -s $PWD/chromedriver /usr/local/bin/chromedriver
-
-ENV PATH="/usr/local/bin/chromedriver:${PATH}"
-
-# 3. Install selenium in Python
-RUN pip install -U selenium
+# 3) Install the Chromedriver version that corresponds to the installed major Chrome version
+# https://blogs.sap.com/2020/12/01/ui5-testing-how-to-handle-chromedriver-update-in-docker-image/
+RUN google-chrome --version | grep -oE "[0-9]{1,10}.[0-9]{1,10}.[0-9]{1,10}" > /tmp/chromebrowser-main-version.txt
+RUN wget --no-verbose -O /tmp/latest_chromedriver_version.txt https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$(cat /tmp/chromebrowser-main-version.txt)
+RUN wget --no-verbose -O /tmp/chromedriver_linux64.zip https://chromedriver.storage.googleapis.com/$(cat /tmp/latest_chromedriver_version.txt)/chromedriver_linux64.zip && rm -rf /opt/selenium/chromedriver && unzip /tmp/chromedriver_linux64.zip -d /opt/selenium && rm /tmp/chromedriver_linux64.zip && mv /opt/selenium/chromedriver /opt/selenium/chromedriver-$(cat /tmp/latest_chromedriver_version.txt) && chmod 755 /opt/selenium/chromedriver-$(cat /tmp/latest_chromedriver_version.txt) && ln -fs /opt/selenium/chromedriver-$(cat /tmp/latest_chromedriver_version.txt) /usr/bin/chromedriver
 
 # Set the working directory to /app
 WORKDIR /app
+
+# 3. Install selenium 
+RUN npm config set unsafe-perm true
+RUN npm i selenium-webdriver
 
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
@@ -64,6 +62,7 @@ COPY . .
 # Expose the port that the application listens on
 EXPOSE 80
 EXPOSE 5432
+EXPOSE 8080
 
 # Set the environment variables
 ENV NODE_ENV=production
