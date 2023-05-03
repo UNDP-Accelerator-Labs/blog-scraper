@@ -19,11 +19,11 @@ ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
 # 0. Install essential packages
 RUN apt-get update \
     && apt-get install -y \
-        build-essential \
         cmake \
         git \
         wget \
         unzip \
+        unixodbc-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # 1. Install Chrome (root image is debian)
