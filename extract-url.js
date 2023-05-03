@@ -19,8 +19,8 @@ const options = new chrome.Options();
 // // if(production == 'true' ){
   options.addArguments('--headless'); // Run Chrome in headless mode (without a UI)
   options.addArguments('--window-size=1920,1080'); // Set the window size
-  options.add_argument('--no-sandbox')
-  options.add_argument('--disable-dev-shm-usage')
+  options.addArguments('--no-sandbox')
+  options.addArguments('--disable-dev-shm-usage')
 // }
 // else{
 //   options.addArguments('--start-maximized'); // Maximize the window
@@ -151,5 +151,5 @@ await driver.quit();
   // getFn();
 // }
 
-
-module.exports = extractBlogUrl;
+extractBlogUrl()
+// module.exports = extractBlogUrl;

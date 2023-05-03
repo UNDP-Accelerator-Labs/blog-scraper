@@ -8,7 +8,7 @@ const { Pool } = require('pg');
    const DB_NAME = 'blogs';
    const DB_PASS = 'acclabsblogs@2023';
    const DB_PORT = '5432';
-   const production = true;
+   const production = false;
 
    const L_DB_USER ='postgres';
    const L_DB_HOST = 'localhost';
@@ -19,10 +19,10 @@ const { Pool } = require('pg');
 console.log('production',production, DB_USER  )
 
 const pool = new Pool({
-  user: production  ? DB_USER : L_DB_USER,
-  host: production  ? DB_HOST : L_DB_HOST,
-  database: production  ? DB_NAME : L_DB_NAME,
-  password: production  ? DB_PASS : L_DB_PASS,
+  user:  L_DB_USER,
+  host: L_DB_HOST,
+  database: L_DB_NAME,
+  password:  L_DB_PASS,
   port: DB_PORT, 
 });
 
@@ -44,9 +44,28 @@ pool.query(`
     deleted BOOLEAN DEFAULT FALSE
   )
 `).then(res => {
-  console.log('Table created successfully');
+  console.log('Article Table created successfully');
+
+    pool.query(`
+      CREATE TABLE IF NOT EXISTS public.links (
+        id SERIAL PRIMARY KEY,
+        article_id integer NOT NULL,
+        href text NULL COLLATE pg_catalog."default",
+        linktext text NULL COLLATE pg_catalog."default",
+        CONSTRAINT links_article_id_fkey FOREIGN KEY (article_id)
+        REFERENCES articles (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+      )
+      `).then(res => {
+        console.log('Href Table created successfully');
+      }).catch(err => {
+        console.error('Error href creating table:', err);
+      });
+
 }).catch(err => {
   console.error('Error creating table:', err);
 });
+
 
 module.exports = pool;

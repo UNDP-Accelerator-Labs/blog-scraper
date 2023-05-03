@@ -1,36 +1,51 @@
-const docx = require('docx');
+const fs = require('fs');
 const request = require('request');
+const pdfParser = require('pdf-parse');
+const docxPdf = require('docx-pdf');
 
-function getWordDocumentMetadataFromUrl(url) {
+function getDocxMetadataFromUrl(url) {
   return new Promise((resolve, reject) => {
-    const docxBuffer = [];
+    const docxPath = 'temp.docx';
+    const pdfPath = 'temp.pdf';
 
-    request(url)
-      .on('data', (chunk) => {
-        docxBuffer.push(chunk);
-      })
-      .on('end', () => {
-        const buffer = Buffer.concat(docxBuffer);
+    const writeStream = fs.createWriteStream(docxPath);
+    writeStream.on('finish', () => {
+      docxPdf(docxPath, pdfPath, (err) => {
+        if (err) {
+          return reject(err);
+        }
 
-        const doc = new docx.Document(buffer);
+        fs.readFile(pdfPath, (err, buffer) => {
+          if (err) {
+            return reject(err);
+          }
 
-        const metadata = {
-          title: doc.title,
-          author: doc.author,
-          creationDate: doc.creationDate,
-          lastModifiedBy: doc.lastModifiedBy,
-          lastModifiedDate: doc.lastModifiedDate,
-          keywords: doc.keywords,
-          description: doc.description,
-          content: doc.getText(),
-        };
-        console.log('metadata', metadata)
-        resolve(metadata);
-      })
-      .on('error', (err) => {
-        reject(err);
+          pdfParser(buffer).then((pdf) => {
+            const { info, metadata, text } = pdf;
+            const json = { info, metadata, text };
+
+            // Delete the downloaded files
+            fs.unlink(docxPath, (err) => {
+              if (err) {
+                console.error(`Error deleting ${docxPath}`, err);
+              }
+            });
+            fs.unlink(pdfPath, (err) => {
+              if (err) {
+                console.error(`Error deleting ${pdfPath}`, err);
+              }
+            });
+
+            resolve(json);
+          }).catch((err) => {
+            reject(err);
+          });
+        });
       });
+    });
+
+    request({ url, encoding: null, timeout: 10000 }).pipe(writeStream);
   });
 }
 
-module.exports = getWordDocumentMetadataFromUrl;
+module.exports = getDocxMetadataFromUrl;
