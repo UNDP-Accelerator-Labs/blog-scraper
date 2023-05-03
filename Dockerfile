@@ -24,7 +24,6 @@ RUN apt-get update \
         git \
         wget \
         unzip \
-        unixodbc-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # 1. Install Chrome (root image is debian)
