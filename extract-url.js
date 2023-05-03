@@ -116,7 +116,7 @@ for (let i = 0; i < countries.length; i++) {
     
     for (let k = 0; k < urls.length; k++) {
       const url = await urls[k].getAttribute('href');
-      console.log('url', url);
+      // console.log('url', url);
       validUrls.push(url);
     }
 
