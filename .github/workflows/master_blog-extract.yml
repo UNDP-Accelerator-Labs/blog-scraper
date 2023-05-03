@@ -23,14 +23,14 @@ jobs:
       uses: docker/login-action@v1
       with:
         registry: https://index.docker.io/v1/
-        username: ${{ secrets.AzureAppService_ContainerUsername_85c5201e616b473d898085a3fd896d41 }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_fa4029753db24689b76e1378c52d860e }}
+        username: ${{ secrets.AzureAppService_ContainerUsername_d2491d5d2e7848c8b93878d0fe786ea9 }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_fc926520a0d445dfaa0ee5f4007aa89d }}
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_85c5201e616b473d898085a3fd896d41 }}/my-blog-scrapper:${{ github.sha }}
+        tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_d2491d5d2e7848c8b93878d0fe786ea9 }}/my-blog-scrapper:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
@@ -47,5 +47,5 @@ jobs:
       with:
         app-name: 'blog-extract'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_b080c2eb0cfe496bbcba77e7ff53e616 }}
-        images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_85c5201e616b473d898085a3fd896d41 }}/my-blog-scrapper:${{ github.sha }}'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_109f238fa3ea4693a3a1253d52fd49c8 }}
+        images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_d2491d5d2e7848c8b93878d0fe786ea9 }}/my-blog-scrapper:${{ github.sha }}'
