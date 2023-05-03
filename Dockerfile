@@ -16,9 +16,11 @@ RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash && apt-get install -
 
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
 
+ARG DEBIAN_FRONTEND=noninteractive
 # 0. Install essential packages
 RUN apt-get update \
     && apt-get install -y \
+        build-essential \
         cmake \
         git \
         wget \
