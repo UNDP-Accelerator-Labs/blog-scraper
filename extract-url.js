@@ -19,7 +19,8 @@ const options = new chrome.Options();
 // // if(production == 'true' ){
   options.addArguments('--headless'); // Run Chrome in headless mode (without a UI)
   options.addArguments('--window-size=1920,1080'); // Set the window size
-  // options.addArguments('--disable-gpu'); // Disable the GPU
+  options.add_argument('--no-sandbox')
+  options.add_argument('--disable-dev-shm-usage')
 // }
 // else{
 //   options.addArguments('--start-maximized'); // Maximize the window
