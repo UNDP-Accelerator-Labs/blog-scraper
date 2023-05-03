@@ -16,7 +16,7 @@ const { Pool } = require('pg');
   const L_DB_PASS ='     ';
 // } = process.env;
 
-console.log('production',production, DB_USER  )
+console.log('production',production, production  ? DB_USER : L_DB_USER  )
 
 const pool = new Pool({
  user: production  ? DB_USER : L_DB_USER,

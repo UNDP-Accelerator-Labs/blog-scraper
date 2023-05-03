@@ -151,5 +151,5 @@ await driver.quit();
   // getFn();
 // }
 
-extractBlogUrl()
-// module.exports = extractBlogUrl;
+// extractBlogUrl()
+module.exports = extractBlogUrl;
