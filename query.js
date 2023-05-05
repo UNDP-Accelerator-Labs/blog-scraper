@@ -4,13 +4,13 @@ const checkUrlQuery = url => ({
     values: [url],
   });
 
-const saveQuery = (url, countryName, languageName, title, postedDate, content, article_type, posted_date_str) =>   ({
+const saveQuery = (url, countryName, languageName, title, postedDate, content, article_type, posted_date_str, html_content) =>   ({
 text: `
-    INSERT INTO articles (url, country, language, title, posted_date, content, article_type, posted_date_str)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    INSERT INTO articles (url, country, language, title, posted_date, content, article_type, posted_date_str, all_html_content)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     RETURNING *
 `,
-values: [url, countryName, languageName, title, postedDate, content, article_type, posted_date_str],
+values: [url, countryName, languageName, title, postedDate, content, article_type, posted_date_str, html_content],
 });
 
 const saveAsArrayQuery = articles => ({

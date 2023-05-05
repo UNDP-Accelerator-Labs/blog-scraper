@@ -2,27 +2,25 @@ require('dotenv').config();
 const { Pool } = require('pg');
 
 // Set up the connection to the database
-// const { 
-  const DB_USER = 'undpacclab@acclabs';
-  const DB_HOST = 'acclabs.postgres.database.azure.com';
-  const DB_NAME = 'blogs';
-  const DB_PASS = 'acclabsblogs@2023';
-  const DB_PORT = '5432';
-  const production = true;
+const { 
+  DB_USER, 
+  DB_HOST,
+  DB_NAME,
+  DB_PASS,
+  DB_PORT,
+  production,
 
-  const L_DB_USER ='postgres';
-  const L_DB_HOST = 'localhost';
-  const L_DB_NAME ='acclab_website_extract';
-  const L_DB_PASS ='     ';
-// } = process.env;
-
-console.log('production',production, production  ? DB_USER : L_DB_USER  )
+  L_DB_USER,
+  L_DB_HOST,
+  L_DB_NAME,
+  L_DB_PASS,
+} = process.env;
 
 const pool = new Pool({
- user: production  ? DB_USER : L_DB_USER,
- host: production  ? DB_HOST : L_DB_HOST,
- database: production  ? DB_NAME : L_DB_NAME,
- password: production  ? DB_PASS : L_DB_PASS,
+ user: production == 'true'   ? DB_USER : L_DB_USER,
+ host: production == 'true'   ? DB_HOST : L_DB_HOST,
+ database: production == 'true'   ? DB_NAME : L_DB_NAME,
+ password: production == 'true'   ? DB_PASS : L_DB_PASS,
  port: DB_PORT, 
 });
 
@@ -38,6 +36,7 @@ pool.query(`
     posted_date_str VARCHAR(50),
     content TEXT,
     article_type TEXT,
+    all_html_content TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP,

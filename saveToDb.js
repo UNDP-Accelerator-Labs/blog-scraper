@@ -3,7 +3,7 @@ const {Builder, By, Key, until} = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 const chromedriver = require('chromedriver');
 const pool =  require('./db');
-const { evaluateArticleType, extractLanguageFromUrl, extractPdfContent } = require('./utils');
+const { evaluateArticleType, extractLanguageFromUrl, article_types } = require('./utils');
 const { saveQuery, saveHrefLinks } = require('./query');
 const getPdfMetadataFromUrl = require('./pdf');
 const getWordDocumentMetadataFromUrl = require('./docx');
@@ -35,7 +35,7 @@ const driver = new Builder()
 
 // sample word doc 
 // let docurl = 'https://popp.undp.org/_layouts/15/WopiFrame.aspx?sourcedoc=/UNDP_POPP_DOCUMENT_LIBRARY/Public/HR_Non-Staff_International%20Personnel%20Services%20Agreement_IPSA.docx&action=default'
-const extractAndSaveData = async (url) => {
+const extractAndSaveData = async (url ) => {
   // Navigate to the URL
   await driver.get(url);
 
@@ -44,6 +44,7 @@ const extractAndSaveData = async (url) => {
   let country = '';
   let contentElements = [];
   let content = '';
+
   let languageName = await extractLanguageFromUrl(url) ||  'en';
   let postedDateStr = ''
   let archorTags = [];
@@ -51,9 +52,9 @@ const extractAndSaveData = async (url) => {
   
 
   let article_type = await evaluateArticleType(url);
+  let html_content = await driver.findElement(By.tagName('body')).getText() || null;
 
   if(article_type == 'document'){
-    console.log('document')
     if(url.includes('.pdf')){
       // Extract pdf content and metadata
       const pdfContent = await getPdfMetadataFromUrl(url);
@@ -85,13 +86,13 @@ const extractAndSaveData = async (url) => {
   else if ( article_type == 'project'){
 
     try {
-      articleTitle = await driver.findElement(By.css('.coh-inline-element.title-heading')).getText();
+      articleTitle = await driver.findElement(By.css('.coh-inline-element.title-heading')).getText() | null;
     } catch(err){ 
       articleTitle = ''
     }
     
     try{
-      postedDateStr = await driver.findElement(By.css('.coh-inline-element.column.publication-card__title h6')).getText() ;
+      postedDateStr = await driver.findElement(By.css('.coh-inline-element.column.publication-card__title h6')).getText() | null;
     }
     catch(err){
       postedDateStr = ''
@@ -127,11 +128,11 @@ const extractAndSaveData = async (url) => {
   }
   else if (article_type == 'publications'){
     
-    articleTitle = await driver.findElement(By.css('.coh-inline-element.column')).getText();
-    postedDateStr = await driver.findElement(By.css('.coh-inline-element.column.publication-card__title h6')).getText();
+    articleTitle = await driver.findElement(By.css('.coh-inline-element.column')).getText() | null;
+    postedDateStr = await driver.findElement(By.css('.coh-inline-element.column.publication-card__title h6')).getText() | null;
     postedDate = isNaN(new Date(postedDateStr)) ? null :  new Date(postedDateStr);
     //Extract country
-    country = await driver.findElement(By.css('.site-title a')).getText();
+    country = await driver.findElement(By.css('.site-title a')).getText() | null;
 
     // Extract the content
     try{
@@ -149,15 +150,15 @@ const extractAndSaveData = async (url) => {
     
   }
   else if (url.includes('.medium.com')){
-    postedDateStr = await driver.findElement(By.css('.pw-published-date')).getText();
+    postedDateStr = await driver.findElement(By.css('.pw-published-date')).getText() | null;
     postedDate = isNaN(new Date(postedDateStr)) ? null :  new Date(postedDateStr);
     languageName = '';
 
     // // Extract the article title
-    articleTitle = await driver.findElement(By.className('pw-post-title')).getText();
+    articleTitle = await driver.findElement(By.className('pw-post-title')).getText() | null;
 
     // //Extract country
-    country = await driver.findElement(By.css('.bk a')).getText();
+    country = await driver.findElement(By.css('.bk a')).getText() | null;
 
     // // Extract the content
     try{
@@ -185,16 +186,16 @@ const extractAndSaveData = async (url) => {
     }
 
   }
-  else {
+  else if (article_types.filter(p => url.includes(p)).length > 0) {
     // Extract the article title
-    articleTitle = await driver.findElement(By.className('article-title')).getText();
+    articleTitle = await driver.findElement(By.className('article-title')).getText() || null;
 
     // Extract the posted date
-    postedDateStr = await driver.findElement(By.className('posted-date')).getText();
+    postedDateStr = await driver.findElement(By.className('posted-date')).getText() | null;;
     postedDate = isNaN(new Date(postedDateStr)) ? null : new Date(postedDateStr) ;
 
     //Extract country
-    country = await driver.findElement(By.css('.site-title a')).getText();
+    country = await driver.findElement(By.css('.site-title a')).getText() | null;
 
     // Extract the content
     try{
@@ -222,12 +223,43 @@ const extractAndSaveData = async (url) => {
       })
     }
   }
+  else {
+     // Extract the article title
+     articleTitle = null;
+
+     // Extract the posted date
+     postedDateStr = null;
+     postedDate = null;
+ 
+     //Extract country
+     country = await driver.findElement(By.css('.site-title a')).getText() || null;
+ 
+     // Extract the content
+     try{
+      archorTags = await driver.findElements(By.css('a'));
+     }
+     catch (err){
+         console.log('error', err)
+     }
+ 
+     content = '';
+
+     //extract href link and text in a blog if it exist
+     for (let i = 0; i < archorTags?.length; i++) {
+       const linktext = await archorTags[i].getText();
+       const href = await archorTags[i].getAttribute('href');
+       hrefObj.push({
+         linktext,
+         href
+       })
+     }
+  }
 
   // Save the data to the database
   try{
     
     await pool.query(
-        saveQuery(url, country, languageName, articleTitle, postedDate, content, article_type, postedDateStr) 
+        saveQuery(url, country, languageName, articleTitle, postedDate, content, article_type, postedDateStr, html_content) 
         )
         .then(async (data)=>{
           console.log('saving article content to db')
@@ -235,7 +267,7 @@ const extractAndSaveData = async (url) => {
           //save href links in a blog if it exist
           if(hrefObj.length > 0){
             await hrefObj.forEach(obj=> obj.article_id = data.rows[0].id );
-
+            
             await pool.query(
               saveHrefLinks(hrefObj)
             )
@@ -245,7 +277,6 @@ const extractAndSaveData = async (url) => {
             })
             .catch(err => {
               console.error('Error saving href to table:', err);
-              console.log('hrefObj', hrefObj)
               hrefObj = [];
             });
           }

@@ -94,10 +94,21 @@ const extractPdfContent = async (url) => {
   });
 };
 
-  
+
+const article_types = [
+  'project',
+  'event',
+  'speeches',
+  'stories',
+  'white-paper',
+  'article',
+  'blog',
+  'news'
+]
 
 module.exports = {
     evaluateArticleType,
     extractLanguageFromUrl,
-    extractPdfContent
+    extractPdfContent,
+    article_types
 }
