@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@azure/functions": "^3.5.1",
+    "azure-functions-core-tools": "^4.0.5148",
     "chromedriver": "^112.0.0",
     "docx": "^8.0.3",
     "docx-pdf": "^0.0.1",
@@ -18,8 +19,5 @@
     "pg": "^8.10.0",
     "request": "^2.88.2",
     "selenium-webdriver": "^4.9.0"
-  },
-  "devDependencies": {
-    "azure-functions-core-tools": "^2.7.3188"
   }
 }
