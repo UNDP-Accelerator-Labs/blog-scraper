@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy container app to Azure Web App - blog-extract
+name: Build and deploy container app to Azure Web App - web-extract
 
 on:
   push:
@@ -23,14 +23,14 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: https://index.docker.io/v1/
-        username: ${{ secrets.AzureAppService_ContainerUsername_f7f6d3b85c8d4f33b00613f94f29f2b3 }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_ddebfe6ab2dc4e5082f5b0f2909b7978 }}
+        username: ${{ secrets.AzureAppService_ContainerUsername_bcb0cb2d874148498d8a8bac7fd41bdc }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_46ea81b93647421d8146c5e536fc364a }}
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_f7f6d3b85c8d4f33b00613f94f29f2b3 }}/my-blog-scrapper:${{ github.sha }}
+        tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_bcb0cb2d874148498d8a8bac7fd41bdc }}/my-blog-scrapper:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
@@ -45,7 +45,7 @@ jobs:
       id: deploy-to-webapp
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'blog-extract'
+        app-name: 'web-extract'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_3a2374b0c6b24c64bcac7b6296343a28 }}
-        images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_f7f6d3b85c8d4f33b00613f94f29f2b3 }}/my-blog-scrapper:${{ github.sha }}'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_c4b6dd1e26e941ee8a0a4c63802b618f }}
+        images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_bcb0cb2d874148498d8a8bac7fd41bdc }}/my-blog-scrapper:${{ github.sha }}'
