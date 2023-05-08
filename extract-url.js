@@ -5,7 +5,7 @@ const chromedriver = require('chromedriver');
 var cron = require('node-cron');
 
 const { searchTerms } = require('./searchTerm');
-const pool =  require('./db');
+// const pool =  require('./db');
 const { checkUrlQuery, saveQuery } = require('./query');
 const extractAndSaveData = require('./saveToDb');
 const { extractLanguageFromUrl } = require('./utils');
@@ -67,13 +67,13 @@ const searchForKeywords = async (url) => {
           const url = await list[k].getAttribute('href');
 
           // Check if the URL already exists in the database
-          const res = await pool.query(checkUrlQuery(url));
-          if (res.rowCount === 0) {
-            searchResults.push(url);
-            await extractAndSaveData(url);
-          } else {
-            console.log(`Article from ${url} already exists in database`);
-          }
+          // const res = await pool.query(checkUrlQuery(url));
+          // if (res.rowCount === 0) {
+          //   searchResults.push(url);
+          //   await extractAndSaveData(url);
+          // } else {
+          //   console.log(`Article from ${url} already exists in database`);
+          // }
           
         }
 

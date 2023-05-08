@@ -2,7 +2,7 @@ require('dotenv').config();
 const {Builder, By, Key, until} = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 const chromedriver = require('chromedriver');
-const pool =  require('./db');
+// const pool =  require('./db');
 const { evaluateArticleType, extractLanguageFromUrl, article_types } = require('./utils');
 const { saveQuery, saveHrefLinks } = require('./query');
 const getPdfMetadataFromUrl = require('./pdf');
@@ -256,39 +256,39 @@ const extractAndSaveData = async (url ) => {
   }
 
   // Save the data to the database
-  try{
+  // try{
     
-    await pool.query(
-        saveQuery(url, country, languageName, articleTitle, postedDate, content, article_type, postedDateStr, html_content) 
-        )
-        .then(async (data)=>{
-          console.log('saving article content to db')
+  //   await pool.query(
+  //       saveQuery(url, country, languageName, articleTitle, postedDate, content, article_type, postedDateStr, html_content) 
+  //       )
+  //       .then(async (data)=>{
+  //         console.log('saving article content to db')
 
-          //save href links in a blog if it exist
-          if(hrefObj.length > 0){
-            await hrefObj.forEach(obj=> obj.article_id = data.rows[0].id );
+  //         //save href links in a blog if it exist
+  //         if(hrefObj.length > 0){
+  //           await hrefObj.forEach(obj=> obj.article_id = data.rows[0].id );
             
-            await pool.query(
-              saveHrefLinks(hrefObj)
-            )
-            .then((res) => {
-              console.log('successfully saved href links in blogs');
-              hrefObj = [];
-            })
-            .catch(err => {
-              console.error('Error saving href to table:', err);
-              hrefObj = [];
-            });
-          }
+  //           await pool.query(
+  //             saveHrefLinks(hrefObj)
+  //           )
+  //           .then((res) => {
+  //             console.log('successfully saved href links in blogs');
+  //             hrefObj = [];
+  //           })
+  //           .catch(err => {
+  //             console.error('Error saving href to table:', err);
+  //             hrefObj = [];
+  //           });
+  //         }
           
-        })
-        .catch(err => {
-          console.error('Error saving blog content to table:', err);
-        });
-  }
-  catch(err){
-    console.log("Error occurred while saving data to database", err, url)
-  };
+  //       })
+  //       .catch(err => {
+  //         console.error('Error saving blog content to table:', err);
+  //       });
+  // }
+  // catch(err){
+  //   console.log("Error occurred while saving data to database", err, url)
+  // };
 
   return;
 }
