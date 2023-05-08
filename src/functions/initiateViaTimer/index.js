@@ -1,4 +1,4 @@
-const extractBlogUrl = require('../extract-url');
+const extractBlogUrl = require('../../extract-url');
 
 module.exports = async function (context, myTimer) {
     var timeStamp = new Date().toISOString();
@@ -7,6 +7,7 @@ module.exports = async function (context, myTimer) {
     {
         context.log('Blog scrapper is running late!');
     }
+    
     context.log('Blog scrapper started! ', timeStamp);   
     // extractBlogUrl()
 };
