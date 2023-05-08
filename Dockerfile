@@ -49,6 +49,7 @@ WORKDIR /app
 # 3. Install selenium 
 RUN npm config set unsafe-perm true
 RUN npm i selenium-webdriver
+RUN npm i -g azure-functions-core-tools@2 --unsafe-perm true
 
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
