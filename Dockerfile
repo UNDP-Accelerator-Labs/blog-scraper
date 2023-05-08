@@ -65,6 +65,7 @@ EXPOSE 80
 EXPOSE 5432
 EXPOSE 8080
 EXPOSE 7000-8000
+EXPOSE 10000-10009
 
 # Set the environment variables
 ENV NODE_ENV=production
