@@ -2,9 +2,9 @@ require('dotenv').config();
 const {Builder, By, Key, until} = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 const chromedriver = require('chromedriver');
-// const pool =  require('./db');
+const pool =  require('./db');
 const { evaluateArticleType, extractLanguageFromUrl, article_types } = require('./utils');
-const { saveQuery, saveHrefLinks } = require('./query');
+const { saveQuery, saveHrefLinks, updateQuery } = require('./query');
 const getPdfMetadataFromUrl = require('./pdf');
 const getWordDocumentMetadataFromUrl = require('./docx');
 
@@ -14,18 +14,10 @@ const getWordDocumentMetadataFromUrl = require('./docx');
 
 // Set up the Chrome options
 const options = new chrome.Options();
-// // if(production == 'true' ){
-  options.addArguments('--headless'); // Run Chrome in headless mode (without a UI)
-  options.addArguments('--window-size=1920,1080'); // Set the window size
-  options.addArguments('--no-sandbox')
-  options.addArguments('--disable-dev-shm-usage')
-// }
-// else{
-//   options.addArguments('--start-maximized'); // Maximize the window
-//   options.addArguments('--disable-gpu'); // Disable the GPU
-//   options.addArguments('--disable-dev-shm-usage'); // Disable shared memory usage
-//   options.addArguments('--no-sandbox'); // Disable the sandbox
-// }
+options.addArguments('--headless'); // Run Chrome in headless mode (without a UI)
+options.addArguments('--window-size=1920,1080'); // Set the window size
+options.addArguments('--no-sandbox')
+options.addArguments('--disable-dev-shm-usage')
 
 // Set up the WebDriver
 const driver = new Builder()
@@ -35,18 +27,18 @@ const driver = new Builder()
 
 // sample word doc 
 // let docurl = 'https://popp.undp.org/_layouts/15/WopiFrame.aspx?sourcedoc=/UNDP_POPP_DOCUMENT_LIBRARY/Public/HR_Non-Staff_International%20Personnel%20Services%20Agreement_IPSA.docx&action=default'
-const extractAndSaveData = async (url ) => {
+const extractAndSaveData = async (url, id = null ) => {
   // Navigate to the URL
   await driver.get(url);
 
-  let articleTitle = '';
-  let postedDate = '';
-  let country = '';
+  let articleTitle = null;
+  let postedDate = null;
+  let country = null;
   let contentElements = [];
-  let content = '';
+  let content = null;
 
   let languageName = await extractLanguageFromUrl(url) ||  'en';
-  let postedDateStr = ''
+  let postedDateStr = null;
   let archorTags = [];
   let hrefObj = []
   
@@ -54,14 +46,16 @@ const extractAndSaveData = async (url ) => {
   let article_type = await evaluateArticleType(url);
   let html_content = await driver.findElement(By.tagName('body')).getText() || null;
 
+  let raw_html = await driver.getPageSource();
+
   if(article_type == 'document'){
     if(url.includes('.pdf')){
       // Extract pdf content and metadata
       const pdfContent = await getPdfMetadataFromUrl(url);
-      content = pdfContent?.text || '';
+      content = pdfContent?.text || null;
       postedDate = pdfContent?.metadata?._metadata['xmp:createdate'] || null;
-      postedDateStr = pdfContent?.metadata?._metadata['xmp:createdate'] || '';
-      articleTitle = pdfContent?.metadata?._metadata['dc:title'] || pdfContent?.text?.substring(0, 100) || '';
+      postedDateStr = pdfContent?.metadata?._metadata['xmp:createdate'] || null;
+      articleTitle = pdfContent?.metadata?._metadata['dc:title'] || pdfContent?.text?.substring(0, 100) || null;
 
     }
     else if(url.includes('.docx') 
@@ -86,16 +80,16 @@ const extractAndSaveData = async (url ) => {
   else if ( article_type == 'project'){
 
     try {
-      articleTitle = await driver.findElement(By.css('.coh-inline-element.title-heading')).getText() | null;
+      articleTitle = await driver.findElement(By.css('.coh-inline-element.title-heading')).getText() || null;
     } catch(err){ 
-      articleTitle = ''
+      articleTitle = null;
     }
     
     try{
-      postedDateStr = await driver.findElement(By.css('.coh-inline-element.column.publication-card__title h6')).getText() | null;
+      postedDateStr = await driver.findElement(By.css('.coh-inline-element.column.publication-card__title h6')).getText() || null;
     }
     catch(err){
-      postedDateStr = ''
+      postedDateStr = null;
     }
 
     postedDate = isNaN(new Date(postedDateStr)) ? null : new Date(postedDateStr);
@@ -109,7 +103,7 @@ const extractAndSaveData = async (url ) => {
         console.log('error', err)
     }
 
-    content = '';
+    content = null;
     for (let i = 0; i < contentElements.length; i++) {
       const text = await contentElements[i].getText();
       content += text + '\n';
@@ -128,11 +122,11 @@ const extractAndSaveData = async (url ) => {
   }
   else if (article_type == 'publications'){
     
-    articleTitle = await driver.findElement(By.css('.coh-inline-element.column')).getText() | null;
-    postedDateStr = await driver.findElement(By.css('.coh-inline-element.column.publication-card__title h6')).getText() | null;
+    articleTitle = await driver.findElement(By.css('.coh-inline-element.column')).getText() || null;
+    postedDateStr = await driver.findElement(By.css('.coh-inline-element.column.publication-card__title h6')).getText() || null;
     postedDate = isNaN(new Date(postedDateStr)) ? null :  new Date(postedDateStr);
     //Extract country
-    country = await driver.findElement(By.css('.site-title a')).getText() | null;
+    country = await driver.findElement(By.css('.site-title a')).getText() || null;
 
     // Extract the content
     try{
@@ -142,7 +136,7 @@ const extractAndSaveData = async (url ) => {
         console.log('error', err)
     }
 
-    content = '';
+    content = null;
     for (let i = 0; i < contentElements.length; i++) {
       const text = await contentElements[i].getText();
       content += text + '\n';
@@ -150,15 +144,15 @@ const extractAndSaveData = async (url ) => {
     
   }
   else if (url.includes('.medium.com')){
-    postedDateStr = await driver.findElement(By.css('.pw-published-date')).getText() | null;
+    postedDateStr = await driver.findElement(By.css('.pw-published-date')).getText() || null;
     postedDate = isNaN(new Date(postedDateStr)) ? null :  new Date(postedDateStr);
-    languageName = '';
+    languageName = null;
 
     // // Extract the article title
-    articleTitle = await driver.findElement(By.className('pw-post-title')).getText() | null;
+    articleTitle = await driver.findElement(By.className('pw-post-title')).getText() || null;
 
     // //Extract country
-    country = await driver.findElement(By.css('.bk a')).getText() | null;
+    country = await driver.findElement(By.css('.bk a')).getText() || null;
 
     // // Extract the content
     try{
@@ -169,7 +163,7 @@ const extractAndSaveData = async (url ) => {
         console.log('error', err)
     }
 
-    content = '';
+    content = null;
     for (let i = 0; i < contentElements.length; i++) {
       const text = await contentElements[i].getText();
       content += text + '\n';
@@ -191,11 +185,11 @@ const extractAndSaveData = async (url ) => {
     articleTitle = await driver.findElement(By.className('article-title')).getText() || null;
 
     // Extract the posted date
-    postedDateStr = await driver.findElement(By.className('posted-date')).getText() | null;;
+    postedDateStr = await driver.findElement(By.className('posted-date')).getText() || null;;
     postedDate = isNaN(new Date(postedDateStr)) ? null : new Date(postedDateStr) ;
 
     //Extract country
-    country = await driver.findElement(By.css('.site-title a')).getText() | null;
+    country = await driver.findElement(By.css('.site-title a')).getText() || null;
 
     // Extract the content
     try{
@@ -207,7 +201,7 @@ const extractAndSaveData = async (url ) => {
     }
 
     //extract content of a blog
-    content = '';
+    content = null;
     for (let i = 0; i < contentElements.length; i++) {
       const text = await contentElements[i].getText();
       content += text + '\n';
@@ -242,7 +236,7 @@ const extractAndSaveData = async (url ) => {
          console.log('error', err)
      }
  
-     content = '';
+     content = null;
 
      //extract href link and text in a blog if it exist
      for (let i = 0; i < archorTags?.length; i++) {
@@ -255,40 +249,59 @@ const extractAndSaveData = async (url ) => {
      }
   }
 
-  // Save the data to the database
-  // try{
-    
-  //   await pool.query(
-  //       saveQuery(url, country, languageName, articleTitle, postedDate, content, article_type, postedDateStr, html_content) 
-  //       )
-  //       .then(async (data)=>{
-  //         console.log('saving article content to db')
-
-  //         //save href links in a blog if it exist
-  //         if(hrefObj.length > 0){
-  //           await hrefObj.forEach(obj=> obj.article_id = data.rows[0].id );
+  // Save the data to the database if id = null
+  if(id == null){
+    try{
+      await pool.query(
+          saveQuery(url, country, languageName, articleTitle, postedDate, content, article_type, postedDateStr, html_content, raw_html) 
+          )
+          .then(async (data)=>{
+            console.log('saving article content to db')
+  
+            //save href links in a blog if it exist
+            if(hrefObj.length > 0){
+              await hrefObj.forEach(obj=> obj.article_id = data.rows[0].id );
+              
+              await pool.query(
+                saveHrefLinks(hrefObj)
+              )
+              .then((res) => {
+                console.log('successfully saved href links in blogs');
+                hrefObj = [];
+              })
+              .catch(err => {
+                console.error('Error saving href to table:', err);
+                hrefObj = [];
+              });
+            }
             
-  //           await pool.query(
-  //             saveHrefLinks(hrefObj)
-  //           )
-  //           .then((res) => {
-  //             console.log('successfully saved href links in blogs');
-  //             hrefObj = [];
-  //           })
-  //           .catch(err => {
-  //             console.error('Error saving href to table:', err);
-  //             hrefObj = [];
-  //           });
-  //         }
+          })
+          .catch(err => {
+            console.error('Error saving blog content to table:', err);
+          });
+    }
+    catch(err){
+      console.log("Error occurred while saving data to database", err, url)
+    };
+  }
+  else{
+    //update the record in db
+    try{
+      await pool.query(
+          updateQuery(id, url, country, languageName, articleTitle, postedDate, content, article_type, postedDateStr, html_content, raw_html) 
+          )
+          .then(async (data)=>{
+            console.log('updating article content to db');
+          })
+          .catch(err => {
+            console.error('Error saving blog content to table:', err);
+          });
           
-  //       })
-  //       .catch(err => {
-  //         console.error('Error saving blog content to table:', err);
-  //       });
-  // }
-  // catch(err){
-  //   console.log("Error occurred while saving data to database", err, url)
-  // };
+    }
+    catch(err){
+      console.log("Error occurred while updating database record", err, url)
+    };
+  }
 
   return;
 }

@@ -5,7 +5,7 @@ const chromedriver = require('chromedriver');
 var cron = require('node-cron');
 
 const { searchTerms } = require('./searchTerm');
-// const pool =  require('./db');
+const pool =  require('./db');
 const { checkUrlQuery, saveQuery } = require('./query');
 const extractAndSaveData = require('./saveToDb');
 const { extractLanguageFromUrl } = require('./utils');
@@ -36,7 +36,6 @@ const driver = new Builder()
   .setChromeOptions(options)
   .build();
 
-const searchResults = [];
 
 const searchForKeywords = async (url) => {
     // Define the keywords to search for
@@ -67,13 +66,12 @@ const searchForKeywords = async (url) => {
           const url = await list[k].getAttribute('href');
 
           // Check if the URL already exists in the database
-          // const res = await pool.query(checkUrlQuery(url));
-          // if (res.rowCount === 0) {
-          //   searchResults.push(url);
-          //   await extractAndSaveData(url);
-          // } else {
-          //   console.log(`Article from ${url} already exists in database`);
-          // }
+          const res = await pool.query(checkUrlQuery(url));
+          if (res.rowCount === 0) {
+            await extractAndSaveData(url);
+          } else {
+            console.log(`Article from ${url} already exists in database`);
+          }
           
         }
 
@@ -124,16 +122,13 @@ for (let i = 0; i < countries.length; i++) {
   }
 
   // Loop through each URL and perform a search
-  for (let k = 13; k < validUrls.length; k++) {
+  for (let k = 0; k < validUrls.length; k++) {
     const url = validUrls[k];
     await searchForKeywords(url);
   }
 
 }
 
-// searchResults.forEach(async (url) => {
-//   await extractAndSaveData(url);
-// });
 
 // Quit the WebDriver
 await driver.quit();
@@ -141,15 +136,5 @@ await driver.quit();
 }
 
 
-// if(production === 'true') {
-//   cron.schedule('0 0 1,15 * *', () => {
-//     console.log('running a task twice a month');
-//     getFn();
-//   });
-// }
-// else {
-  // getFn();
-// }
-
-// extractBlogUrl()
-module.exports = extractBlogUrl;
+extractBlogUrl()
+// module.exports = extractBlogUrl;
