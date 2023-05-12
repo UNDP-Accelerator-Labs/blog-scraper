@@ -30,7 +30,7 @@ const driver = new Builder()
 const extractAndSaveData = async (url, id = null ) => {
   // Navigate to the URL
   await driver.get(url);
-
+console.log('url ', url, id)
   let articleTitle = null;
   let postedDate = null;
   let country = null;
@@ -103,7 +103,7 @@ const extractAndSaveData = async (url, id = null ) => {
         console.log('error', err)
     }
 
-    content = null;
+    content = '';
     for (let i = 0; i < contentElements.length; i++) {
       const text = await contentElements[i].getText();
       content += text + '\n';
@@ -136,7 +136,7 @@ const extractAndSaveData = async (url, id = null ) => {
         console.log('error', err)
     }
 
-    content = null;
+    content = '';
     for (let i = 0; i < contentElements.length; i++) {
       const text = await contentElements[i].getText();
       content += text + '\n';
@@ -163,7 +163,7 @@ const extractAndSaveData = async (url, id = null ) => {
         console.log('error', err)
     }
 
-    content = null;
+    content = '';
     for (let i = 0; i < contentElements.length; i++) {
       const text = await contentElements[i].getText();
       content += text + '\n';
@@ -201,7 +201,7 @@ const extractAndSaveData = async (url, id = null ) => {
     }
 
     //extract content of a blog
-    content = null;
+    content = '';
     for (let i = 0; i < contentElements.length; i++) {
       const text = await contentElements[i].getText();
       content += text + '\n';
@@ -236,7 +236,7 @@ const extractAndSaveData = async (url, id = null ) => {
          console.log('error', err)
      }
  
-     content = null;
+     content = '';
 
      //extract href link and text in a blog if it exist
      for (let i = 0; i < archorTags?.length; i++) {
@@ -247,6 +247,10 @@ const extractAndSaveData = async (url, id = null ) => {
          href
        })
      }
+  }
+
+  if(content.length <= 0){
+    content = null;
   }
 
   // Save the data to the database if id = null
