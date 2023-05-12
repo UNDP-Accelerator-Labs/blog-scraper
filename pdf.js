@@ -2,21 +2,33 @@ const request = require('request');
 const pdfParser = require('pdf-parse');
 
 function getPdfMetadataFromUrl(url) {
-  return new Promise((resolve, reject) => {
-    request({ url, encoding: null }, (error, response, buffer) => {
-      if (error) {
-        return reject(error);
+  try {
+    return new Promise((resolve, reject) => {
+      try{
+        request({ url, encoding: null }, (error, response, buffer) => {
+          if (error) {
+            return reject(error);
+          }
+    
+          pdfParser(buffer).then((pdf) => {
+            const { info, metadata, text } = pdf;
+            const json = { info, metadata, text };
+            resolve(json);
+          }).catch((err) => {
+            return reject(err);
+          });
+        });
       }
-
-      pdfParser(buffer).then((pdf) => {
-        const { info, metadata, text } = pdf;
-        const json = { info, metadata, text };
-        resolve(json);
-      }).catch((err) => {
-        reject(err);
-      });
-    });
-  });
+      catch(err){
+        console.log("Error fetching pdf file ", err)
+        return {}
+      }
+    })
+  }
+  catch(err){
+    console.log("Error reading pdf file ", err)
+    return {}
+  }
 }
 
 module.exports = getPdfMetadataFromUrl;

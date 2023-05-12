@@ -29,13 +29,34 @@ const saveHrefLinks = (arrObj) => {
 
 
 const getAllBlogs = () =>({
-  text: 'SELECT id, url FROM articles'
+  text: `SELECT id, url 
+  FROM articles 
+  WHERE DATE(updated_at) != CURRENT_DATE 
+    AND DATE(created_at) != CURRENT_DATE 
+    AND article_type NOT IN ('document')
+  ORDER BY id ASC;
+  
+  `
 })
+
+const getDistinctUrls = (validUrls) => ({
+  text: `
+    SELECT DISTINCT url
+    FROM (
+      SELECT unnest($1::text[]) AS url
+    ) AS v
+    WHERE NOT EXISTS (
+      SELECT 1 FROM articles WHERE url LIKE '%' || v.url || '%'
+    )
+  `,
+  values: [validUrls],
+});
+
 
 const updateQuery = (id, url, countryName, languageName, title, postedDate, content, article_type, posted_date_str, html_content, raw_html) => ({
   text: `
       UPDATE articles
-      SET url = $2, country = $3, language = $4, title = $5, posted_date = $6, content = $7, article_type = $8, posted_date_str = $9, all_html_content = $10, raw_html = $11
+      SET url = $2, country = $3, language = $4, title = $5, posted_date = $6, content = $7, article_type = $8, posted_date_str = $9, all_html_content = $10, raw_html = $11, updated_at = now()
       WHERE id = $1
       RETURNING *
   `,
@@ -52,4 +73,6 @@ module.exports = {
 
     getAllBlogs,
     updateQuery,
+
+    getDistinctUrls,
 };

@@ -10,6 +10,7 @@ const fetchALlBlogs = async () => {
   // fetch all blogs
   const res = await pool.query(getAllBlogs());
 
+  console.log('res.rowCount ', res.rowCount)
   // Loop through each URL and perform a search
   for (let k = 0; k < res.rowCount; k++) {
     
@@ -19,7 +20,7 @@ const fetchALlBlogs = async () => {
     await extractAndSaveData(dbUrl, id);
   }
 
-
+  console.log('Successfully updated all blogs')
 }
 
 fetchALlBlogs()

@@ -30,7 +30,7 @@ const driver = new Builder()
 const extractAndSaveData = async (url, id = null ) => {
   // Navigate to the URL
   await driver.get(url);
-console.log('url ', url, id)
+  
   let articleTitle = null;
   let postedDate = null;
   let country = null;
@@ -51,7 +51,7 @@ console.log('url ', url, id)
   if(article_type == 'document'){
     if(url.includes('.pdf')){
       // Extract pdf content and metadata
-      const pdfContent = await getPdfMetadataFromUrl(url);
+      const pdfContent = await getPdfMetadataFromUrl(url) || {};
       content = pdfContent?.text || null;
       postedDate = pdfContent?.metadata?._metadata['xmp:createdate'] || null;
       postedDateStr = pdfContent?.metadata?._metadata['xmp:createdate'] || null;

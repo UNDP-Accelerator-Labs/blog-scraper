@@ -6,7 +6,7 @@ var cron = require('node-cron');
 
 const { searchTerms } = require('./searchTerm');
 const pool =  require('./db');
-const { checkUrlQuery, saveQuery } = require('./query');
+const { checkUrlQuery, saveQuery, getDistinctUrls } = require('./query');
 const extractAndSaveData = require('./saveToDb');
 const { extractLanguageFromUrl } = require('./utils');
 
@@ -85,7 +85,7 @@ const searchForKeywords = async (url ) => {
 
 
 
-const extractBlogUrl = async () => {
+const updateMissingUrl = async () => {
 console.log('start here ')
 // Navigate to the base website
 await driver.get('https://www.undp.org/');
@@ -121,16 +121,17 @@ for (let i = 0; i < countries.length; i++) {
 
   }
 
-  // Loop through each URL and perform a search
-  for (let k = 0; k < validUrls.length; k++) {
-    const url = validUrls[k];
+  let getDistinct = await pool.query(getDistinctUrls(validUrls));
 
-    console.log('This is runing for ', k, ' out of ', validUrls.length )
+  // Loop through each URL and perform a search
+  for (let k = 0; k < getDistinct.rowCount; k++) {
+    const url = getDistinct.rows[k]?.url || '';
+    console.log('url ', k + 1, ' out of ', getDistinct.rowCount, 'urls')
     await searchForKeywords(url);
   }
 
   console.log('Successfully saved all blogs')
-  
+
 }
 
 
@@ -140,5 +141,5 @@ await driver.quit();
 }
 
 
-extractBlogUrl()
-// module.exports = extractBlogUrl;
+updateMissingUrl()
+// module.exports = updateMissingUrl;
