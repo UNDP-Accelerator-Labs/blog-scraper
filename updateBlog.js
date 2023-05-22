@@ -1,19 +1,19 @@
 require('dotenv').config();
 
 const pool =  require('./db');
-const { checkUrlQuery, saveQuery, getAllBlogs } = require('./query');
+const { checkUrlQuery, getAllBlogsWithNull, getAllBlogs } = require('./query');
 const extractAndSaveData = require('./saveToDb');
 
 
 
 const fetchALlBlogs = async () => {
+  // await pool.connect();
   // fetch all blogs
-  const res = await pool.query(getAllBlogs());
+  const res = await pool.query(getAllBlogsWithNull());
 
-  console.log('res.rowCount ', res.rowCount)
   // Loop through each URL and perform a search
   for (let k = 0; k < res.rowCount; k++) {
-    
+    console.log('Updating content ', k+1 , ' of ', res.rowCount)
     let dbUrl = res.rows[k]['url'];
     let id = res.rows[k]['id'];
 

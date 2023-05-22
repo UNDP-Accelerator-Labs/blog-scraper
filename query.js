@@ -63,6 +63,17 @@ const updateQuery = (id, url, countryName, languageName, title, postedDate, cont
   values: [id, url, countryName, languageName, title, postedDate, content, article_type, posted_date_str, html_content, raw_html],
 });
 
+const getAllBlogsWithNull = () =>({
+  text: `SELECT id, url 
+  FROM articles 
+  WHERE title IS NULL 
+    OR content IS NULL 
+    AND article_type NOT IN ('document')
+    AND DATE(updated_at) != CURRENT_DATE 
+  ORDER BY id ASC;
+  
+  `
+})
 
 
 module.exports = { 
@@ -72,6 +83,7 @@ module.exports = {
     saveHrefLinks,
 
     getAllBlogs,
+    getAllBlogsWithNull,
     updateQuery,
 
     getDistinctUrls,

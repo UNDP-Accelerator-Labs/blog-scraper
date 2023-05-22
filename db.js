@@ -24,6 +24,7 @@ const pool = new Pool({
  port: DB_PORT, 
 });
 
+
 // Create the table
 pool.query(`
   CREATE TABLE IF NOT EXISTS articles (

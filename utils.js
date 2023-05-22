@@ -103,7 +103,8 @@ const article_types = [
   'white-paper',
   'article',
   'blog',
-  'news'
+  'news',
+  'press-releases'
 ]
 
 module.exports = {

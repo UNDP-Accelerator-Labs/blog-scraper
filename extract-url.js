@@ -86,7 +86,8 @@ const searchForKeywords = async (url ) => {
 
 
 const extractBlogUrl = async () => {
-console.log('start here ')
+console.log('starting... ')
+// await pool.connect();
 // Navigate to the base website
 await driver.get('https://www.undp.org/');
 
@@ -136,6 +137,7 @@ for (let i = 0; i < countries.length; i++) {
 
 // Quit the WebDriver
 await driver.quit();
+// await pool.end();
 
 }
 
