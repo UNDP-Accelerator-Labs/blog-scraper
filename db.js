@@ -16,11 +16,13 @@ const {
   L_DB_PASS,
 } = process.env;
 
+let isProd = ['production', 'local-production'].includes(process.env.NODE_ENV);
+
 const pool = new Pool({
- user: production == 'true'   ? DB_USER : L_DB_USER,
- host: production == 'true'   ? DB_HOST : L_DB_HOST,
- database: production == 'true'   ? DB_NAME : L_DB_NAME,
- password: production == 'true'   ? DB_PASS : L_DB_PASS,
+ user: isProd ? DB_USER : L_DB_USER,
+ host: isProd ? DB_HOST : L_DB_HOST,
+ database: isProd ? DB_NAME : L_DB_NAME,
+ password: isProd ? DB_PASS : L_DB_PASS,
  port: DB_PORT, 
 });
 
@@ -72,6 +74,43 @@ pool.query(`
       }).catch(err => {
         console.error('Error updating article table:', err);
       });
+
+      pool.query(`
+        ALTER TABLE articles
+        ADD COLUMN IF NOT EXISTS iso3 VARCHAR (3)
+      `).then(res => {
+        console.log('Article Table modified successfully');
+      }).catch(err => {
+        console.error('Error updating article table:', err);
+      });
+
+      pool.query(`
+        ALTER TABLE articles
+        ADD COLUMN IF NOT EXISTS has_lab BOOLEAN
+      `).then(res => {
+        console.log('Article Table modified successfully');
+      }).catch(err => {
+        console.error('Error updating article table:', err);
+      });
+
+      pool.query(`
+        ALTER TABLE articles
+        ADD COLUMN IF NOT EXISTS lat FLOAT,
+        ADD COLUMN IF NOT EXISTS lng FLOAT
+      `).then(res => {
+        console.log('Article Table altered successfully');
+      }).catch(err => {
+        console.error('Error altering article table:', err);
+      });
+
+      pool.query(`
+        CREATE EXTENSION IF NOT EXISTS postgis;
+      `).then(res => {
+        console.log('EXTENSION installed successfully');
+      }).catch(err => {
+        console.error('Error installing EXTENSION:', err);
+      });
+
 
 }).catch(err => {
   console.error('Error creating table:', err);

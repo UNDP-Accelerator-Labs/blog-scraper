@@ -68,7 +68,6 @@ const getAllBlogsWithNull = () =>({
   FROM articles 
   WHERE title IS NULL 
     OR content IS NULL 
-    AND article_type NOT IN ('document')
     AND DATE(updated_at) != CURRENT_DATE 
   ORDER BY id ASC;
   

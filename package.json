@@ -4,6 +4,9 @@
   "description": "",
   "scripts": {
     "start": "func start",
+    "updateMissingUrls": "node updateMissingCountries.js",
+    "updateRecords": "node updateBlog.js",
+    "updateIso3Record" : "node updateRecordWithIso3.js",
     "test": "echo \"No tests yet...\""
   },
   "dependencies": {
@@ -17,6 +20,7 @@
     "node-cron": "^3.0.2",
     "pdf-parse": "^1.1.1",
     "pg": "^8.10.0",
+    "pg-promise": "^11.4.3",
     "request": "^2.88.2",
     "selenium-webdriver": "^4.9.0"
   }

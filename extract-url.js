@@ -142,5 +142,5 @@ await driver.quit();
 }
 
 
-extractBlogUrl()
-// module.exports = extractBlogUrl;
+// extractBlogUrl()
+module.exports = extractBlogUrl;

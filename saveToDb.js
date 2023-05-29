@@ -49,7 +49,7 @@ const extractAndSaveData = async (url, id = null ) => {
   let raw_html = await driver.getPageSource();
 
   if(article_type == 'document'){
-    if(url.includes('.pdf')){
+    if(url.includes('.pdf') || url.includes('.PDF')){
       // Extract pdf content and metadata
       const pdfContent = await getPdfMetadataFromUrl(url) || {};
       content = pdfContent?.text || null;
@@ -80,7 +80,9 @@ const extractAndSaveData = async (url, id = null ) => {
   else if ( article_type == 'project'){
 
     try {
-      articleTitle = await driver.findElement(By.css('.coh-inline-element.title-heading')).getText() || null;
+      articleTitle = await driver.findElement(By.css('.coh-inline-element.title-heading')).getText() ||
+      await driver.findElement(By.css('.coh-heading.color-white')).getText()
+      || null;
     } catch(err){ 
       articleTitle = null;
     }
@@ -218,8 +220,15 @@ const extractAndSaveData = async (url, id = null ) => {
     }
   }
   else {
-     // Extract the article title
-     articleTitle = null;
+     // Extract the article title 
+     try{
+      articleTitle = await driver.findElement(By.css('.coh-heading.heading.h2.coh-style-undp-heading-h2')).getText() || 
+      await driver.findElement(By.css('.coh-inline-element.content-box')).getText()
+      || null; 
+     }
+      catch (err){
+          console.log('error', err)
+      }
 
      // Extract the posted date
      postedDateStr = null;

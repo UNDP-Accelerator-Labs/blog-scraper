@@ -1,6 +1,6 @@
 const searchTerms = {
     en : [
-        "accelerator lab", "innovation-acclab", "acclab", "acceleratorlab", "AccLabGM", "innovation", "lab",
+        "accelerator lab", "innovation-acclab", "acclab", "acceleratorlab", "AccLabGM", "innovation",
         ],
     fr: [
         "laboratoire d'acceleration", "accelerateur lab", "laboratoire d'accelerateur", "laboratoires d'acceleration", "laboratoires d'accelerateur",
