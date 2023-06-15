@@ -42,12 +42,21 @@ app.get(('/update-missing-countries', (req,res)=>{
   res.send('Updates to blogs with missing countries started!')
 }))
 
+app.use((req, res, next) => {
+  res.status(404).send(
+      "<h1>Page not found on the server</h1>")
+})
+
+app.use((err, req, res, next) => {
+  console.error(err.stack)
+  res.status(500).send('Something broke!')
+})
+
 //RUN A CRON JOB 12AM EVERY SUNDAY TO EXECUTE THE SCRAPPER
 cron.schedule('0 12 * * 0', () => {
   // Execute web extract function using child_process
   extractBlogUrl()
 });
-
 
 app.listen(port, () => {
   console.log(`app listening on port ${port}`)
