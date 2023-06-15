@@ -49,6 +49,38 @@ To set up the application locally, follow these steps:
 9. Update search keywords or taxonomy: Edit the `searchTerm.js` file to update the search keywords or taxonomy.
 10. You can also intiate the blog scrapper via an endpoint `/initialize`.
 
+## Create docker image locally
+
+Run
+```
+make -s build
+```
+to build the docker image.
+Use `make -s git-check` to verify that the current working copy is clean and
+that no unwanted (or uncommit) files will be included in the image.
+
+## Push docker image
+
+Make sure to log in to azure via `make azlogin`.
+
+Run
+```
+make -s build
+make -s dockerpush
+```
+to build the image and push it to azure. Make sure to update the image in the
+Deployment Center. This is only if you need to test non major version changes.
+For proper deployment use the deploy functionality as described below.
+
+## Deploying new version
+
+Make sure to be on the master branch with a clean working copy.
+
+Run
+```
+make -s deploy
+```
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
