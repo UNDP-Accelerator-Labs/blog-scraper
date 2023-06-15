@@ -63,14 +63,7 @@ COPY . .
 # Expose the port that the application listens on
 EXPOSE 80
 EXPOSE 5432
-EXPOSE 8080
-EXPOSE 7000-8000
-EXPOSE 10000-10009
-
-# Set the environment variables
-ENV NODE_ENV=production
-ENV PORT=80
-ENV DB_PORT=5432
+EXPOSE 3000
 
 # Start the application
 CMD ["npm", "start"]
