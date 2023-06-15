@@ -7,7 +7,7 @@ if ! make -s git-check ; then
     exit 1
 fi
 
-BRANCH_MAIN=main
+BRANCH_MAIN=master
 
 if [ $(make -s branch) != "${BRANCH_MAIN}" ]; then
     echo "must be on ${BRANCH_MAIN} to deploy"
