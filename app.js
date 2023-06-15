@@ -1,3 +1,4 @@
+const fs = require('fs')
 const express = require('express')
 const extractBlogUrl = require('./extract-url');
 
@@ -10,6 +11,16 @@ const app = express()
 const port = 3000
 
 //EXPOSE THE SCRAPER VIA API
+app.get('/version', (req, res) => {
+  fs.readFile('version.txt', (err, data) => {
+    if (err) {
+      res.send('no version available');
+    } else {
+      res.send(data);
+    }
+  })
+})
+
 app.get('/initialize', (req, res) => {
   extractBlogUrl()
 
