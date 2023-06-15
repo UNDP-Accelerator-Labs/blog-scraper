@@ -56,4 +56,5 @@ async function updateRecordsForDistinctCountries() {
 }
 
 // Call the main function to start the process
-updateRecordsForDistinctCountries();
+// updateRecordsForDistinctCountries();
+module.exports = updateRecordsForDistinctCountries;

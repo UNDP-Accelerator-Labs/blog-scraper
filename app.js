@@ -1,10 +1,42 @@
 const express = require('express')
+const extractBlogUrl = require('./extract-url');
+
+const cron = require('node-cron');
+const updateRecordsForDistinctCountries = require('./updateRecordWithIso3')
+const updateNullBlogs = require('./updateBlog')
+const updateMissingUrl = require('./updateMissingCountries')
+
 const app = express()
 const port = 3000
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
+//EXPOSE THE SCRAPER VIA API
+app.get('/initialize', (req, res) => {
+  extractBlogUrl()
+
+  res.send('The blog extract as started!')
 })
+
+app.get('/update-iso3-codes', (req,res) =>{
+  updateRecordsForDistinctCountries()
+  res.send('ISO3 code update of all records started!')
+})
+
+app.get(('/update-null-blogs', (req,res)=>{
+  updateNullBlogs()
+  res.send('Updates to blogs with null records started!')
+}))
+
+app.get(('/update-missing-countries', (req,res)=>{
+  updateMissingUrl()
+  res.send('Updates to blogs with missing countries started!')
+}))
+
+//RUN A CRON JOB 12AM EVERY SUNDAY TO EXECUTE THE SCRAPPER
+cron.schedule('0 12 * * 0', () => {
+  // Execute web extract function using child_process
+  extractBlogUrl()
+});
+
 
 app.listen(port, () => {
   console.log(`app listening on port ${port}`)

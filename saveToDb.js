@@ -8,9 +8,6 @@ const { saveQuery, saveHrefLinks, updateQuery } = require('./query');
 const getPdfMetadataFromUrl = require('./pdf');
 const getWordDocumentMetadataFromUrl = require('./docx');
 
-// const { 
-  const production = true;
-// } = process.env;
 
 // Set up the Chrome options
 const options = new chrome.Options();
@@ -27,10 +24,10 @@ const driver = new Builder()
 
 // sample word doc 
 // let docurl = 'https://popp.undp.org/_layouts/15/WopiFrame.aspx?sourcedoc=/UNDP_POPP_DOCUMENT_LIBRARY/Public/HR_Non-Staff_International%20Personnel%20Services%20Agreement_IPSA.docx&action=default'
-const extractAndSaveData = async (url, id = null ) => {
+const extractAndSaveData = async (url, id = null, countryName = null ) => {
   // Navigate to the URL
   await driver.get(url);
-  
+
   let articleTitle = null;
   let postedDate = null;
   let country = null;
@@ -52,10 +49,12 @@ const extractAndSaveData = async (url, id = null ) => {
     if(url.includes('.pdf') || url.includes('.PDF')){
       // Extract pdf content and metadata
       const pdfContent = await getPdfMetadataFromUrl(url) || {};
-      content = pdfContent?.text || null;
-      postedDate = pdfContent?.metadata?._metadata['xmp:createdate'] || null;
-      postedDateStr = pdfContent?.metadata?._metadata['xmp:createdate'] || null;
-      articleTitle = pdfContent?.metadata?._metadata['dc:title'] || pdfContent?.text?.substring(0, 100) || null;
+      content = await pdfContent?.text || null;
+      postedDate = new Date(pdfContent?.metadata?._metadata['xmp:createdate']) || null;
+      postedDateStr = await pdfContent?.metadata?._metadata['xmp:createdate'] || null;
+      articleTitle = await pdfContent?.metadata?._metadata['dc:title'] || pdfContent?.text?.substring(0, 100) || null;
+
+      country = countryName;
 
     }
     else if(url.includes('.docx') 
@@ -263,7 +262,7 @@ const extractAndSaveData = async (url, id = null ) => {
   }
 
   // Save the data to the database if id = null
-  if(id == null){
+  if(id == null || isNaN(id) == true ){
     try{
       await pool.query(
           saveQuery(url, country, languageName, articleTitle, postedDate, content, article_type, postedDateStr, html_content, raw_html) 

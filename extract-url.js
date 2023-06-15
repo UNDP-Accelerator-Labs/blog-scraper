@@ -9,25 +9,21 @@ const pool =  require('./db');
 const { checkUrlQuery, saveQuery } = require('./query');
 const extractAndSaveData = require('./saveToDb');
 const { extractLanguageFromUrl } = require('./utils');
-
-// const { 
-  const production = true;
-// } = process.env;
+const updateRecordsForDistinctCountries = require('./updateRecordWithIso3')
 
 // Set up the Chrome options
 const options = new chrome.Options();
-// // if(production == 'true' ){
-  options.addArguments('--headless'); // Run Chrome in headless mode (without a UI)
-  options.addArguments('--window-size=1920,1080'); // Set the window size
-  options.addArguments('--no-sandbox')
-  options.addArguments('--disable-dev-shm-usage')
-// }
-// else{
+options.addArguments('--headless'); // Run Chrome in headless mode (without a UI)
+options.addArguments('--window-size=1920,1080'); // Set the window size
+options.addArguments('--no-sandbox')
+options.addArguments('--disable-dev-shm-usage')
+
+// UNCOMMENT TO SEE IN BROWSER
 //   options.addArguments('--start-maximized'); // Maximize the window
 //   options.addArguments('--disable-gpu'); // Disable the GPU
 //   options.addArguments('--disable-dev-shm-usage'); // Disable shared memory usage
 //   options.addArguments('--no-sandbox'); // Disable the sandbox
-// }
+
 
 
 // Set up the WebDriver
@@ -55,12 +51,20 @@ const searchForKeywords = async (url ) => {
       // Navigate to the URL with search parameters
       await driver.get(`${url}?search=${keyword.split(" ").join('+')}`);
 
+      let countryName = null;
+
       // Wait for the search results to load
       try {
         // await driver.wait(until.elementLocated(By.className('item-list')), 9000);
         const resultList = await driver.wait(until.elementLocated(By.className('item-list')), 5000);
-        const list = await resultList.findElements(By.tagName('a'));
 
+        try {
+          countryName =  await driver.findElement(By.css('.site-title a')).getText();
+        }
+        catch{(err)=> console.log('Error while retrieving country name ', err) }
+        
+        const list = await resultList.findElements(By.tagName('a'));
+        
         for (let k = 0; k < list.length; k++) {
           // Extract the URLs from the <a> elements
           const url = await list[k].getAttribute('href');
@@ -68,7 +72,7 @@ const searchForKeywords = async (url ) => {
           // Check if the URL already exists in the database
           const res = await pool.query(checkUrlQuery(url));
           if (res.rowCount === 0) {
-            await extractAndSaveData(url);
+            await extractAndSaveData(url, null, countryName);
           } else {
             console.log(`Article from ${url} already exists in database`);
           }
@@ -131,6 +135,9 @@ for (let i = 0; i < countries.length; i++) {
   }
 
   console.log('Successfully saved all blogs')
+
+  //update iso3 code of all records
+  updateRecordsForDistinctCountries()
   
 }
 

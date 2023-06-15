@@ -141,5 +141,5 @@ await driver.quit();
 }
 
 
-updateMissingUrl()
-// module.exports = updateMissingUrl;
+// updateMissingUrl()
+module.exports = updateMissingUrl;

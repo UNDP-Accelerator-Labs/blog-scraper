@@ -6,7 +6,7 @@ const extractAndSaveData = require('./saveToDb');
 
 
 
-const fetchALlBlogs = async () => {
+const updateNullBlogs = async () => {
   // await pool.connect();
   // fetch all blogs
   const res = await pool.query(getAllBlogsWithNull());
@@ -23,6 +23,6 @@ const fetchALlBlogs = async () => {
   console.log('Successfully updated all blogs')
 }
 
-fetchALlBlogs()
+// fetchALlBlogs()
 
-// module.exports = fetchALlBlogs;
+module.exports = updateNullBlogs;

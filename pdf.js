@@ -1,7 +1,7 @@
 const request = require('request');
 const pdfParser = require('pdf-parse');
 
-function getPdfMetadataFromUrl(url) {
+async function getPdfMetadataFromUrl(url) {
   try {
     return new Promise((resolve, reject) => {
       try{
@@ -13,7 +13,8 @@ function getPdfMetadataFromUrl(url) {
           pdfParser(buffer).then((pdf) => {
             const { info, metadata, text } = pdf;
             const json = { info, metadata, text };
-            resolve(json);
+            // console.log('json ', json)
+            resolve(pdf);
           }).catch((err) => {
             return reject(err);
           });

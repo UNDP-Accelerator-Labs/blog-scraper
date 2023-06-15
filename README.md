@@ -1,6 +1,6 @@
 # UNDP Website Scraper
 
-This is an Azure function application written in Node.js that scrapes the UNDP website for published articles related to predefined keywords. The application utilizes two Postgres databases: one to save extracted articles and another to check the ISO3 code of countries and whether there is a UNDP Accelerator lab in each country.
+This is an application written in Node.js that scrapes the UNDP website for published articles related to predefined keywords. The application utilizes two Postgres databases: one to save extracted articles and another to check the ISO3 code of countries and whether there is a UNDP Accelerator lab in each country. The application can be deployed/ run as an Azure function or web app expose via API. The blog scrapper runs every Sunday, 12AM.
 
 ## Prerequisites
 
@@ -43,10 +43,11 @@ To set up the application locally, follow these steps:
     NODE_ENV='local'
     ```
 5. Start the application: Run `npm start` to start the application.
-6. Update blog records: To update the blog records, run `npm run updateRecords`.
-7. Update ISO3 codes: To update the ISO3 codes of records, run `npm run updateIso3Record`.
-8. Extract articles for missing URLs: To extract articles of countries that do not have records in the Blog DB, run `npm run updateMissingUrls`.
+6. Update blog records: To update the blog with null records, you can access the endpoint via `/update-null-blogs`.
+7. Update ISO3 codes: To update the ISO3 codes of records, you can access the endpoint via `/update-iso3-codes`.
+8. Extract articles for missing URLs: To extract articles of countries that do not have records in the Blog DB, you can access the endpoint via `/update-missing-countries`.
 9. Update search keywords or taxonomy: Edit the `searchTerm.js` file to update the search keywords or taxonomy.
+10. You can also intiate the blog scrapper via an endpoint `/initialize`.
 
 ## License
 
