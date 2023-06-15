@@ -80,7 +80,3 @@ Run
 ```
 make -s deploy
 ```
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
