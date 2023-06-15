@@ -1,0 +1,40 @@
+name: Deployment
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+
+jobs:
+  deploy_pipeline:
+    name: Deploy
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Docker login
+      uses: azure/docker-login@v1
+      with:
+        login-server: acclabdocker.azurecr.io
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+
+    - name: Set env
+      run: echo "IMAGE_TAG=$(make -s name)" >> $GITHUB_ENV
+
+    - name: Build docker image
+      run: |
+        make -s build
+
+    - name: Push docker image
+      run: |
+        make -s dockerpush
+
+    - uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'blogscraper'
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        images: 'acclabdocker.azurecr.io/blogscraper:${{ env.IMAGE_TAG }}'
