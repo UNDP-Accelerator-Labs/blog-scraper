@@ -60,4 +60,11 @@ cron.schedule('0 12 * * 0', () => {
 
 app.listen(port, () => {
   console.log(`app listening on port ${port}`)
+  fs.readFile('version.txt', (err, data) => {
+    if (err) {
+      console.log('no version available');
+    } else {
+      console.log(data);
+    }
+  })
 })
