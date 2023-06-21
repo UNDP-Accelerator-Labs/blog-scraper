@@ -18,38 +18,38 @@ const port = 3000
 let versionObj = null;
 
 function getVersionString() {
-	return new Promise((resolve) => {
-		if (versionObj !== null) {
-			resolve(versionObj);
-			return;
-		}
-		fs.readFile('version.txt', (err, data) => {
-			if (err) {
-				versionObj = {
-					'name': 'no version available',
-					'commit': 'unknown',
-				};
-			} else {
-				const lines = data.toString().split(/[\r\n]+/);
-				versionObj = {
-					'name': lines[0] || 'no version available',
-					'commit': lines[1] || 'unknown',
-				};
-			}
-			resolve(versionObj);
-		});
-	});
+  return new Promise((resolve) => {
+    if (versionObj !== null) {
+      resolve(versionObj);
+      return;
+    }
+    fs.readFile('version.txt', (err, data) => {
+      if (err) {
+        versionObj = {
+          'name': 'no version available',
+          'commit': 'unknown',
+        };
+      } else {
+        const lines = data.toString().split(/[\r\n]+/);
+        versionObj = {
+          'name': lines[0] || 'no version available',
+          'commit': lines[1] || 'unknown',
+        };
+      }
+      resolve(versionObj);
+    });
+  });
 }
 
 app.get('/version', (req, res) => {
   getVersionString().then(vo => res.send(vo)).catch(err => {
-		console.log(err);
-		res.status(500).send({
-			'name': 'error while reading version',
-			'commit': 'unknown',
-			'app': `${app_id}`,
-		})
-	});
+    console.log(err);
+    res.status(500).send({
+      'name': 'error while reading version',
+      'commit': 'unknown',
+      'app': `${app_id}`,
+    })
+  });
 })
 
 //EXPOSE THE SCRAPER VIA API
@@ -91,13 +91,12 @@ app.post(('/update-missing-countries', (req, res)=>{
 }))
 
 app.use((req, res, next) => {
-  res.status(404).send(
-      "<h1>Page not found on the server</h1>")
+  res.status(404).send('<h1>Page not found on the server</h1>');
 })
 
 app.use((err, req, res, next) => {
-  console.error(err.stack)
-  res.status(500).send('Something broke!')
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
 })
 
 //RUN A CRON JOB 12AM EVERY SUNDAY TO EXECUTE THE SCRAPPER
@@ -109,7 +108,7 @@ cron.schedule('0 12 * * 0', () => {
 app.listen(port, () => {
   console.log(`app listening on port ${port}`)
   getVersionString().then(vo => {
-		console.log('name', vo.name);
-		console.log('commit', vo.commit);
-	}).catch(err => console.log(err));
+    console.log('name', vo.name);
+    console.log('commit', vo.commit);
+  }).catch(err => console.log(err));
 })
