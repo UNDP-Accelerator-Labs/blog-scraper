@@ -49,4 +49,4 @@ git-check:
 	./sh/git_check.sh
 
 run-web:
-	npm start 1>&2
+	npm start
