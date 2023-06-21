@@ -10,6 +10,7 @@ help:
 	@echo "current-version	computes the current version"
 	@echo "next-version	computes the next version"
 	@echo "git-check	ensures no git visible files have been altered"
+	@echo "run-web	starts the server"
 
 export LC_ALL=C
 export LANG=C
@@ -46,3 +47,6 @@ next-version:
 
 git-check:
 	./sh/git_check.sh
+
+run-web:
+	npm start 1>&2
