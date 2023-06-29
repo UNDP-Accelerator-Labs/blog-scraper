@@ -3,7 +3,7 @@ FROM node:16-slim
 
 # FROM ubuntu:20.04
 
-RUN apt-get update && apt-get install -y ca-certificates curl apt-transport-https lsb-release gnupg
+RUN apt-get update && apt-get -y upgrade && apt-get install -y ca-certificates curl apt-transport-https lsb-release gnupg
 
 # RUN curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/microsoft.gpg
 # RUN AZ_REPO=$(lsb_release -cs) && \
