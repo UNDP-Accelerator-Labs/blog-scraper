@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@azure/functions": "^3.5.1",
+    "axios": "^1.4.0",
     "azure-functions-core-tools": "^4.0.5148",
     "child_process": "^1.0.2",
     "chromedriver": "^114.0.2",

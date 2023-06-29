@@ -74,6 +74,20 @@ const getAllBlogsWithNull = () =>({
   `
 })
 
+const getAllDocument = `
+  SELECT id, url, content, country
+  FROM articles 
+  WHERE article_type = 'document' 
+  AND DATE(updated_at) != CURRENT_DATE 
+  ORDER BY id ASC;
+  `;
+
+const updateDocumentRecord = `
+      UPDATE articles
+      SET country = $2, language = $3, lat = $4,
+      lng = $5, iso3 = $6, has_lab = $7, updated_at = now()
+      WHERE id = $1
+  `;
 
 module.exports = { 
     checkUrlQuery,
@@ -86,4 +100,6 @@ module.exports = {
     updateQuery,
 
     getDistinctUrls,
+    getAllDocument,
+    updateDocumentRecord,
 };

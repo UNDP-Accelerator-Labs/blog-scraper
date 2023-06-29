@@ -6,6 +6,7 @@ const cron = require('node-cron');
 const updateRecordsForDistinctCountries = require('./updateRecordWithIso3')
 const updateNullBlogs = require('./updateBlog')
 const updateMissingUrl = require('./updateMissingCountries')
+const updateDocument = require('./updateDocumentRecord')
 
 const APP_SECRET = process.env.APP_SECRET;
 if (!APP_SECRET) {
@@ -90,6 +91,13 @@ app.post(('/update-missing-countries', (req, res)=>{
   res.send('Updates to blogs with missing countries started!')
 }))
 
+app.post(('/update-document-records', (req, res)=>{
+  if (!verifyToken(req, res)) return;
+
+  updateDocument()
+  res.send('Updates to all records with type document started!')
+}))
+
 app.use((req, res, next) => {
   res.status(404).send('<h1>Page not found on the server</h1>');
 })
@@ -100,7 +108,7 @@ app.use((err, req, res, next) => {
 })
 
 //RUN A CRON JOB 12AM EVERY SUNDAY TO EXECUTE THE SCRAPPER
-cron.schedule('0 12 * * 0', () => {
+cron.schedule('0 0 * * 0', () => {
   // Execute web extract function using child_process
   extractBlogUrl()
 });
