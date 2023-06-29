@@ -41,6 +41,10 @@ To set up the application locally, follow these steps:
     LOGIN_DB_PASSWORD=''
 
     NODE_ENV='local'
+
+    NLP_API_URL = ""
+    API_TOKEN = ''
+    APP_SECRET=''
     ```
 5. Start the application: Run `npm start` to start the application.
 6. Update blog records: To update the blog with null records, you can access the endpoint via `/update-null-blogs`.
@@ -48,6 +52,8 @@ To set up the application locally, follow these steps:
 8. Extract articles for missing URLs: To extract articles of countries that do not have records in the Blog DB, you can access the endpoint via `/update-missing-countries`.
 9. Update search keywords or taxonomy: Edit the `searchTerm.js` file to update the search keywords or taxonomy.
 10. You can also intiate the blog scrapper via an endpoint `/initialize`.
+11. Get deployed current version using the endpoint `/version`
+12. Update all records with type document using the endpoint `/update-document-records`
 
 ## Create docker image locally
 
