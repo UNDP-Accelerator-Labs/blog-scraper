@@ -1,37 +1,20 @@
 require('dotenv').config();
+const { chromeOption, config } = require('./config')
 const {Builder, By, Key, until} = require('selenium-webdriver');
-const chrome = require('selenium-webdriver/chrome');
-const chromedriver = require('chromedriver');
-var cron = require('node-cron');
 
 const { searchTerms } = require('./searchTerm');
-const pool =  require('./db');
+const DB = require('./db/index').DB
 const { checkUrlQuery, saveQuery } = require('./query');
+
 const extractAndSaveData = require('./saveToDb');
 const { extractLanguageFromUrl } = require('./utils');
 const updateRecordsForDistinctCountries = require('./updateRecordWithIso3')
 
-// Set up the Chrome options
-const options = new chrome.Options();
-options.addArguments('--headless'); // Run Chrome in headless mode (without a UI)
-options.addArguments('--window-size=1920,1080'); // Set the window size
-options.addArguments('--no-sandbox')
-options.addArguments('--disable-dev-shm-usage')
-
-// UNCOMMENT TO SEE IN BROWSER
-//   options.addArguments('--start-maximized'); // Maximize the window
-//   options.addArguments('--disable-gpu'); // Disable the GPU
-//   options.addArguments('--disable-dev-shm-usage'); // Disable shared memory usage
-//   options.addArguments('--no-sandbox'); // Disable the sandbox
-
-
-
-// Set up the WebDriver
-const driver = new Builder()
-  .forBrowser('chrome')
-  .setChromeOptions(options)
-  .build();
-
+//Start WebDriver
+let driver = new Builder()
+    .forBrowser('chrome')
+    .setChromeOptions(chromeOption)
+    .build();
 
 const searchForKeywords = async (url ) => {
     // Define the keywords to search for
@@ -55,23 +38,22 @@ const searchForKeywords = async (url ) => {
 
       // Wait for the search results to load
       try {
-        // await driver.wait(until.elementLocated(By.className('item-list')), 9000);
         const resultList = await driver.wait(until.elementLocated(By.className('item-list')), 5000);
 
         try {
           countryName =  await driver.findElement(By.css('.site-title a')).getText();
         }
-        catch{(err)=> console.log('Error while retrieving country name ', err) }
+        catch{(err)=> {} }
         
         const list = await resultList.findElements(By.tagName('a'));
         
         for (let k = 0; k < list.length; k++) {
           // Extract the URLs from the <a> elements
           const url = await list[k].getAttribute('href');
-
+       
           // Check if the URL already exists in the database
-          const res = await pool.query(checkUrlQuery(url));
-          if (res.rowCount === 0) {
+          const res = await DB.blog.any(checkUrlQuery, [url]).catch((err)=>  null)
+          if (res.length) {
             await extractAndSaveData(url, null, countryName);
           } else {
             console.log(`Article from ${url} already exists in database`);
@@ -80,7 +62,7 @@ const searchForKeywords = async (url ) => {
         }
 
       } catch (error) {
-        console.log('Error occurred while waiting for element:', error);
+        console.log('Error occurred while trying to retreve element ', error);
       }
 
     }
@@ -91,9 +73,9 @@ const searchForKeywords = async (url ) => {
 
 const extractBlogUrl = async () => {
 console.log('starting... ')
-// await pool.connect();
+
 // Navigate to the base website
-await driver.get('https://www.undp.org/');
+await driver.get(config['baseUrl']);
 
 // Click the "icon-globe" button to reveal the dropdown
 const globeButton = await driver.findElement(By.className('icon-globe'));
@@ -144,10 +126,9 @@ for (let i = 0; i < countries.length; i++) {
 
 // Quit the WebDriver
 await driver.quit();
-// await pool.end();
 
 }
 
 
-// extractBlogUrl()
-module.exports = extractBlogUrl;
+extractBlogUrl()
+// module.exports = extractBlogUrl;

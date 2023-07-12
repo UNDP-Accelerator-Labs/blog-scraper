@@ -49,9 +49,6 @@ async function updateRecordsForDistinctCountries() {
   } catch (error) {
     console.error('Error updating records:', error);
   } finally {
-    // Disconnect from the databases
-    DB.blog.$pool.end();
-    DB.general.$pool.end();
   }
 }
 

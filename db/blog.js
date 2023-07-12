@@ -15,7 +15,7 @@ const {
 	L_DB_NAME,
 	L_DB_PASS,
   } = process.env;
-  
+
 exports.connection = {
 	database: isProd ? DB_NAME : L_DB_NAME,
 	port: DB_PORT,

@@ -1,21 +1,18 @@
 require('dotenv').config();
 
-const pool =  require('./db');
-const { checkUrlQuery, getAllBlogsWithNull, getAllBlogs } = require('./query');
+const DB = require('./db/index').DB
+const { getAllBlogsWithNull } = require('./query');
 const extractAndSaveData = require('./saveToDb');
 
-
-
 const updateNullBlogs = async () => {
-  // await pool.connect();
   // fetch all blogs
-  const res = await pool.query(getAllBlogsWithNull());
+  const res = await DB.blog.any(getAllBlogsWithNull()).catch((err)=>  null)
 
   // Loop through each URL and perform a search
-  for (let k = 0; k < res.rowCount; k++) {
-    console.log('Updating content ', k+1 , ' of ', res.rowCount)
-    let dbUrl = res.rows[k]['url'];
-    let id = res.rows[k]['id'];
+  for (let k = 0; k < row.length; k++) {
+    console.log('Updating content ', k+1 , ' of ', res.length)
+    let dbUrl = res[k]['url'];
+    let id = res[k]['id'];
 
     await extractAndSaveData(dbUrl, id);
   }
@@ -23,6 +20,6 @@ const updateNullBlogs = async () => {
   console.log('Successfully updated all blogs')
 }
 
-// fetchALlBlogs()
+// updateNullBlogs()
 
 module.exports = updateNullBlogs;

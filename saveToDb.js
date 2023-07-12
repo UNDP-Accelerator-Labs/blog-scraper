@@ -1,26 +1,19 @@
 require('dotenv').config();
+const { chromeOption } = require('./config')
 const {Builder, By, Key, until} = require('selenium-webdriver');
-const chrome = require('selenium-webdriver/chrome');
-const chromedriver = require('chromedriver');
-const pool =  require('./db');
+const DB = require('./db/index').DB
+
 const { evaluateArticleType, extractLanguageFromUrl, article_types } = require('./utils');
 const { saveQuery, saveHrefLinks, updateQuery } = require('./query');
 const getPdfMetadataFromUrl = require('./pdf');
+
 const getWordDocumentMetadataFromUrl = require('./docx');
 
-
-// Set up the Chrome options
-const options = new chrome.Options();
-options.addArguments('--headless'); // Run Chrome in headless mode (without a UI)
-options.addArguments('--window-size=1920,1080'); // Set the window size
-options.addArguments('--no-sandbox')
-options.addArguments('--disable-dev-shm-usage')
-
-// Set up the WebDriver
-const driver = new Builder()
-  .forBrowser('chrome')
-  .setChromeOptions(options)
-  .build();
+// Start WebDriver
+let driver = new Builder()
+    .forBrowser('chrome')
+    .setChromeOptions(chromeOption)
+    .build();
 
 // sample word doc 
 // let docurl = 'https://popp.undp.org/_layouts/15/WopiFrame.aspx?sourcedoc=/UNDP_POPP_DOCUMENT_LIBRARY/Public/HR_Non-Staff_International%20Personnel%20Services%20Agreement_IPSA.docx&action=default'
@@ -264,33 +257,31 @@ const extractAndSaveData = async (url, id = null, countryName = null ) => {
   // Save the data to the database if id = null
   if(id == null || isNaN(id) == true ){
     try{
-      await pool.query(
-          saveQuery(url, country, languageName, articleTitle, postedDate, content, article_type, postedDateStr, html_content, raw_html) 
-          )
-          .then(async (data)=>{
-            console.log('saving article content to db')
-  
-            //save href links in a blog if it exist
-            if(hrefObj.length > 0){
-              await hrefObj.forEach(obj=> obj.article_id = data.rows[0].id );
-              
-              await pool.query(
-                saveHrefLinks(hrefObj)
-              )
-              .then((res) => {
-                console.log('successfully saved href links in blogs');
-                hrefObj = [];
-              })
-              .catch(err => {
-                console.error('Error saving href to table:', err);
-                hrefObj = [];
-              });
-            }
+      await DB.blog.none(saveQuery(url, country, languageName, articleTitle, postedDate, content, article_type, postedDateStr, html_content, raw_html))
+      .then(async (data) => {
+          console.log('saving article content to db')
+
+          //save href links in a blog if it exist
+          if(hrefObj.length > 0){
+            await hrefObj.forEach(obj=> obj.article_id = data[0].id );
             
-          })
-          .catch(err => {
-            console.error('Error saving blog content to table:', err);
-          });
+            await DB.blog.none(
+              saveHrefLinks(hrefObj)
+            )
+            .then((res) => {
+              console.log('successfully saved href links in blogs');
+              hrefObj = [];
+            })
+            .catch(err => {
+              console.error('Error saving href to table:', err);
+              hrefObj = [];
+            });
+          }
+      })
+      .catch(err=>{
+        console.log('Error while saving to db ', err)
+      })
+
     }
     catch(err){
       console.log("Error occurred while saving data to database", err, url)
@@ -299,7 +290,7 @@ const extractAndSaveData = async (url, id = null, countryName = null ) => {
   else{
     //update the record in db
     try{
-      await pool.query(
+      await DB.blog.any(
           updateQuery(id, url, country, languageName, articleTitle, postedDate, content, article_type, postedDateStr, html_content, raw_html) 
           )
           .then(async (data)=>{
@@ -315,10 +306,9 @@ const extractAndSaveData = async (url, id = null, countryName = null ) => {
     };
   }
 
+  // Quit WebDriver
+  driver.quit();
   return;
 }
-
-
-// extractAndSaveData()
 
 module.exports = extractAndSaveData;
