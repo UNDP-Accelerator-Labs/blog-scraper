@@ -1,6 +1,6 @@
 # UNDP Website Scraper
 
-This is an application written in Node.js that scrapes the UNDP website for published articles related to predefined keywords. The application utilizes two Postgres databases: one to save extracted articles and another to check the ISO3 code of countries and whether there is a UNDP Accelerator lab in each country. The application is drployed as web app expose via API. The blog scrapper runs every Sunday, 12AM.
+This is an application written in Node.js that scrapes the UNDP website for published articles related to predefined keywords. The application utilizes two Postgres databases: one to save extracted articles and another to check the ISO3 code of countries and whether there is a UNDP Accelerator lab in each country. The application is deployed as web app expose via API. The blog scrapper runs every Sunday, 12AM.
 
 ## Prerequisites
 
