@@ -1,4 +1,5 @@
 const { spawn } = require('child_process');
+const { config } = require('./config')
 
 const evaluateArticleType = async (url) => {
     if(url.includes('news')){
@@ -48,7 +49,7 @@ const evaluateArticleType = async (url) => {
 
 const  extractLanguageFromUrl = (url) => {
     const urlParts = url.split('/');
-    const languageIndex = urlParts.indexOf('www.undp.org') + 1;
+    const languageIndex = urlParts.indexOf(config['baseUrl.basic']) + 1;
     
     if (languageIndex >= urlParts.length) {
       return null;

@@ -1,8 +1,5 @@
 // Check if the URL already exists in the database
-const checkUrlQuery = url => ({
-    text: 'SELECT * FROM articles WHERE url = $1',
-    values: [url],
-  });
+const checkUrlQuery = 'SELECT * FROM articles WHERE url = $1'
 
 const saveQuery = (url, countryName, languageName, title, postedDate, content, article_type, posted_date_str, html_content, raw_html) =>   ({
 text: `

@@ -1,29 +1,20 @@
 require('dotenv').config();
+const { chromeOption, config } = require('./config')
 const {Builder, By, Key, until} = require('selenium-webdriver');
-const chrome = require('selenium-webdriver/chrome');
-const chromedriver = require('chromedriver');
-const pool =  require('./db');
+const DB = require('./db/index').DB
+
 const { evaluateArticleType, extractLanguageFromUrl, article_types } = require('./utils');
 const { saveQuery, saveHrefLinks, updateQuery } = require('./query');
 const getPdfMetadataFromUrl = require('./pdf');
+
 const getWordDocumentMetadataFromUrl = require('./docx');
 
+// Start WebDriver
+let driver = new Builder()
+    .forBrowser('chrome')
+    .setChromeOptions(chromeOption)
+    .build();
 
-// Set up the Chrome options
-const options = new chrome.Options();
-options.addArguments('--headless'); // Run Chrome in headless mode (without a UI)
-options.addArguments('--window-size=1920,1080'); // Set the window size
-options.addArguments('--no-sandbox')
-options.addArguments('--disable-dev-shm-usage')
-
-// Set up the WebDriver
-const driver = new Builder()
-  .forBrowser('chrome')
-  .setChromeOptions(options)
-  .build();
-
-// sample word doc 
-// let docurl = 'https://popp.undp.org/_layouts/15/WopiFrame.aspx?sourcedoc=/UNDP_POPP_DOCUMENT_LIBRARY/Public/HR_Non-Staff_International%20Personnel%20Services%20Agreement_IPSA.docx&action=default'
 const extractAndSaveData = async (url, id = null, countryName = null ) => {
   // Navigate to the URL
   await driver.get(url);
@@ -41,7 +32,11 @@ const extractAndSaveData = async (url, id = null, countryName = null ) => {
   
 
   let article_type = await evaluateArticleType(url);
-  let html_content = await driver.findElement(By.tagName('body')).getText() || null;
+  let html_content;
+
+  try{
+    html_content = await driver.findElement(By.tagName(config['html_content.element.article_page.tagname'])).getText() || null;
+  } catch(err){ html_content = null }
 
   let raw_html = await driver.getPageSource();
 
@@ -57,14 +52,13 @@ const extractAndSaveData = async (url, id = null, countryName = null ) => {
       country = countryName;
 
     }
-    else if(url.includes('.docx') 
+    else if(url.includes('.docx') // TODO:: Fix bug in word doc extract
     || url.includes('.doc')
     || url.includes('.odt') 
     || url.includes('.rtf') 
     || url.includes('.txt')
     || url.includes('docs.goo') 
     ){
-      console.log('word doc')
       // Extract docx content and metadata
       // const docxContent = await getWordDocumentMetadataFromUrl(url);
       // content = docxContent?.text || '';
@@ -79,15 +73,14 @@ const extractAndSaveData = async (url, id = null, countryName = null ) => {
   else if ( article_type == 'project'){
 
     try {
-      articleTitle = await driver.findElement(By.css('.coh-inline-element.title-heading')).getText() ||
-      await driver.findElement(By.css('.coh-heading.color-white')).getText()
-      || null;
+      articleTitle = await driver.findElement(By.css(config["title.element.project_page.css_selector"])).getText() ||
+      await driver.findElement(By.css(config["title_2.element.project_page.css_selector"])).getText();
     } catch(err){ 
       articleTitle = null;
     }
     
     try{
-      postedDateStr = await driver.findElement(By.css('.coh-inline-element.column.publication-card__title h6')).getText() || null;
+      postedDateStr = await driver.findElement(By.css(config['posted_date_str.element.project_page.css_selector'])).getText() || null;
     }
     catch(err){
       postedDateStr = null;
@@ -95,14 +88,15 @@ const extractAndSaveData = async (url, id = null, countryName = null ) => {
 
     postedDate = isNaN(new Date(postedDateStr)) ? null : new Date(postedDateStr);
 
-    // Extract the content
     try{
-      contentElements = await driver.findElements(By.css('.grid-container p'));
-      archorTags = await driver.findElements(By.css('.grid-container a'));
+      contentElements = await driver.findElements(By.css(config['content.element.project_page.css_selector']));
     }
-    catch (err){
-        console.log('error', err)
+    catch (err){ contentElements = []}
+
+    try{
+      archorTags = await driver.findElements(By.css(config['content_url_list.elements.project_page.css_selector']));
     }
+    catch (err){ archorTags = []}
 
     content = '';
     for (let i = 0; i < contentElements.length; i++) {
@@ -113,7 +107,11 @@ const extractAndSaveData = async (url, id = null, countryName = null ) => {
     //extract href link and text in a blog if it exist
     for (let i = 0; i < archorTags?.length; i++) {
       const linktext = await archorTags[i].getText();
-      const href = await archorTags[i].getAttribute('href');
+
+      try{
+        href = await archorTags[i].getAttribute(config['content_url.element.project_page.attribute']);
+      }catch(err){ href = ""}
+
       hrefObj.push({
         linktext,
         href
@@ -123,18 +121,27 @@ const extractAndSaveData = async (url, id = null, countryName = null ) => {
   }
   else if (article_type == 'publications'){
     
-    articleTitle = await driver.findElement(By.css('.coh-inline-element.column')).getText() || null;
-    postedDateStr = await driver.findElement(By.css('.coh-inline-element.column.publication-card__title h6')).getText() || null;
-    postedDate = isNaN(new Date(postedDateStr)) ? null :  new Date(postedDateStr);
-    //Extract country
-    country = await driver.findElement(By.css('.site-title a')).getText() || null;
-
-    // Extract the content
     try{
-      contentElements = await driver.findElements(By.css('.coh-container.coh-wysiwyg p'));
+      articleTitle = await driver.findElement(By.css(config['itle.element.publication.css_selector'])).getText() || null;
+    }
+    catch(err){ articleTitle = null }
+
+    try{
+      postedDateStr = await driver.findElement(By.css(config['posted_date_str.element.publication.css_selector'])).getText() || null;
+    }
+    catch(err){ postedDateStr = null }
+
+    postedDate = isNaN(new Date(postedDateStr)) ? null :  new Date(postedDateStr);
+    try{
+      country = await driver.findElement(By.css(config['country_name.element.publication.css_selector'])).getText() || null;
+    }
+    catch(err){ country = null }
+
+    try{
+      contentElements = await driver.findElements(By.css(config["content.elements.publication.css_selector"]));
     }
     catch (err){
-        console.log('error', err)
+      contentElements = [];
     }
 
     content = '';
@@ -145,24 +152,29 @@ const extractAndSaveData = async (url, id = null, countryName = null ) => {
     
   }
   else if (url.includes('.medium.com')){
-    postedDateStr = await driver.findElement(By.css('.pw-published-date')).getText() || null;
+    try{
+      postedDateStr = await driver.findElement(By.css(config["posted_date_str.element.medium_post.css_selector"])).getText() || null;
+    }
+    catch(err){ postedDateStr = null }
     postedDate = isNaN(new Date(postedDateStr)) ? null :  new Date(postedDateStr);
     languageName = null;
 
-    // // Extract the article title
-    articleTitle = await driver.findElement(By.className('pw-post-title')).getText() || null;
+    try{
+      articleTitle = await driver.findElement(By.className(config["title.element.medium_post.classname"])).getText() || null;
+    }catch(err){ articleTitle = null }
 
-    // //Extract country
-    country = await driver.findElement(By.css('.bk a')).getText() || null;
+    try{
+      country = await driver.findElement(By.css(config["country_name.element.medium_post.css_selector"])).getText() || null;
+    }catch(err){ country = null }
+    
+    try{
+      contentElements = await driver.findElements(By.css(config["content.elements.medium_post.css_selector"]));
+    }catch(err){ contentElements = [] }
 
     // // Extract the content
     try{
-      contentElements = await driver.findElements(By.css('.gq.gr.gs.gt.gu p'));
-      archorTags = await driver.findElements(By.css('.gq.gr.gs.gt.gu a'));
-    }
-    catch (err){
-        console.log('error', err)
-    }
+      archorTags = await driver.findElements(By.css(config["content_url.elements.medium_post.css_selector"]));
+    }catch (err){ archorTags= []}
 
     content = '';
     for (let i = 0; i < contentElements.length; i++) {
@@ -173,7 +185,11 @@ const extractAndSaveData = async (url, id = null, countryName = null ) => {
     //extract href link and text in a blog if it exist
     for (let i = 0; i < archorTags?.length; i++) {
       const linktext = await archorTags[i].getText();
-      const href = await archorTags[i].getAttribute('href');
+      let  href;
+      try{
+         href = await archorTags[i].getAttribute(config['content_url.element.project_page.attribute']);
+      }catch(err){ href = ""}
+
       hrefObj.push({
         linktext,
         href
@@ -182,24 +198,28 @@ const extractAndSaveData = async (url, id = null, countryName = null ) => {
 
   }
   else if (article_types.filter(p => url.includes(p)).length > 0) {
-    // Extract the article title
-    articleTitle = await driver.findElement(By.className('article-title')).getText() || null;
+    try{
+      articleTitle = await driver.findElement(By.className(config["title.element.blog.classname"])).getText() || null;
+    }catch(err){ articleTitle = null }
 
-    // Extract the posted date
-    postedDateStr = await driver.findElement(By.className('posted-date')).getText() || null;;
+    try{
+      postedDateStr = await driver.findElement(By.className(config["posted_date_str.element.blog.classname"])).getText() || null;
+    }catch(err){ postedDateStr = null }
+
     postedDate = isNaN(new Date(postedDateStr)) ? null : new Date(postedDateStr) ;
 
-    //Extract country
-    country = await driver.findElement(By.css('.site-title a')).getText() || null;
-
-    // Extract the content
     try{
-      contentElements = await driver.findElements(By.css('.coh-inline-element.m-content.coh-wysiwyg p'));
-      archorTags = await driver.findElements(By.css('.coh-inline-element.m-content.coh-wysiwyg a'));
+      country = await driver.findElement(By.css(config["country_name.element.blog.css_selector"])).getText() || null;
+    }catch(err){ country = null }
+    
+    try{
+      contentElements = await driver.findElements(By.css(config["content.elements.blog.css_selector"])) || [];
+    }catch(err){ contentElements = [] }
+    
+    try{
+      archorTags = await driver.findElements(By.css(config["content_url.elements.blog.css_selector"])) || [];
     }
-    catch (err){
-        console.log('error', err)
-    }
+    catch (err){ archorTags = []}
 
     //extract content of a blog
     content = '';
@@ -211,7 +231,11 @@ const extractAndSaveData = async (url, id = null, countryName = null ) => {
     //extract href link and text in a blog if it exist
     for (let i = 0; i < archorTags?.length; i++) {
       const linktext = await archorTags[i].getText();
-      const href = await archorTags[i].getAttribute('href');
+      let  href;
+      try{
+         href = await archorTags[i].getAttribute(config['content_url.element.project_page.attribute']);
+      }catch(err){ href = ""}
+
       hrefObj.push({
         linktext,
         href
@@ -219,37 +243,33 @@ const extractAndSaveData = async (url, id = null, countryName = null ) => {
     }
   }
   else {
-     // Extract the article title 
      try{
-      articleTitle = await driver.findElement(By.css('.coh-heading.heading.h2.coh-style-undp-heading-h2')).getText() || 
-      await driver.findElement(By.css('.coh-inline-element.content-box')).getText()
+      articleTitle = await driver.findElement(By.css(config["title.element.webpage.css_selector"])).getText() || 
+      await driver.findElement(By.css(config["title2.element.webpage.css_selector"])).getText()
       || null; 
-     }
-      catch (err){
-          console.log('error', err)
-      }
+     }catch (err){ articleTitle = null;}
 
-     // Extract the posted date
      postedDateStr = null;
      postedDate = null;
  
-     //Extract country
-     country = await driver.findElement(By.css('.site-title a')).getText() || null;
- 
-     // Extract the content
      try{
+      country = await driver.findElement(By.css(config["country_name.element.blog.css_selector"])).getText() || null;
+    }catch(err){ country = ""}
+ 
+    try{
       archorTags = await driver.findElements(By.css('a'));
      }
-     catch (err){
-         console.log('error', err)
-     }
+     catch (err){  archorTags = [] }
  
      content = '';
 
      //extract href link and text in a blog if it exist
      for (let i = 0; i < archorTags?.length; i++) {
        const linktext = await archorTags[i].getText();
-       const href = await archorTags[i].getAttribute('href');
+       try{
+        href = await archorTags[i].getAttribute(config['content_url.element.project_page.attribute']);
+      }catch(err){ href = ""}
+
        hrefObj.push({
          linktext,
          href
@@ -257,68 +277,46 @@ const extractAndSaveData = async (url, id = null, countryName = null ) => {
      }
   }
 
-  if(content.length <= 0){
-    content = null;
-  }
-
   // Save the data to the database if id = null
   if(id == null || isNaN(id) == true ){
-    try{
-      await pool.query(
-          saveQuery(url, country, languageName, articleTitle, postedDate, content, article_type, postedDateStr, html_content, raw_html) 
-          )
-          .then(async (data)=>{
-            console.log('saving article content to db')
-  
-            //save href links in a blog if it exist
-            if(hrefObj.length > 0){
-              await hrefObj.forEach(obj=> obj.article_id = data.rows[0].id );
-              
-              await pool.query(
-                saveHrefLinks(hrefObj)
-              )
-              .then((res) => {
-                console.log('successfully saved href links in blogs');
-                hrefObj = [];
-              })
-              .catch(err => {
-                console.error('Error saving href to table:', err);
-                hrefObj = [];
-              });
-            }
+      await DB.blog.none(
+        saveQuery(url, country, languageName, articleTitle, postedDate, content, article_type, postedDateStr, html_content, raw_html)
+      )
+      .then(async (data) => {
+          //save href links in a blog if it exist
+          if(hrefObj.length > 0){
+            hrefObj.forEach(obj=> obj.article_id = data[0].id );
             
-          })
-          .catch(err => {
-            console.error('Error saving blog content to table:', err);
-          });
-    }
-    catch(err){
-      console.log("Error occurred while saving data to database", err, url)
-    };
+            await DB.blog.none(
+              saveHrefLinks(hrefObj)
+            )
+            .then((res) => {
+              hrefObj = [];
+            })
+            .catch(err => {
+              console.error('Error saving href to table:', err);
+              hrefObj = [];
+            });
+          }
+      })
+      .catch(err=>{
+        console.log('Error while saving content to db ')
+      })
+
   }
   else{
     //update the record in db
-    try{
-      await pool.query(
+    await DB.blog.any(
           updateQuery(id, url, country, languageName, articleTitle, postedDate, content, article_type, postedDateStr, html_content, raw_html) 
-          )
-          .then(async (data)=>{
-            console.log('updating article content to db');
-          })
-          .catch(err => {
-            console.error('Error saving blog content to table:', err);
-          });
-          
-    }
-    catch(err){
-      console.log("Error occurred while updating database record", err, url)
-    };
+        )
+        .catch(err => {
+          console.error('Error occurred while updating content.');
+        });
   }
 
+  // Quit WebDriver
+  // driver.quit();
   return;
 }
-
-
-// extractAndSaveData()
 
 module.exports = extractAndSaveData;
