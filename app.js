@@ -7,6 +7,7 @@ const updateRecordsForDistinctCountries = require('./updateRecordWithIso3')
 const updateNullBlogs = require('./updateBlog')
 const updateMissingUrl = require('./updateMissingCountries')
 const updateDocument = require('./updateDocumentRecord')
+const bodyParser = require('body-parser');
 
 const APP_SECRET = process.env.APP_SECRET;
 if (!APP_SECRET) {
@@ -14,6 +15,7 @@ if (!APP_SECRET) {
 }
 const app = express()
 const port = 3000
+app.use(bodyParser.json());
 
 // HEALTH-CHECK + INFO
 let versionObj = null;
