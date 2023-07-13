@@ -1,14 +1,12 @@
 # UNDP Website Scraper
 
-This is an application written in Node.js that scrapes the UNDP website for published articles related to predefined keywords. The application utilizes two Postgres databases: one to save extracted articles and another to check the ISO3 code of countries and whether there is a UNDP Accelerator lab in each country. The application can be deployed/ run as an Azure function or web app expose via API. The blog scrapper runs every Sunday, 12AM.
+This is an application written in Node.js that scrapes the UNDP website for published articles related to predefined keywords. The application utilizes two Postgres databases: one to save extracted articles and another to check the ISO3 code of countries and whether there is a UNDP Accelerator lab in each country. The application is drployed as web app expose via API. The blog scrapper runs every Sunday, 12AM.
 
 ## Prerequisites
 
 Before setting up the code locally, ensure you have the following prerequisites installed:
 
 - Node.js: Make sure you have Node.js installed. You can check your version by running `node --version`.
-- Azure Functions extension v1.10.4 or above for Visual Studio Code.
-- Azurite: Install Azurite globally using `npm install -g azurite`. You will need it locally for Azure blob/storage simulation. Refer to [this URL](https://www.npmjs.com/package/azurite) for more information.
 
 ## Setup
 
@@ -16,10 +14,7 @@ To set up the application locally, follow these steps:
 
 1. Clone the repository: `git clone https://github.com/UNDP-Accelerator-Labs/blog-scraper.git`
 2. Install dependencies: Run `npm install` or `yarn install` in the project root directory.
-3. Start Azurite: Run the following command to start Azurite with desired paths and logging:
-    ```shell
-    azurite -s -l c:\azurite -d c:\azurite\debug.log
-    ```
+
 4. Create `.env` file: Create a `.env` file in the project root directory and add the following environment variables:
     ```dotenv
     DB_USER=''
@@ -54,6 +49,9 @@ To set up the application locally, follow these steps:
 10. You can also intiate the blog scrapper via an endpoint `/initialize`.
 11. Get deployed current version using the endpoint `/version`
 12. Update all records with type document using the endpoint `/update-document-records`
+
+## Configuration
+You can edit the configuration file `config/config.js` to update the html classname, attributes and css selector required for adequate scraping of required website. The base url of the website to be scrapped is also configurable from this file.
 
 ## Create docker image locally
 
