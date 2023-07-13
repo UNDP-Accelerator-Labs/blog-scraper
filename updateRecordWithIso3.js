@@ -11,7 +11,6 @@ async function updateRecords(country, iso3, hasLab, lat, lng) {
       WHERE country = $3;
     `;
     await DB.blog.none(updateQuery, [iso3, hasLab, country, lat, lng]);
-    console.log(`Updated records for ${country} in Blog DB.`);
   } catch (error) {
     console.error(`Error updating records for ${country} in Blog DB:`, error);
   }
@@ -48,8 +47,7 @@ async function updateRecordsForDistinctCountries() {
     console.log('All records updated successfully.');
   } catch (error) {
     console.error('Error updating records:', error);
-  } finally {
-  }
+  } 
 }
 
 // Call the main function to start the process

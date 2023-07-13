@@ -9,8 +9,7 @@ const DB = require('./db/index').DB
 const { NLP_API_URL, API_TOKEN } = process.env;
 
 const updateDocument = async () => {
-  // fetch all document records
-  const res = await DB.blog.any(getAllDocument);
+  const res = await DB.blog.any(getAllDocument).catch((err)=>  []);
 
   // Loop through each document and update country name
   for (let k = 0; k < res.length; k++) {
@@ -34,14 +33,17 @@ const updateDocument = async () => {
         loc?.lng, 
         loc?.iso3, 
         hasLabResult?.has_lab
-      ]);
-      console.log('updating document record') 
+      ])
+      .catch((err)=> {
+        throw new Error(err);
+      });
     }
     catch(err){
-      console.log("Error occurred while updating document record", err )
+      console.log("Error occurred while updating document record ", err )
     };
   }
 
+  //Log needed for debugging
   console.log('Successfully updated all document record')
 
 }
@@ -82,5 +84,4 @@ const getDocumentLanguage = async (content) => {
     });
 }
 
-// updateDocument()
 module.exports = updateDocument;
