@@ -27,9 +27,8 @@ const searchForKeywords = async (url ) => {
       try {
       await driver.get(`${url}?search=${keyword.split(" ").join('+')}`);
     }
-    catch(err){ 
-      return 
-    }
+    catch(err){ }
+
       let countryName = null;
     let resultList = [];
     let list = []
@@ -57,7 +56,7 @@ const searchForKeywords = async (url ) => {
           await extractAndSaveData(url, null, countryName);
         } 
         }
-      } catch (error) {}
+      } catch (error) { }
     }
   return;
 }
