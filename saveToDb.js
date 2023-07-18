@@ -279,28 +279,28 @@ const extractAndSaveData = async (url, id = null, countryName = null ) => {
 
   // Save the data to the database if id = null
   if(id == null || isNaN(id) == true ){
-      await DB.blog.none(
+      await DB.blog.oneOrNone(
         saveQuery(url, country, languageName, articleTitle, postedDate, content, article_type, postedDateStr, html_content, raw_html)
       )
       .then(async (data) => {
           //save href links in a blog if it exist
           if(hrefObj.length > 0){
-            hrefObj.forEach(obj=> obj.article_id = data[0].id );
+            hrefObj.forEach(obj=> obj.article_id = data.id );
             
-            await DB.blog.none(
+            await DB.blog.oneOrNone(
               saveHrefLinks(hrefObj)
             )
             .then((res) => {
               hrefObj = [];
             })
             .catch(err => {
-              console.error('Error saving href to table:', err);
+              console.error('Error saving href to table:', err.message);
               hrefObj = [];
             });
           }
       })
       .catch(err=>{
-        console.log('Error while saving content to db ')
+        console.log('Error while saving content to db ', err.message )
       })
 
   }
