@@ -4,60 +4,14 @@ const {Builder, By, Key, until} = require('selenium-webdriver');
 const { searchTerms } = require('./searchTerm');
 const DB = require('./db/index').DB
 
-const { checkUrlQuery, saveQuery, getDistinctUrls } = require('./query');
-const extractAndSaveData = require('./saveToDb');
-const { extractLanguageFromUrl } = require('./utils');
+const { getDistinctUrls } = require('./query');
+const { searchForKeywords } = require('./extract-url')
 
 // Set up the WebDriver
 let driver = new Builder()
     .forBrowser('chrome')
     .setChromeOptions(chromeOption)
     .build();
-
-const searchForKeywords = async (url ) => {
-    // Define the keywords to search 
-    let keywords = searchTerms['en']
-
-    // Extracting language from the url
-    let lang = await extractLanguageFromUrl(url);
-
-    if (lang !== null) {
-      keywords = await searchTerms[lang] || searchTerms['en'];
-    }
-
-    // Loop through each keyword and perform a search
-    for (let i = 0; i < keywords.length; i++) {
-      const keyword = keywords[i];
-
-      // Navigate to the URL with search parameters
-      await driver.get(`${url}?search=${keyword.split(" ").join('+')}`);
-
-      // Wait for the search results to load
-      try {
-        const resultList = await driver.wait(until.elementLocated(By.className(config["keyword_search_list.elements.country_page.classname"])), 5000) || [];
-        const list = await resultList.findElements(By.tagName(config["search_result_list.elements.country_page.tagname"])) || [];
-
-        for (let k = 0; k < list.length; k++) {
-          // Extract the URLs from the <a> elements
-          const url = await list[k].getAttribute(config["search_result_url.element.country_page.attribute"]);
-
-          // Check if the URL already exists in the database
-          const res = await DB.blog.any(checkUrlQuery, [url]);
-          if (res.length === 0) {
-            await extractAndSaveData(url);
-          } 
-          
-        }
-
-      } catch (error) {
-        console.log('Error occurred while waiting for element:');
-      }
-
-    }
-    return;
-  }
-
-
 
 const updateMissingUrl = async () => {
 // Navigate to the base website

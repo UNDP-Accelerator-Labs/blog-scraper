@@ -49,23 +49,24 @@ const searchForKeywords = async (url ) => {
         await new Promise(resolve => setTimeout(resolve, 5000));
      }catch(err){ console.log('err', err) }
 
-    try{
-      contentFilter = await driver.findElement(By.css('.select-control[aria-label="Region"]'));
-      await contentFilter.click();
-    }
-    catch (err) {
-      contentFilter = false;  // If 'Load More' button doesn't exist, set the flag to false
-      console.log('err ', err)
-    }
-
-    try{
-       blogFilter = await driver.findElement(By.id("content-type-ajax-blogs"));
-      await blogFilter.click();
-      await new Promise(resolve => setTimeout(resolve, 10000));
-    }
-    catch (err) {
-      blogFilter = false;  // If 'Load More' button doesn't exist, set the flag to false
-      console.log('err ', err)
+    //Only extract blogs if config["extract_blog_only"] is set to true
+    if(config["extract_blog_only"]){
+      try{
+        contentFilter = await driver.findElement(By.css(config[ "filter_select.select.country_page.css_selector"]));
+        await contentFilter.click();
+      }
+      catch (err) {
+        contentFilter = false;  // If 'Load More' button doesn't exist, set the flag to false
+      }
+  
+      try{
+         blogFilter = await driver.findElement(By.id(config["blog_filter.select.country_page.id"]));
+        await blogFilter.click();
+        await new Promise(resolve => setTimeout(resolve, 10000));
+      }
+      catch (err) {
+        blogFilter = false;  // If 'Load More' button doesn't exist, set the flag to false
+      }
     }
 
     let loadMoreExists = true;
@@ -89,7 +90,6 @@ const searchForKeywords = async (url ) => {
       urlElements = await  driver.findElements((By.xpath(config['search_result_list.elements.country_page.path'])));
     } catch (err) {
       urlElements = [];  
-      console.log('err ', err)
     }
 
     for (let element of urlElements) {
@@ -157,4 +157,7 @@ const extractBlogUrl = async () => {
   await driver.quit();
 }
 // extractBlogUrl()
-module.exports = extractBlogUrl;
+module.exports = {
+  extractBlogUrl,
+  searchForKeywords
+}
