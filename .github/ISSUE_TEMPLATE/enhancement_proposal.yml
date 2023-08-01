@@ -1,0 +1,49 @@
+name: Enhancement Proposal
+description: Propose an enhancement or improvement to the project.
+title: "[ENHANCEMENT]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this request!
+  - type: textarea
+    id: documentation
+    attributes:
+      label: What areas do you propose needs enhancement or improvement?
+      description: Provide a brief description of the enhancement or improvement.
+      placeholder: Brief description of the enhancement or improvement
+    validations:
+      required: true
+  - type: textarea
+    id: current-state
+    attributes:
+      label: Where is the current state/behavior?
+      description: Describe the current behavior or limitations, if relevant.
+      placeholder: Describe the current behavior or limitations
+    validations:
+      required: false
+  - type: textarea
+    id: suggestions
+    attributes:
+      label: How will the proposed enhancement improve the system?
+      description: Describe how the enhancement will improve or change the current behavior.
+      placeholder: The enhancement will improve or change the current behavior...
+    validations:
+      required: false
+  - type: textarea
+    id: beneficial
+    attributes:
+      label: Add why this is beneficial.
+      description: Explain any specific use cases where this enhancement would be beneficial.
+      placeholder: How is this beneficial?
+    validations:
+      required: false
+  - type: textarea
+    id: relevant-info
+    attributes:
+      label: Add any other relevant details
+      description: Add any other relevant details or resources that support the proposal.
+      placeholder: Add any other relevant info
+    validations:
+      required: false

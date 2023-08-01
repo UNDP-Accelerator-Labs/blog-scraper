@@ -1,0 +1,78 @@
+name: Issue Report
+description: File a bug report
+title: "[Issue]: "
+labels: ["bug", "issue"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this issue report!
+  - type: input
+    id: contact
+    attributes:
+      label: Contact Details
+      description: How can we get in touch with you if we need more info?
+      placeholder: ex. email@example.com
+    validations:
+      required: false
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Issue description
+      description: Provide a brief description of the issue.
+      placeholder: Describe the issue
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce.
+      description: Provide steps to reproduce
+      placeholder: First step, second step, and so on...
+    validations:
+      required: true
+  - type: textarea
+    id: url
+    attributes:
+      label: Where did this happen?
+      description: Provide describe which pad, template, collection, url and screenshot.
+      placeholder: Describe which pad, collection, url and screenshot.
+    validations:
+      required: true
+  - type: textarea
+    id: expectation
+    attributes:
+      label: What do you expect?
+      description: Describe what you expected to happen.
+      placeholder: Tell us what you expect!
+    validations:
+      required: false
+  - type: dropdown
+    id: version
+    attributes:
+      label: Platform
+      description: What platform are you reporting?
+      options:
+        - Action Plan
+        - Solution Mapping
+        - Experiments
+        - Global
+    validations:
+      required: true
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: What browsers are you seeing the problem on?
+      multiple: true
+      options:
+        - Firefox
+        - Chrome
+        - Safari
+        - Microsoft Edge
+  - type: textarea
+    id: relevant-info
+    attributes:
+      label: Add any other relevant details
+      description: Please add any other relevant details
+      placeholder: Add any other relevant info
+
