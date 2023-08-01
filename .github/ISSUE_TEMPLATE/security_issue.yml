@@ -1,0 +1,57 @@
+name: Security Issue
+description: Report a security vulnerability in the project.
+title: "[SECURITY]: "
+labels: ["security"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this security request!
+  - type: textarea
+    id: documentation
+    attributes:
+      label: Issue description
+      description: Provide a detailed description of the security issue.
+      placeholder: Brief description of the security issue.
+    validations:
+      required: true
+  - type: textarea
+    id: current-state
+    attributes:
+      label: Platforms
+      description: List the platform(s) of the project that are affected by this security issue.
+      placeholder: List of affected platform.
+    validations:
+      required: false
+  - type: textarea
+    id: suggestions
+    attributes:
+      label: Steps to reproduce.
+      description: Provide steps to reproduce the vulnerability, if possible.
+      placeholder: steps to reproduce the vulnerability.
+    validations:
+      required: true
+  - type: textarea
+    id: beneficial
+    attributes:
+      label: Impact of the security issue.
+      description: Explain the potential impact of the vulnerability if left unaddressed.
+      placeholder: the potential impact of the vulnerability
+    validations:
+      required: false
+  - type: textarea
+    id: insights
+    attributes:
+      label: Impact of the security issue.
+      description: Offer any suggestions or insights on how to fix the security issue.
+      placeholder: Offer any suggestions or insights
+    validations:
+      required: false
+  - type: textarea
+    id: relevant-info
+    attributes:
+      label: Add any other relevant details
+      description: Add any other relevant details or resources to help address the security issue.
+      placeholder: Add any other relevant info
+    validations:
+      required: false

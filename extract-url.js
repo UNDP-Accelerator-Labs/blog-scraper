@@ -62,7 +62,7 @@ const searchForKeywords = async (url ) => {
       try{
          blogFilter = await driver.findElement(By.id(config["blog_filter.select.country_page.id"]));
         await blogFilter.click();
-        await new Promise(resolve => setTimeout(resolve, 10000));
+        await new Promise(resolve => setTimeout(resolve, 5000));
       }
       catch (err) {
         blogFilter = false;  // If 'Load More' button doesn't exist, set the flag to false
@@ -83,7 +83,7 @@ const searchForKeywords = async (url ) => {
         loadMoreExists = false;  // If 'Load More' button doesn't exist, set the flag to false
       }
     }
-    await new Promise(resolve => setTimeout(resolve, 10000));
+    await new Promise(resolve => setTimeout(resolve, 5000));
 
     // After scrolling to the end, find all URLs in the 'a' elements
     try{
