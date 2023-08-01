@@ -14,6 +14,7 @@ async function getPdfMetadataFromUrl(url) {
           }
     
           pdfParser(buffer).then((pdf) => {
+            //Delete pdf files in local memory to avoid running out of memory
             fs.readdir(rootDirectory, (err, files) => {
               if (err) {
                 console.error('Error reading directory:', err);
@@ -35,7 +36,7 @@ async function getPdfMetadataFromUrl(url) {
                 }
               });
             });
-            
+
             resolve(pdf);
           }).catch((err) => {
             return reject(err);
