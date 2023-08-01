@@ -1,5 +1,8 @@
 const request = require('request');
 const pdfParser = require('pdf-parse');
+const fs = require('fs');
+const path = require('path');
+const rootDirectory = __dirname;
 
 async function getPdfMetadataFromUrl(url) {
   try {
@@ -11,9 +14,28 @@ async function getPdfMetadataFromUrl(url) {
           }
     
           pdfParser(buffer).then((pdf) => {
-            const { info, metadata, text } = pdf;
-            const json = { info, metadata, text };
-            // console.log('json ', json)
+            fs.readdir(rootDirectory, (err, files) => {
+              if (err) {
+                console.error('Error reading directory:', err);
+                return;
+              }
+            
+              files.forEach((file) => {
+                const filePath = path.join(rootDirectory, file);
+            
+                // Check if the file has .pdf extension
+                if (path.extname(filePath) === '.pdf') {
+                  fs.unlink(filePath, (err) => {
+                    if (err) {
+                      console.error(`Error deleting file ${file}:`, err);
+                    } else {
+                      console.log(`Deleted file: ${file}`);
+                    }
+                  });
+                }
+              });
+            });
+            
             resolve(pdf);
           }).catch((err) => {
             return reject(err);
@@ -31,5 +53,6 @@ async function getPdfMetadataFromUrl(url) {
     return {}
   }
 }
+
 
 module.exports = getPdfMetadataFromUrl;
