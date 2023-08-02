@@ -1,6 +1,6 @@
 const fs = require('fs')
 const express = require('express')
-const extractBlogUrl = require('./extract-url');
+const { extractBlogUrl } = require('./extract-url');
 
 const cron = require('node-cron');
 const updateRecordsForDistinctCountries = require('./updateRecordWithIso3')

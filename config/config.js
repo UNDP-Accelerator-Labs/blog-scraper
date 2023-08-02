@@ -2,6 +2,7 @@
 const config = {
     "baseUrl" : "https://www.undp.org",
     "headless.run" : true,
+    "extract_blog_only": true,
 
     //Atribute naming style => Action_Name.Element_type.Page_name.CSS_Selector_property
     "search.element.homepage.classname": "icon-globe",
@@ -16,8 +17,12 @@ const config = {
     "page_country_name.element.country_page.css_selector" : ".site-title a",
     "search_result_list.elements.country_page.tagname" : 'a',
     "search_result_url.element.country_page.attribute" : 'href',
-
+    "search_result_list.elements.country_page.path" : "//div[@class='item-list']//ul//li//div//span//a",
     "html_content.element.article_page.tagname" : "body",
+    "search_result_list.button.country_page.path" : "//li[@class='pager__item']//a[@title='Load more items']",
+    "scroll_result_list.button.country_page.classname" : "views-infinite-scroll-content-wrapper",
+    "filter_select.select.country_page.css_selector" : '.select-control[aria-label="Region"]',
+    "blog_filter.select.country_page.id"  : "content-type-ajax-blogs",
 
     "title.element.project_page.css_selector" : ".coh-inline-element.title-heading",
     "title_2.element.project_page.css_selector" : ".coh-heading.color-white",

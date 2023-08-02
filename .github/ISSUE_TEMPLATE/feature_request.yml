@@ -1,0 +1,49 @@
+name: Feature Request
+description: Suggest a new feature for the project.
+title: "[FEATURE]: "
+labels: ["feature request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this feature request!
+  - type: textarea
+    id: documentation
+    attributes:
+      label: What areas do you propose needs enhancement or improvement?
+      description: Describe the problem or limitation that this feature request aims to address.
+      placeholder: Brief description of the problem or limitation that this feature request address.
+    validations:
+      required: true
+  - type: textarea
+    id: current-state
+    attributes:
+      label: Where is the current state/behavior?
+      description: Describe the current behavior or limitations, if relevant.
+      placeholder: Describe the current behavior or limitations
+    validations:
+      required: false
+  - type: textarea
+    id: suggestions
+    attributes:
+      label: How would it improve the project?
+      description: Explain your suggested solution or feature.
+      placeholder: The feature will improve or change the current behavior...
+    validations:
+      required: false
+  - type: textarea
+    id: beneficial
+    attributes:
+      label: Add why this is beneficial.
+      description: Provide specific use cases or scenarios where this feature would be beneficial.
+      placeholder: How is this beneficial?
+    validations:
+      required: false
+  - type: textarea
+    id: relevant-info
+    attributes:
+      label: Add any other relevant details
+      description: Add any other relevant details or resources to support the feature request.
+      placeholder: Add any other relevant info
+    validations:
+      required: false

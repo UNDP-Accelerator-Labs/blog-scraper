@@ -1,0 +1,50 @@
+name: Documentation Improvement
+description: Propose a documentation improvement for the project
+title: "[DOCS]: "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this request!
+  - type: textarea
+    id: documentation
+    attributes:
+      label: What areas do you propose needs improvement?
+      description: Specify the area of documentation that requires improvement, e.g., installation guide, API documentation, usage examples, etc.
+      placeholder: Specify the area of documentation that requires improvement
+    validations:
+      required: true
+  - type: textarea
+    id: current-state
+    attributes:
+      label: Where is the current state of the documentation?
+      description: Briefly describe the current state of the documentation in the specified area.
+      placeholder: Current state of the documentation?
+    validations:
+      required: false
+  - type: textarea
+    id: suggestions
+    attributes:
+      label: What are your suggestions?
+      description: Describe the suggested improvement or addition to the documentation.
+      placeholder: What do you suggest?
+    validations:
+      required: false
+  - type: textarea
+    id: beneficial
+    attributes:
+      label: Add why this is beneficial.
+      description: Explain why this improvement is necessary or beneficial.
+      placeholder: How is this beneficial?
+    validations:
+      required: false
+  - type: textarea
+    id: relevant-info
+    attributes:
+      label: Add any other relevant details
+      description: Add any other relevant details or resources that support the documentation improvement proposal.
+      placeholder: Add any other relevant info
+    validations:
+      required: false
+
