@@ -1,18 +1,7 @@
 # # Use the official Node.js image as a base
 FROM node:16-slim
 
-# FROM ubuntu:20.04
-
 RUN apt-get update && apt-get -y upgrade && apt-get install -y ca-certificates curl apt-transport-https lsb-release gnupg
-
-# RUN curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/microsoft.gpg
-# RUN AZ_REPO=$(lsb_release -cs) && \
-#     echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | tee /etc/apt/sources.list.d/azure-cli.list && \
-#     echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-$AZ_REPO-prod $AZ_REPO main" | tee /etc/apt/sources.list.d/dotnetdev.list
-
-# RUN apt-get update && apt-get install -y azure-cli azure-functions-core-tools-3
-
-# RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash && apt-get install -y nodejs
 
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
 
@@ -26,6 +15,10 @@ RUN apt-get update \
     wget \
     unzip \
     unixodbc-dev \
+    fonts-liberation libasound2 libatk-bridge2.0-0 libatk1.0-0  libatspi2.0-0 \
+    libcairo2 libcups2 libdbus-1-3 libdrm2 libgbm1 libglib2.0-0 \
+    libgtk-3-0 libnspr4 libnss3 libpango-1.0-0 libu2f-udev \
+    libvulkan1 libxcomposite1 libxdamage1 libxfixes3 libxkbcommon0 libxrandr2  xdg-utils \
     && rm -rf /var/lib/apt/lists/*
 
 # 2) Install latest stable Chrome
@@ -36,25 +29,19 @@ RUN echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" |
 RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | \
     apt-key add -
 
-# Install Chrome
-ENV CHROME_VERSION="114.0.5735.198-1"
+RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+RUN apt-get install ./google-chrome-stable_current_amd64.deb
 
-RUN set -ex \
-    && wget --no-verbose -O /tmp/chrome.deb https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}_amd64.deb \
-    && (dpkg -i /tmp/chrome.deb || apt-get -fy install) \
-    && rm /tmp/chrome.deb \
-    && sed -i 's|HERE/chrome"|HERE/chrome" --disable-setuid-sandbox --no-sandbox|g' "/opt/google/chrome/google-chrome" \
-    && google-chrome --version
-    
 # 3) Install the Chromedriver version that corresponds to the installed major Chrome version
 # https://blogs.sap.com/2020/12/01/ui5-testing-how-to-handle-chromedriver-update-in-docker-image/
+# For some reasone, there is a breaking change with Chrome drive and the latest google chrome browser. Hence, the reason for default Chrome driver to the last know working version
+# TODO=> Find fix for breaking change =:)
 RUN google-chrome --version | grep -oE "[0-9]{1,10}.[0-9]{1,10}.[0-9]{1,10}" > /tmp/chromebrowser-main-version.txt
-RUN wget --no-verbose -O /tmp/latest_chromedriver_version.txt https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$(cat /tmp/chromebrowser-main-version.txt)
-RUN wget --no-verbose -O /tmp/chromedriver_linux64.zip https://chromedriver.storage.googleapis.com/$(cat /tmp/latest_chromedriver_version.txt)/chromedriver_linux64.zip \
+RUN wget --no-verbose -O /tmp/latest_chromedriver_version.txt https://chromedriver.storage.googleapis.com/LATEST_RELEASE_114.0.5735
+RUN wget --no-verbose -O /tmp/chromedriver_linux64.zip https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip \
     && rm -rf /opt/selenium/chromedriver \
     && unzip /tmp/chromedriver_linux64.zip -d /opt/selenium \
-    && rm /tmp/chromedriver_linux64.zip \
-    && mv /opt/selenium/chromedriver /opt/selenium/chromedriver-$(cat /tmp/latest_chromedriver_version.txt) \
+    && rm /tmp/chromedriver_linux64.zip && mv /opt/selenium/chromedriver /opt/selenium/chromedriver-$(cat /tmp/latest_chromedriver_version.txt) \
     && chmod 755 /opt/selenium/chromedriver-$(cat /tmp/latest_chromedriver_version.txt) \
     && ln -fs /opt/selenium/chromedriver-$(cat /tmp/latest_chromedriver_version.txt) /usr/bin/chromedriver
 
