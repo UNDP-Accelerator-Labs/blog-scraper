@@ -37,7 +37,7 @@ RUN apt-get install ./google-chrome-stable_current_amd64.deb
 # For some reasone, there is a breaking change with Chrome drive and the latest google chrome browser. Hence, the reason for default Chrome driver to the last know working version
 # TODO=> Find fix for breaking change =:)
 RUN google-chrome --version | grep -oE "[0-9]{1,10}.[0-9]{1,10}.[0-9]{1,10}" > /tmp/chromebrowser-main-version.txt
-RUN wget --no-verbose -O /tmp/latest_chromedriver_version.txt https://chromedriver.storage.googleapis.com/LATEST_RELEASE_114.0.5735 
+RUN wget --no-verbose -O /tmp/latest_chromedriver_version.txt https://chromedriver.storage.googleapis.com/LATEST_RELEASE_114.0.5735
 RUN wget --no-verbose -O /tmp/chromedriver_linux64.zip https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip \
     && rm -rf /opt/selenium/chromedriver \
     && unzip /tmp/chromedriver_linux64.zip -d /opt/selenium \
