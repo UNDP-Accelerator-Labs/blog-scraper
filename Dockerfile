@@ -36,12 +36,16 @@ RUN echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" |
 RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | \
     apt-key add -
 
-RUN apt-get update
-
+# Install Chrome
 ENV CHROME_VERSION="114.0.5735.198-1"
 
-RUN apt-get install -y google-chrome-stable=${CHROME_VERSION} libxss1
-
+RUN set -ex \
+    && wget --no-verbose -O /tmp/chrome.deb https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}_amd64.deb \
+    && (dpkg -i /tmp/chrome.deb || apt-get -fy install) \
+    && rm /tmp/chrome.deb \
+    && sed -i 's|HERE/chrome"|HERE/chrome" --disable-setuid-sandbox --no-sandbox|g' "/opt/google/chrome/google-chrome" \
+    && google-chrome --version
+    
 # 3) Install the Chromedriver version that corresponds to the installed major Chrome version
 # https://blogs.sap.com/2020/12/01/ui5-testing-how-to-handle-chromedriver-update-in-docker-image/
 RUN google-chrome --version | grep -oE "[0-9]{1,10}.[0-9]{1,10}.[0-9]{1,10}" > /tmp/chromebrowser-main-version.txt
