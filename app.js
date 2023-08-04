@@ -1,13 +1,18 @@
+require('dotenv').config();
 const fs = require('fs')
 const express = require('express')
-const { extractBlogUrl } = require('./extract-url');
+const { extractBlogUrl } = require('./controllers/extract-url');
 
 const cron = require('node-cron');
-const updateRecordsForDistinctCountries = require('./updateRecordWithIso3')
-const updateNullBlogs = require('./updateBlog')
-const updateMissingUrl = require('./updateMissingCountries')
-const updateDocument = require('./updateDocumentRecord')
+const updateRecordsForDistinctCountries = require('./controllers/updateRecordWithIso3')
+const updateNullBlogs = require('./controllers/updateBlog')
+const updateMissingUrl = require('./controllers/updateMissingCountries')
+const updateDocument = require('./controllers/updateDocumentRecord')
+
+const verifyToken = require('./middleware/verifyJwt')
 const bodyParser = require('body-parser');
+
+const routes = require('./routes')
 
 const APP_SECRET = process.env.APP_SECRET;
 if (!APP_SECRET) {
@@ -55,50 +60,38 @@ app.get('/version', (req, res) => {
   });
 })
 
-//EXPOSE THE SCRAPER VIA API
-function verifyToken(req, res) {
-  const { token } = req.body;
-  if (token !== APP_SECRET) {
-    res.status(401).send('invalid token');
-    return false;
-  }
-  return true;
-}
 
-app.post('/initialize', (req, res) => {
-  if (!verifyToken(req, res)) return;
+app.post('/initialize', verifyToken, (req, res) => {
   extractBlogUrl()
-
   res.send('The blog extract as started!')
 })
 
-app.post('/update-iso3-codes', (req, res) =>{
-  if (!verifyToken(req, res)) return;
+app.post('/update-iso3-codes', verifyToken, (req, res) =>{
 
   updateRecordsForDistinctCountries()
   res.send('ISO3 code update of all records started!')
 })
 
-app.post(('/update-null-blogs', (req, res)=>{
-  if (!verifyToken(req, res)) return;
-
+app.post(('/update-null-blogs', verifyToken, (req, res)=>{
   updateNullBlogs()
+
   res.send('Updates to blogs with null records started!')
 }))
 
-app.post(('/update-missing-countries', (req, res)=>{
-  if (!verifyToken(req, res)) return;
+app.post(('/update-missing-countries', verifyToken, (req, res)=>{
 
   updateMissingUrl()
   res.send('Updates to blogs with missing countries started!')
 }))
 
-app.post(('/update-document-records', (req, res)=>{
-  if (!verifyToken(req, res)) return;
+app.post(('/update-document-records', verifyToken, (req, res)=>{
 
   updateDocument()
   res.send('Updates to all records with type document started!')
 }))
+
+//DEFINE EXTERNAL API ENDPOINTS
+app.use('/v2/api', verifyToken, routes )
 
 app.use((req, res, next) => {
   res.status(404).send('<h1>Page not found on the server</h1>');

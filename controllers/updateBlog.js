@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const DB = require('./db/index').DB
+const DB = require('../db/index').DB
 const { getAllBlogsWithNull } = require('./query');
 const extractAndSaveData = require('./saveToDb');
 

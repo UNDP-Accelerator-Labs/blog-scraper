@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const DB = require('./db/index').DB
+const DB = require('../db/index').DB
 
 // Helper function to update records in DB1
 async function updateRecords(country, iso3, hasLab, lat, lng) {
