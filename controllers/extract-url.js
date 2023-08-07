@@ -1,13 +1,13 @@
 require('dotenv').config();
-const { chromeOption, config } = require('./config')
+const { chromeOption, config } = require('../config')
 const {Builder, By, Key, until} = require('selenium-webdriver');
 
-const { searchTerms } = require('./searchTerm');
-const DB = require('./db/index').DB
+const { searchTerms } = require('../searchTerm');
+const DB = require('../db/index').DB
 const { checkUrlQuery, saveQuery } = require('./query');
 
 const extractAndSaveData = require('./saveToDb');
-const { extractLanguageFromUrl } = require('./utils');
+const { extractLanguageFromUrl } = require('../utils');
 const updateRecordsForDistinctCountries = require('./updateRecordWithIso3')
 
 //Start WebDriver

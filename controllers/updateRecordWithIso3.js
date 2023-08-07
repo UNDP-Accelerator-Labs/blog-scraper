@@ -1,6 +1,5 @@
 require('dotenv').config();
-
-const DB = require('./db/index').DB
+const DB = require('../db').DB
 
 // Helper function to update records in DB1
 async function updateRecords(country, iso3, hasLab, lat, lng) {
@@ -30,7 +29,7 @@ async function updateRecordsForDistinctCountries() {
       const countryNameQuery = `
         SELECT iso3
         FROM country_names
-        WHERE name = $1;
+        WHERE $1 LIKE CONCAT('%', name, '%');
       `;
       const iso3Result = await DB.general.any(countryNameQuery, [country.country]).catch(()=> ({ iso3 : null }));
 

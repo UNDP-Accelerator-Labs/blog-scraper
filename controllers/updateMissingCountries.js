@@ -1,8 +1,8 @@
 require('dotenv').config();
-const { chromeOption, config } = require('./config')
+const { chromeOption, config } = require('../config')
 const {Builder, By, Key, until} = require('selenium-webdriver');
-const { searchTerms } = require('./searchTerm');
-const DB = require('./db/index').DB
+const { searchTerms } = require('../searchTerm');
+const DB = require('../db/index').DB
 
 const { getDistinctUrls } = require('./query');
 const { searchForKeywords } = require('./extract-url')

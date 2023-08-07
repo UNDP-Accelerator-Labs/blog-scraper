@@ -1,9 +1,9 @@
 require('dotenv').config();
-const { chromeOption, config } = require('./config')
+const { chromeOption, config } = require('../config')
 const {Builder, By, Key, until} = require('selenium-webdriver');
-const DB = require('./db/index').DB
+const DB = require('../db/index').DB
 
-const { evaluateArticleType, extractLanguageFromUrl, article_types } = require('./utils');
+const { evaluateArticleType, extractLanguageFromUrl, article_types } = require('../utils');
 const { saveQuery, saveHrefLinks, updateQuery } = require('./query');
 const getPdfMetadataFromUrl = require('./pdf');
 

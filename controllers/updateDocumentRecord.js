@@ -1,10 +1,10 @@
 require('dotenv').config();
 
-const pool =  require('./db');
+const pool =  require('../db');
 const { getAllDocument, updateDocumentRecord } = require('./query');
 const axios = require('axios');
 
-const DB = require('./db/index').DB
+const DB = require('../db/index').DB
 
 const { NLP_API_URL, API_TOKEN } = process.env;
 
