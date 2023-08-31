@@ -75,6 +75,7 @@ const getAllDocument = `
   SELECT id, url, content, country
   FROM articles 
   WHERE article_type != 'document' 
+  AND has_lab = true
   AND DATE(updated_at) != CURRENT_DATE 
   ORDER BY id ASC;
   `;

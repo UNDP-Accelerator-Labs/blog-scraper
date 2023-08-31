@@ -1,11 +1,11 @@
 require('dotenv').config();
 
 const DB = require('../db/index').DB
-const { getAllBlogsWithNull } = require('./query');
+const { getAllBlogsWithNull, getAllDocument } = require('./query');
 const extractAndSaveData = require('./saveToDb');
 
 const updateNullBlogs = async () => {
-  const res = await DB.blog.any(getAllBlogsWithNull()).catch((err)=>  [])
+  const res = await DB.blog.any(getAllDocument()).catch((err)=>  [])
 
   // Loop through each URL and perform a search
   for (let k = 0; k < res.length; k++) {
