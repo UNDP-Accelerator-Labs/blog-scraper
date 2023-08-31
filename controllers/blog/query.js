@@ -1,3 +1,4 @@
+const sqlregex = require('../../middleware/search').sqlregex
 
 const theWhereClause = (country, type )=> {
   let whereClause = '';
@@ -23,15 +24,15 @@ const theWhereClause = (country, type )=> {
 }
 
 const searchTextConditionFn = (searchText) => {
+  const search = sqlregex(searchText)
   let searchTextCondition = '';
    if (searchText !== null && searchText !== undefined && searchText.length > 0) {
     searchTextCondition = `
-      AND (title ~* '\\m${searchText}\\M'
-        OR content ~* '\\m${searchText}\\M'
-        OR all_html_content ~* '\\m${searchText}\\M')
+      AND (title ~* '\\m${search}\\M'
+        OR content ~* '\\m${search}\\M'
+        OR all_html_content ~* '\\m${search}\\M')
     `;
   }
-
   return searchTextCondition;
 }
 
@@ -64,15 +65,16 @@ exports.searchBlogQuery = (searchText, page, country, type, page_content_limit) 
     (page - 1) * page_content_limit,
     page,
   ];
+  const search = sqlregex(searchText)
   let searchTextCondition = '';
    if (searchText !== null && searchText !== undefined && searchText.length > 0) {
     searchTextCondition = `
-      AND (title ~* ('\\m' || $3::TEXT || '\\M')
-        OR content ~* ('\\m' || $3::TEXT || '\\M')
-        OR all_html_content ~* ('\\m' || $3::TEXT || '\\M')
-        OR country ~* ('\\m' || $3::TEXT || '\\M'))
+      AND (title ~* ('\\m' || $3 || '\\M')
+        OR content ~* ('\\m' || $3 || '\\M')
+        OR all_html_content ~* ('\\m' || $3 || '\\M')
+        OR country ~* ('\\m' || $3 || '\\M'))
     `;
-     values.splice(2, 0, searchText);
+     values.splice(2, 0, search);
   }
    return {
     text: `

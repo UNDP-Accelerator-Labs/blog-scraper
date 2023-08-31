@@ -74,7 +74,7 @@ const getAllBlogsWithNull = () =>({
 const getAllDocument = `
   SELECT id, url, content, country
   FROM articles 
-  WHERE article_type = 'document' 
+  WHERE article_type != 'document' 
   AND DATE(updated_at) != CURRENT_DATE 
   ORDER BY id ASC;
   `;

@@ -27,14 +27,14 @@ const config = {
     "title.element.project_page.css_selector" : ".coh-inline-element.title-heading",
     "title_2.element.project_page.css_selector" : ".coh-heading.color-white",
     "posted_date_str.element.project_page.css_selector" : ".coh-inline-element.column.publication-card__title h6",
-    "content.element.project_page.css_selector" : ".grid-container p",
-    "content_url_list.elements.project_page.css_selector" : ".grid-container a",
+    "content.element.project_page.css_selector" : ".grid-container",
+    "content_url_list.elements.project_page.css_selector" : ".grid-container",
     "content_url.element.project_page.attribute" : 'href',
 
     "title.element.publication.css_selector" : ".coh-inline-element.column",
     "posted_date_str.element.publication.css_selector" : '.coh-inline-element.column.publication-card__title h6',
     "country_name.element.publication.css_selector" : '.site-title a',
-    "content.elements.publication.css_selector" : '.coh-container.coh-wysiwyg p',
+    "content.elements.publication.css_selector" : '.coh-container.coh-wysiwyg',
 
     "title.element.medium_post.classname" : 'pw-post-title',
     "country_name.element.medium_post.css_selector" : '.bk a',
@@ -45,7 +45,7 @@ const config = {
     "title.element.blog.classname" : "article-title",
     "posted_date_str.element.blog.classname" : 'posted-date',
     "country_name.element.blog.css_selector" : '.site-title a',
-    "content.elements.blog.css_selector" : ".coh-inline-element.m-content.coh-wysiwyg p",
+    "content.elements.blog.css_selector" : ".coh-inline-element.m-content.coh-wysiwyg",
     "content_url.elements.blog.css_selector" : ".coh-inline-element.m-content.coh-wysiwyg a",
 
     "title.element.webpage.css_selector" : ".coh-heading.heading.h2.coh-style-undp-heading-h2",

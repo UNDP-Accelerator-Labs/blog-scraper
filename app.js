@@ -61,34 +61,34 @@ app.get('/version', (req, res) => {
 })
 
 
-app.post('/initialize', verifyToken, (req, res) => {
-  extractBlogUrl()
-  res.send('The blog extract as started!')
-})
+// app.post('/initialize', verifyToken, (req, res) => {
+//   extractBlogUrl()
+//   res.send('The blog extract as started!')
+// })
 
-app.post('/update-iso3-codes', verifyToken, (req, res) =>{
+// app.post('/update-iso3-codes', verifyToken, (req, res) =>{
 
-  updateRecordsForDistinctCountries()
-  res.send('ISO3 code update of all records started!')
-})
+//   updateRecordsForDistinctCountries()
+//   res.send('ISO3 code update of all records started!')
+// })
 
-app.post(('/update-null-blogs', verifyToken, (req, res)=>{
-  updateNullBlogs()
+// app.post(('/update-null-blogs', verifyToken, (req, res)=>{
+//   updateNullBlogs()
 
-  res.send('Updates to blogs with null records started!')
-}))
+//   res.send('Updates to blogs with null records started!')
+// }))
 
-app.post(('/update-missing-countries', verifyToken, (req, res)=>{
+// app.post(('/update-missing-countries', verifyToken, (req, res)=>{
 
-  updateMissingUrl()
-  res.send('Updates to blogs with missing countries started!')
-}))
+//   updateMissingUrl()
+//   res.send('Updates to blogs with missing countries started!')
+// }))
 
-app.post(('/update-document-records', verifyToken, (req, res)=>{
+// app.post(('/update-document-records', verifyToken, (req, res)=>{
 
-  updateDocument()
-  res.send('Updates to all records with type document started!')
-}))
+//   updateDocument()
+//   res.send('Updates to all records with type document started!')
+// }))
 
 //DEFINE EXTERNAL API ENDPOINTS
 app.use('/v2/api', verifyToken, routes )
@@ -105,9 +105,9 @@ app.use((err, req, res, next) => {
 //RUN A CRON JOB 12AM EVERY SUNDAY TO EXECUTE THE SCRAPPER
 cron.schedule('0 0 * * 0', () => {
   // Execute web extract function using child_process
-  extractBlogUrl()
+  // extractBlogUrl()
 });
-
+  
 app.listen(port, () => {
   console.log(`app listening on port ${port}`)
   getVersionString().then(vo => {
