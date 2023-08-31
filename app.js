@@ -107,7 +107,7 @@ cron.schedule('0 0 * * 0', () => {
   // Execute web extract function using child_process
   extractBlogUrl()
 });
-
+  
 app.listen(port, () => {
   console.log(`app listening on port ${port}`)
   getVersionString().then(vo => {

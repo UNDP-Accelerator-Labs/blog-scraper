@@ -100,22 +100,29 @@ const extractAndSaveData = async (url, id = null, countryName = null ) => {
 
     content = '';
     for (let i = 0; i < contentElements.length; i++) {
-      const text = await contentElements[i].getText();
-      content += text + '\n';
+      const hasFeaturedClass = await contentElements[i].getAttribute('class').then(classes => classes.includes('featured-stories'));
+      if (!hasFeaturedClass) {
+        const text = await contentElements[i].getText();
+        content += text + '\n';
+      }
     }
 
     //extract href link and text in a blog if it exist
     for (let i = 0; i < archorTags?.length; i++) {
-      const linktext = await archorTags[i].getText();
+      const hasFeaturedClass = await archorTags[i].getAttribute('class').then(classes => classes.includes('featured-stories'));
+      if (!hasFeaturedClass) {
+        const linktext = await archorTags[i].getText();
 
-      try{
-        href = await archorTags[i].getAttribute(config['content_url.element.project_page.attribute']);
-      }catch(err){ href = ""}
+        try{
+          href = await archorTags[i].getAttribute(config['content_url.element.project_page.attribute']);
+        }catch(err){ href = ""}
 
-      hrefObj.push({
-        linktext,
-        href
-      })
+        hrefObj.push({
+          linktext,
+          href
+        })
+
+      }
     }
 
   }
@@ -146,8 +153,11 @@ const extractAndSaveData = async (url, id = null, countryName = null ) => {
 
     content = '';
     for (let i = 0; i < contentElements.length; i++) {
-      const text = await contentElements[i].getText();
-      content += text + '\n';
+      const hasFeaturedClass = await contentElements[i].getAttribute('class').then(classes => classes.includes('featured-stories'));
+      if (!hasFeaturedClass) {
+        const text = await contentElements[i].getText();
+        content += text + '\n';
+      }
     }
     
   }
@@ -224,8 +234,11 @@ const extractAndSaveData = async (url, id = null, countryName = null ) => {
     //extract content of a blog
     content = '';
     for (let i = 0; i < contentElements.length; i++) {
-      const text = await contentElements[i].getText();
-      content += text + '\n';
+      const hasFeaturedClass = await contentElements[i].getAttribute('class').then(classes => classes.includes('featured-stories'));
+      if (!hasFeaturedClass) {
+        const text = await contentElements[i].getText();
+        content += text + '\n';
+      }
     }
 
     //extract href link and text in a blog if it exist
