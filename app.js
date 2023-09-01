@@ -72,23 +72,24 @@ app.post('/update-iso3-codes', verifyToken, (req, res) =>{
   res.send('ISO3 code update of all records started!')
 })
 
-app.post(('/update-null-blogs', verifyToken, (req, res)=>{
+app.post('/update-null-blogs', verifyToken, (req, res)=>{
+  console.log('update-null-blogs')
   updateNullBlogs()
 
   res.send('Updates to blogs with null records started!')
-}))
+})
 
-app.post(('/update-missing-countries', verifyToken, (req, res)=>{
+app.post('/update-missing-countries', verifyToken, (req, res)=>{
 
   updateMissingUrl()
   res.send('Updates to blogs with missing countries started!')
-}))
+})
 
-app.post(('/update-document-records', verifyToken, (req, res)=>{
+app.post('/update-document-records', verifyToken, (req, res)=>{
 
   updateDocument()
   res.send('Updates to all records with type document started!')
-}))
+})
 
 //DEFINE EXTERNAL API ENDPOINTS
 app.use('/v2/api', verifyToken, routes )

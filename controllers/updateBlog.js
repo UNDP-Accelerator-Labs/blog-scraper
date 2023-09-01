@@ -5,7 +5,7 @@ const { getAllBlogsWithNull, getAllDocument } = require('./query');
 const extractAndSaveData = require('./saveToDb');
 
 const updateNullBlogs = async () => {
-  const res = await DB.blog.any(getAllDocument()).catch((err)=>  [])
+  const res = await DB.blog.any(getAllDocument).catch((err)=>  [])
 
   // Loop through each URL and perform a search
   for (let k = 0; k < res.length; k++) {
