@@ -267,14 +267,14 @@ const extractAndSaveData = async (url, id = null, countryName = null ) => {
  
      try{
       country = await driver.findElement(By.css(config["country_name.element.blog.css_selector"])).getText() || null;
-    }catch(err){ country = ""}
+    }catch(err){ country = null}
  
     try{
       archorTags = await driver.findElements(By.css('a'));
      }
      catch (err){  archorTags = [] }
  
-     content = '';
+     content = null;
 
      //extract href link and text in a blog if it exist
      for (let i = 0; i < archorTags?.length; i++) {

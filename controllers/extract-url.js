@@ -115,48 +115,46 @@ const searchForKeywords = async (url ) => {
   return;
 }
 
-const extractBlogUrl = async () => {
-  // Navigate to the base website
+const extractBlogUrl = async (params) => {
+  const { startIndex, delimeter, } = params || {};
+
   await driver.get(config['baseUrl']);
-  //  Click the "icon-globe" button to reveal the dropdown
   const globeButton = await driver.findElement(By.className(config['search.element.homepage.classname']));
   await globeButton.click();
-   // Find all the "countries" elements
   const countries = await driver.findElements(By.className(config['country_list.elements.homepage.classname']));
   let validUrls = [];
-  //  Loop through each "country" element
+
   for (let i = 0; i < countries.length; i++) {
     const country = countries[i];
-     // Extract the country name
-    const countryName = await country.findElement(By.className(config['country_name.element.homepage.classname'])).getText();
-     // Extract the URLs for each language in the "languages" element
     const languages = await country.findElements(By.className(config['language_list.elements.homepage.classname']));
+
     for (let j = 0; j < languages.length; j++) {
       const language = languages[j];
-       // Extract the URLs from the <a> elements
       const urls = await language.findElements(By.tagName(config['language_name.element.homepage.tagname']));
-       for (let k = 0; k < urls.length; k++) {
+      for (let k = 0; k < urls.length; k++) {
         const url = await urls[k].getAttribute(config['page_url.element.homepage.attribute']);
         validUrls.push(url);
       }
-     }
-    //  Loop through each URL and perform a search
-    for (let k = 0; k < validUrls.length; k++) {
+    }
+
+    //THIS IS A LONG LOOP, HENCE SEVER USUSALLY RUN OUT OF MEMORY
+    //SET START INDEX & delimeter TO LIMIT THE RANGE OF A SINGLE RUN
+    //SETTING SMALL delimeter SHOULD AVOID SERVER CRASHING AFTER RUNNING FOR A LONG TIME
+    const start= startIndex ?? 0;
+    const end = delimeter ?? validUrls.length
+    for (let k = start; k < end; k++) {
       const url = validUrls[k];
       // Logging needed for debugging
-      console.log('This is running for', k + 1, 'out of', validUrls.length);
-     
+      console.log('This is running for', k + 1, 'out of ', end);
       await searchForKeywords(url);
     }
-     // Logging needed for debugging
-    console.log('Successfully saved all blogs');
-     // Update iso3 code of all records
+
     updateRecordsForDistinctCountries();
   }
-   // Quit the WebDriver
+
   await driver.quit();
 }
-// extractBlogUrl()
+
 module.exports = {
   extractBlogUrl,
   searchForKeywords

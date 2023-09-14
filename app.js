@@ -5,7 +5,7 @@ const { extractBlogUrl } = require('./controllers/extract-url');
 
 const cron = require('node-cron');
 const updateRecordsForDistinctCountries = require('./controllers/updateRecordWithIso3')
-const updateNullBlogs = require('./controllers/updateBlog')
+const updateDbRecord = require('./controllers/updateBlog')
 const updateMissingUrl = require('./controllers/updateMissingCountries')
 const updateDocument = require('./controllers/updateDocumentRecord')
 
@@ -62,7 +62,13 @@ app.get('/version', (req, res) => {
 
 
 app.post('/initialize', verifyToken, (req, res) => {
-  extractBlogUrl()
+  const { startIndex, delimeter } = req.body
+  if(typeof startIndex === 'number' 
+    && typeof delimeter === 'number'
+    && startIndex < delimeter){
+    extractBlogUrl({ startIndex, delimeter })
+  } else extractBlogUrl()
+  
   res.send('The blog extract as started!')
 })
 
@@ -72,11 +78,15 @@ app.post('/update-iso3-codes', verifyToken, (req, res) =>{
   res.send('ISO3 code update of all records started!')
 })
 
-app.post('/update-null-blogs', verifyToken, (req, res)=>{
-  console.log('update-null-blogs')
-  updateNullBlogs()
+app.post('/update-record', verifyToken, (req, res)=>{
+  const { startIndex, delimeter } = req.body
+  if(typeof startIndex === 'number' 
+    && typeof delimeter === 'number'
+    && startIndex < delimeter){
+      updateDbRecord({ startIndex, delimeter })
+  } else updateDbRecord()
 
-  res.send('Updates to blogs with null records started!')
+  res.send('Updates to articles records has started!')
 })
 
 app.post('/update-missing-countries', verifyToken, (req, res)=>{
@@ -103,12 +113,33 @@ app.use((err, req, res, next) => {
   res.status(500).send('Something broke!');
 })
 
-//RUN A CRON JOB 12AM EVERY SUNDAY TO EXECUTE THE SCRAPPER
-cron.schedule('0 0 * * 0', () => {
-  // Execute web extract function using child_process
-  extractBlogUrl()
+//TO AVOID AZURE WEB SERVICE MEMORY ISSUE,
+//THE CRON JOB WILL BE SPLIT WITH THE WEEKEND DAYS
+// FROM FRIDAY 7PM EVENING TO 11PM SUNDAY
+
+//THERE ARE IN TOTAL 183 COUNTRY/LANGUAGE PAGE INSTANCES ON THE UNDP WEBSITES
+//THE CRON JOBS WILL RUN 7 TIMES OVER THE WEEKEND TO ENSURE THAT EVERY PAGE IS CHECKED
+
+// Calculate the start index and delimeter for each run
+const calculateStartIndexAnddelimeter = (runNumber) => {
+  const startIndex = (runNumber - 1) * 26;
+  const delimeter = startIndex + 25;
+  return { startIndex, delimeter };
+};
+
+//RUN EVERY 7 HOURS
+cron.schedule('0 */7 * * 5-0', () => {
+  const currentHour = new Date().getHours();
+  const runNumber = Math.ceil((currentHour - 19) / 7);
+  //SET delimeter AND START INDEX FOR THE LAST RUN TO MAKE 183
+  const { startIndex, delimeter } = (runNumber === 7)
+  ? { startIndex: 156, delimeter: 183 }
+  : calculateStartIndexAnddelimeter(runNumber);
+
+  extractBlogUrl({ startIndex, delimeter });
 });
-  
+
+
 app.listen(port, () => {
   console.log(`app listening on port ${port}`)
   getVersionString().then(vo => {

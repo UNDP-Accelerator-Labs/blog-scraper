@@ -3,7 +3,7 @@ let findOR = /\sOR\s|\s?\,\s?/dgi
 let findPhrase = /(?<=(^|\s))\"[\w\d\*\s\']+\"(?=(\s|$))/dgi
 const fNest = /[\(\)\"\w\d\*\']+(\sor)?\s\(+[\"\w\d\*\s\'\(]+\)+/dgi
 
-function prepStr (_str) {
+function prepStr (_str = '') {
 	const max = ([..._str.matchAll(findPhrase)]?.length ?? 0) - 1
 
 	function findPhrases (_i = 0) {
