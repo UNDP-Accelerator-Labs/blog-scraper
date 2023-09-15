@@ -120,23 +120,33 @@ app.use((err, req, res, next) => {
 //THERE ARE IN TOTAL 183 COUNTRY/LANGUAGE PAGE INSTANCES ON THE UNDP WEBSITES
 //THE CRON JOBS WILL RUN 7 TIMES OVER THE WEEKEND TO ENSURE THAT EVERY PAGE IS CHECKED
 
-// Calculate the start index and delimeter for each run
-const calculateStartIndexAnddelimeter = (runNumber) => {
-  const startIndex = (runNumber - 1) * 26;
-  const delimeter = startIndex + 25;
-  return { startIndex, delimeter };
-};
-
 // RUN EVERY FRIDAY FROM 7 PM IN AN INTERVAL OF 7 HOURS
-cron.schedule('0 19/7 * * 5', () => {
-  const currentHour = new Date().getHours();
-  const runNumber = Math.ceil((currentHour - 19) / 7);
-  //SET delimeter AND START INDEX FOR THE LAST RUN TO MAKE 183
-  const { startIndex, delimeter } = (runNumber === 7)
-  ? { startIndex: 156, delimeter: 183 }
-  : calculateStartIndexAnddelimeter(runNumber);
+cron.schedule( '0 19 * * 5', () => {
+  extractBlogUrl({ startIndex : 0, delimeter: 25 });
+});
 
-  extractBlogUrl({ startIndex, delimeter });
+cron.schedule( '0 2 * * 6', () => {
+  extractBlogUrl({ startIndex: 26, delimeter: 51 });
+});
+
+cron.schedule( '0 9 * * 6', () => {
+  extractBlogUrl({ startIndex: 52, delimeter: 77 });
+});
+
+cron.schedule( '0 16 * * 6', () => {
+  extractBlogUrl({ startIndex: 78, delimeter: 103 });
+});
+
+cron.schedule( '0 23 * * 6', () => {
+  extractBlogUrl({ startIndex: 104, delimeter: 129 });
+});
+
+cron.schedule( '0 6 * * 7', () => {
+  extractBlogUrl({ startIndex: 130, delimeter: 155 });
+});
+
+cron.schedule( '0 13 * * 7', () => {
+  extractBlogUrl({ startIndex: 156, delimeter: 183 });
 });
 
 
