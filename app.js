@@ -127,8 +127,8 @@ const calculateStartIndexAnddelimeter = (runNumber) => {
   return { startIndex, delimeter };
 };
 
-//RUN EVERY 7 HOURS
-cron.schedule('0 */7 * * 5-0', () => {
+// RUN EVERY FRIDAY FROM 7 PM IN AN INTERVAL OF 7 HOURS
+cron.schedule('0 19/7 * * 5', () => {
   const currentHour = new Date().getHours();
   const runNumber = Math.ceil((currentHour - 19) / 7);
   //SET delimeter AND START INDEX FOR THE LAST RUN TO MAKE 183
