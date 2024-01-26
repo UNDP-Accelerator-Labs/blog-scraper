@@ -1,0 +1,110 @@
+<% 
+    // CREATE ALIASES 
+    const menulist = locals.metadata.site.acclab_suites 
+    const title = locals.metadata.site.title 
+    const stats = locals?.stats 
+    const countries = locals?.countries?.sort((a, b) => a?.country?.localeCompare(b?.country)) || [];
+    const articletype = locals?.articletype?.sort((a, b) => a?.article_type.localeCompare(b?.article_type))
+    .map(item => ({
+        ...item,
+        label: item.article_type ? item.article_type.toUpperCase() : null
+      })) || [];
+    const geodata = locals?.geodata 
+    const results = locals?.results 
+
+    const total_pages = locals?.total_pages;
+    const current_page = locals?.current_page;
+%>
+
+<div class="cell large-3 small-12 sidebar-width">
+  <div class="column sidebar-desktop">
+    <button class="button button-secondary sort-filter-search">
+      Search and filter
+      <span>Close</span>
+    </button>
+    <div class="search-filter">
+      <div class="expand-search">
+        <button class="icon-search">Search</button>
+        <button class="expand-button">
+          <span class="icon-search"></span>
+        </button>
+        <input id="search-input" type="text" aria-label="expand-search" />
+        <button class="close-button">
+          <span class="icon-close"></span>
+        </button>
+      </div>
+      <div class="select-wrapper">
+        <div class="multi-select" data-multi-select="">
+          <button aria-label="Region" aria-expanded="false" data-id="filter1">
+            Country
+          </button>
+          <ul
+            data-type="region"
+            role="listbox"
+            aria-multiselectable="true"
+            aria-hidden="true"
+            aria-modal="true"
+          >
+            <% for (let i = 0; i < countries.length; i++) { %>
+            <li role="option">
+              <div class="form-check">
+                <label for="<%= countries[i]?.country %>"
+                  ><%= countries[i]?.country || countries[i]?.iso3 %> (<%=
+                  countries[i]?.recordcount || 0 %>)</label
+                >
+                <input
+                  type="checkbox"
+                  id="<%= countries[i]?.iso3 %>"
+                  name="country"
+                  value="<%= countries[i]?.country %>"
+                />
+              </div>
+            </li>
+            <% } %>
+          </ul>
+        </div>
+        <div class="multi-select" data-multi-select="">
+          <button aria-label="Region" aria-expanded="false" data-id="filter2">
+            Document
+          </button>
+          <ul
+            data-type="region"
+            role="listbox"
+            aria-multiselectable="true"
+            aria-hidden="true"
+            aria-modal="true"
+          >
+            <% for (let i = 0; i < articletype.length; i++) { %>
+            <li role="option">
+              <div class="form-check">
+                <label for="<%= articletype[i]?.country %>"
+                  ><%= articletype[i]?.label %> (<%=
+                  articletype[i]?.recordcount || 0 %>)</label
+                >
+                <input
+                  type="checkbox"
+                  id="<%= articletype[i]?.article_type %>"
+                  name="article_type"
+                  value="<%= articletype[i]?.article_type %>"
+                />
+              </div>
+            </li>
+            <% } %>
+          </ul>
+        </div>
+        <br/>
+        <div class="cell cta-container">
+            <a id="apply-search" class="button button-primary button-without-arrow" role="button" href="#">
+                Apply 
+            </a>
+        </div>
+
+        <span class="active-filter">Active Filters:</span>
+        <div class="selected-chips"></div>
+        <button class="clear-search-filter">Clear All</button>
+      </div>
+    </div>
+  </div>
+
+  <br />
+</div>

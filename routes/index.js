@@ -1,9 +1,6 @@
-const express = require("express");
-const blog = require("../controllers");
+if (!exports.api) { exports.api = {} }
+if (!exports.home) { exports.home = {} }
 
-let router = express();
 
-// api routes v2 (/v2/api)
-router.use("/blog", blog());
-
-module.exports = router;
+exports.api.blog = require("../controllers");
+exports.home.browse = require('./home')

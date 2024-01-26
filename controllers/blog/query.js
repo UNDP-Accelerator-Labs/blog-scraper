@@ -1,7 +1,4 @@
 const sqlregex = require('../../middleware/search').sqlregex
-const { DB } = require('../../db')
-const { as } = require('pg-promise');
-const format = as.format;
 
 const theWhereClause = (country, type )=> {
   let whereClause = '';

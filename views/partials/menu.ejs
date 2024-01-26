@@ -1,0 +1,69 @@
+<%
+	// CREATE ALIASES
+    const menulist = locals.metadata.site.acclab_suites
+    const title = locals.metadata.site.title
+%>
+
+<header class="country-header country-load-animation">
+  <section class="header">
+    <div class="grid-container fluid">
+      <div class="grid-x grid-margin-x align-content-middle">
+        <div class="cell small-8 large-2 shrink align-self-middle top-left">
+          <a href="#" class="logo" tabindex="0" title="UNDP Logo homepage link">
+            <img
+              src="/imgs/branding/UNDP_accelerator_labs_logo_vertical_color_opaque.png"
+              alt="UNDP Logo"
+              width="auto"
+            />
+          </a>
+          <div class="site-title">
+            <span
+              ><a href="#" title="UNDP homepage link"
+                >UNDP Accelerator Labs</a
+              ></span
+            >
+            <span><a href="#" title="UNDP homepage link"><%= title %></a></span>
+          </div>
+        </div>
+        <div class="cell small-1 large-auto align-content-middle top-center">
+          <nav class="menu">
+            <ul class="">
+              <% for (let i = 0; i < menulist.length; i++) { %>
+              <li
+                data-menu-id="<%= menulist[i].title.toLowerCase().replace(/\s+/g, '') %>"
+              >
+                <a target="_blank" href="<%= menulist[i].url %>" tabindex="0"
+                  ><%= menulist[i].title %></a
+                >
+              </li>
+              <% } %>
+            </ul>
+          </nav>
+        </div>
+
+        <div class="mobile-nav">
+          <div class="grid-x">
+            <div class="cell mobile-links">
+              <ul>
+                <% for (let i = 0; i < menulist.length; i++) { %>
+                <li
+                  data-menu-id="<%= menulist[i].title.toLowerCase().replace(/\s+/g, '') %>"
+                >
+                  <a
+                    target="_blank"
+                    class="cta__link cta--space"
+                    href="<%= menulist[i].url %>"
+                    tabindex="0"
+                    ><%= menulist[i].title %></a
+                  >
+                </li>
+                <% } %>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</header>
+<div id="loader" class="loader"></div>
