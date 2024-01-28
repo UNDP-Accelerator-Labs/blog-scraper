@@ -144,7 +144,8 @@ function getVersionString() {
   });
 }
 
-app.get('/', routes.home.browse)
+app.get('/', routes.home.index)
+app.get('/browse', routes.home.browse)
 
 app.get('/version', (req, res) => {
   getVersionString().then(vo => res.send(vo)).catch(err => {

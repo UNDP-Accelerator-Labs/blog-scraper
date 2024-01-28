@@ -11,4 +11,5 @@ exports.csp_links = [
     'https://cdn.jsdelivr.net',
     'https://code.jquery.com',
     'https://cdnjs.cloudflare.com',
+    'https://design.undp.org',
   ];

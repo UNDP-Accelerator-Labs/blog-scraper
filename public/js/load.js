@@ -77,13 +77,15 @@ async function onLoad() {
   langSwitch();
 
   accordion('[data-accordion="mobile"]', ".footer-panel", "active");
-  // expandToSize('.pagehero-full');
+  expandToSize('.pagehero-full');
+  expandToSize('.homepage-hero-full')
   swiper(".fluid-carousel", ".slide-content");
+  statsHover()
 
   expandSearch();
   multiSelect();
   toggleFilter();
-
+  swiper('.stats-card-slider');
   // parallaxEffect('.stats-card-slider');
 
   //SHOW LOADING ICON WHEN A SUBMIT BUTTON IS CLICKED

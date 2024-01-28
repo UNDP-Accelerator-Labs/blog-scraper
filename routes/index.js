@@ -3,4 +3,5 @@ if (!exports.home) { exports.home = {} }
 
 
 exports.api.blog = require("../controllers");
-exports.home.browse = require('./home')
+exports.home.index = require('./home')
+exports.home.browse = require('./browse')

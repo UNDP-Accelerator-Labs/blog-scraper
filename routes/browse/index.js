@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
   const current_page = results[0]?.current_page || 1
 
   res.render(
-    "home/",
+    "browse/",
     Object.assign(metadata, {
       stats: stats?.stats,
       results,

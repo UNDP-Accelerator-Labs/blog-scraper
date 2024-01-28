@@ -34,6 +34,7 @@
 @import url("https://cdn.jsdelivr.net/npm/@undp/design-system/docs/css/components/search-expand.min.css");
 @import url("https://cdn.jsdelivr.net/npm/@undp/design-system/docs/css/components/chips.min.css");
 @import url("https://cdn.jsdelivr.net/npm/@undp/design-system/docs/css/templates/generic-page.min.css");
+@import url("https://cdn.jsdelivr.net/npm/@undp/design-system/docs/css/components/homepagehero.min.css");
 .toast {
   position: fixed;
   top: 25px;

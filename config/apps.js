@@ -1,4 +1,4 @@
-exports.app_title = 'Blogs';
+exports.app_title = 'Insights Hub';
 exports.app_title_short = 'sdg-commons-blogs';
 exports.app_suite = 'acclab_platform';
 exports.app_suite_secret = process.env.APP_SUITE_SECRET || 'secret';
@@ -12,7 +12,7 @@ exports.app_suite_url = `https://www.${base_host}/`;
 
 exports.acclab_suites = [
     {
-        title: 'Global',
+        title: 'SDG Innovation Commons',
         url: 'https://sdg-innovation-commons.org'
     },
     {
