@@ -1,6 +1,6 @@
 require('dotenv').config();
 const { chromeOption, config } = require('../config')
-const {Builder, By, Key, until} = require('selenium-webdriver');
+const {Builder, By, Browser, Key, until} = require('selenium-webdriver');
 
 const { searchTerms } = require('../searchTerm');
 const DB = require('../db/index').DB
@@ -10,13 +10,11 @@ const extractAndSaveData = require('./saveToDb');
 const { extractLanguageFromUrl } = require('../utils');
 const updateRecordsForDistinctCountries = require('./updateRecordWithIso3')
 
-//Start WebDriver
-let driver = new Builder()
-    .forBrowser('chrome')
-    .setChromeOptions(chromeOption)
-    .build();
 
 const searchForKeywords = async (url ) => {
+  //Start WebDriver
+let driver = await new Builder().forBrowser(Browser.FIREFOX).build();
+
   let keywords = searchTerms['en']
   let lang = await extractLanguageFromUrl(url);
 

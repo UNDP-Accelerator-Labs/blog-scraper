@@ -1,6 +1,6 @@
 require('dotenv').config();
 const { chromeOption, config } = require('../config')
-const {Builder, By, Key, until} = require('selenium-webdriver');
+const {Builder, By, Browser, Key, until} = require('selenium-webdriver');
 const DB = require('../db/index').DB
 
 const { evaluateArticleType, extractLanguageFromUrl, article_types } = require('../utils');
@@ -9,13 +9,10 @@ const getPdfMetadataFromUrl = require('./pdf');
 
 const getWordDocumentMetadataFromUrl = require('./docx');
 
-// Start WebDriver
-let driver = new Builder()
-    .forBrowser('chrome')
-    .setChromeOptions(chromeOption)
-    .build();
-
 const extractAndSaveData = async (url, id = null, countryName = null ) => {
+
+// Start WebDriver
+let driver = await new Builder().forBrowser(Browser.FIREFOX).build();
   // Navigate to the URL
   await driver.get(url);
 

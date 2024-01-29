@@ -1,19 +1,16 @@
 require('dotenv').config();
 const { chromeOption, config } = require('../config')
-const {Builder, By, Key, until} = require('selenium-webdriver');
+const {Builder, Browser, By, Key, until} = require('selenium-webdriver');
 const { searchTerms } = require('../searchTerm');
 const DB = require('../db/index').DB
 
 const { getDistinctUrls } = require('./query');
 const { searchForKeywords } = require('./extract-url')
 
-// Set up the WebDriver
-let driver = new Builder()
-    .forBrowser('chrome')
-    .setChromeOptions(chromeOption)
-    .build();
 
 const updateMissingUrl = async () => {
+  // Set up the WebDriver
+  let driver = await new Builder().forBrowser(Browser.FIREFOX).build();
 // Navigate to the base website
 await driver.get(config['baseUrl']);
 
