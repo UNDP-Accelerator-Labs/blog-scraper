@@ -45,24 +45,18 @@ RUN wget --no-verbose -O /tmp/chromedriver_linux64.zip https://chromedriver.stor
     && chmod 755 /opt/selenium/chromedriver-$(cat /tmp/latest_chromedriver_version.txt) \
     && ln -fs /opt/selenium/chromedriver-$(cat /tmp/latest_chromedriver_version.txt) /usr/bin/chromedriver
 
-# Set the working directory to /app
+
 WORKDIR /app
 
-# 3. Install selenium
 RUN npm config set unsafe-perm true
 RUN npm i selenium-webdriver
-# RUN npm i -g azure-functions-core-tools@2 --unsafe-perm true
-
-# Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+RUN npm i
 
-# Copy the rest of the application code to the working directory
 COPY . .
 
-# Expose the port that the application listens on
+RUN npm run sass-deploy
 EXPOSE 3000
 
 # Start the application
