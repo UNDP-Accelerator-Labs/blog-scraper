@@ -2,10 +2,11 @@
   // CREATE ALIASES 
   const results = locals?.results;
   const current_page = locals?.current_page;
-
+  const total_records = +(locals?.total_records) || 0;
 %>
 
 <div class="cell large-9 small-12 generic-content">
+  <h6> Showing <%= total_records %> results.</h6>
   <div class="grid-x grid-margin-x content-data">
     <input hidden value="<%= current_page %>" id="current_page" />
     <% for (const blog of results || []) { %>

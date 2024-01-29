@@ -17,6 +17,7 @@ module.exports = async (req, res) => {
   const results = searchResults?.searchResults || []
   const total_pages = results[0]?.total_pages || 0
   const current_page = results[0]?.current_page || 1
+  const total_records = results[0]?.total_records || 0
 
   res.render(
     "browse/",
@@ -24,6 +25,7 @@ module.exports = async (req, res) => {
       stats: stats?.stats,
       results,
       total_pages,
+      total_records,
       current_page,
       countries: filters?.countries,
       articletype: filters?.articleType,

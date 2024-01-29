@@ -216,6 +216,6 @@ exports.sqlregex = (_data, _language) => { // DO SOMETHING HERE FOR RTL LANGUAGE
 			}
 		}).join('')}.*$`
 	})
-	return `(${query.join('|')})`
+	return [`(${query.join('|')})`, terms.flat()]
 }
 

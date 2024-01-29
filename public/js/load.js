@@ -46,7 +46,7 @@ function updateSearchQuery() {
 
   const searchQuery = queryParamsArray.join("&");
   if (searchQuery !== "") {
-    window.location.href = `/?${searchQuery}`;
+    window.location.href = `/browse?${searchQuery}`;
     isLoading(true);
   }
 }
@@ -60,7 +60,7 @@ function updatePaginationLinks() {
     // Update the page in the URL and trigger the search query update
     const queryParams = new URLSearchParams(window.location.search);
     queryParams.set("page", targetPage);
-    window.location.href = `/?${queryParams.toString()}`;
+    window.location.href = `/browse?${queryParams.toString()}`;
     isLoading(true);
   });
 }
@@ -77,15 +77,15 @@ async function onLoad() {
   langSwitch();
 
   accordion('[data-accordion="mobile"]', ".footer-panel", "active");
-  expandToSize('.pagehero-full');
-  expandToSize('.homepage-hero-full')
+  expandToSize(".pagehero-full");
+  expandToSize(".homepage-hero-full");
   swiper(".fluid-carousel", ".slide-content");
-  statsHover()
+  statsHover();
 
   expandSearch();
   multiSelect();
   toggleFilter();
-  swiper('.stats-card-slider');
+  swiper(".stats-card-slider");
   // parallaxEffect('.stats-card-slider');
 
   //SHOW LOADING ICON WHEN A SUBMIT BUTTON IS CLICKED
@@ -106,7 +106,7 @@ async function onLoad() {
     }
   });
   d3.select(".clear-search-filter").on("click", function () {
-    window.location.href = "/";
+    window.location.href = "/browse";
     isLoading(true);
   });
 
@@ -152,7 +152,7 @@ async function onLoad() {
       chip.on("click", function () {
         const updatedQueryParams = new URLSearchParams(window.location.search);
         updatedQueryParams.delete(key);
-        window.location.href = `/?${updatedQueryParams.toString()}`;
+        window.location.href = `/browse?${updatedQueryParams.toString()}`;
         isLoading(true);
       });
     }

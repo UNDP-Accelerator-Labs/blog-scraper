@@ -14,20 +14,13 @@ module.exports = async (req, res) => {
   const data = await getdata(DB.blog, req, res);
 
   const [stats, searchResults, filters] = data || [null, null, null];
-  const results = searchResults?.searchResults || []
-  const total_pages = results[0]?.total_pages || 0
-  const current_page = results[0]?.current_page || 1
 
   res.render(
     "home/",
     Object.assign(metadata, {
       stats: stats?.stats,
-      results,
-      total_pages,
-      current_page,
       countries: filters?.countries,
       articletype: filters?.articleType,
-      geodata: filters?.geoData,
     })
   );
 };
