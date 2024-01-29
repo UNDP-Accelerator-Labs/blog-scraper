@@ -20,11 +20,11 @@ const { DB } = include("db/");
 const { getVersionString } = include("middleware");
 const port = process.env.PORT || 3000;
 
-// const { extractBlogUrl } = require('./controllers/extract-url');
-// const updateRecordsForDistinctCountries = require('./controllers/updateRecordWithIso3')
-// const updateDbRecord = require('./controllers/updateBlog')
-// const updateMissingUrl = require('./controllers/updateMissingCountries')
-// const updateDocument = require('./controllers/updateDocumentRecord')
+const { extractBlogUrl } = require('./controllers/extract-url');
+const updateRecordsForDistinctCountries = require('./controllers/updateRecordWithIso3')
+const updateDbRecord = require('./controllers/updateBlog')
+const updateMissingUrl = require('./controllers/updateMissingCountries')
+const updateDocument = require('./controllers/updateDocumentRecord')
 const verifyToken = include("/middleware/verifyJwt");
 const routes = include("routes/");
 const app = express();
@@ -128,48 +128,48 @@ app.get("/version", (req, res) => {
     });
 });
 
-// app.post('/initialize', verifyToken, (req, res) => {
-//   const { startIndex, delimeter } = req.body
-//   if(typeof startIndex === 'number'
-//     && typeof delimeter === 'number'
-//     && startIndex < delimeter){
-//     extractBlogUrl({ startIndex, delimeter })
-//   } else extractBlogUrl()
-
-//   res.send('The blog extract as started!')
-// })
-
-// app.post('/update-iso3-codes', verifyToken, (req, res) =>{
-
-//   updateRecordsForDistinctCountries()
-//   res.send('ISO3 code update of all records started!')
-// })
-
-// app.post('/update-record', verifyToken, (req, res)=>{
-//   const { startIndex, delimeter } = req.body
-//   if(typeof startIndex === 'number'
-//     && typeof delimeter === 'number'
-//     && startIndex < delimeter){
-//       updateDbRecord({ startIndex, delimeter })
-//   } else updateDbRecord()
-
-//   res.send('Updates to articles records has started!')
-// })
-
-// app.post('/update-missing-countries', verifyToken, (req, res)=>{
-
-//   updateMissingUrl()
-//   res.send('Updates to blogs with missing countries started!')
-// })
-
-// app.post('/update-document-records', verifyToken, (req, res)=>{
-
-//   updateDocument()
-//   res.send('Updates to all records with type document started!')
-// })
 
 //DEFINE EXTERNAL API ENDPOINTS
 app.use("/v2/api", verifyToken, routes.api.blog);
+app.post('/initialize', verifyToken, (req, res) => {
+  const { startIndex, delimeter } = req.body
+  if(typeof startIndex === 'number'
+    && typeof delimeter === 'number'
+    && startIndex < delimeter){
+    extractBlogUrl({ startIndex, delimeter })
+  } else extractBlogUrl()
+
+  res.send('The blog extract as started!')
+})
+
+app.post('/update-iso3-codes', verifyToken, (req, res) =>{
+
+  updateRecordsForDistinctCountries()
+  res.send('ISO3 code update of all records started!')
+})
+
+app.post('/update-record', verifyToken, (req, res)=>{
+  const { startIndex, delimeter } = req.body
+  if(typeof startIndex === 'number'
+    && typeof delimeter === 'number'
+    && startIndex < delimeter){
+      updateDbRecord({ startIndex, delimeter })
+  } else updateDbRecord()
+
+  res.send('Updates to articles records has started!')
+})
+
+app.post('/update-missing-countries', verifyToken, (req, res)=>{
+
+  updateMissingUrl()
+  res.send('Updates to blogs with missing countries started!')
+})
+
+app.post('/update-document-records', verifyToken, (req, res)=>{
+
+  updateDocument()
+  res.send('Updates to all records with type document started!')
+})
 
 app.use((req, res, next) => {
   res.status(404).send("<h1>Page not found on the server</h1>");
@@ -188,33 +188,33 @@ app.use((err, req, res, next) => {
 //THE CRON JOBS WILL RUN 7 TIMES OVER THE WEEKEND TO ENSURE THAT EVERY PAGE IS CHECKED
 
 // RUN EVERY FRIDAY FROM 7 PM IN AN INTERVAL OF 7 HOURS
-// cron.schedule( '0 19 * * 5', () => {
-//   extractBlogUrl({ startIndex : 0, delimeter: 25 });
-// });
+cron.schedule( '0 19 * * 5', () => {
+  extractBlogUrl({ startIndex : 0, delimeter: 25 });
+});
 
-// cron.schedule( '0 2 * * 6', () => {
-//   extractBlogUrl({ startIndex: 26, delimeter: 51 });
-// });
+cron.schedule( '0 2 * * 6', () => {
+  extractBlogUrl({ startIndex: 26, delimeter: 51 });
+});
 
-// cron.schedule( '0 9 * * 6', () => {
-//   extractBlogUrl({ startIndex: 52, delimeter: 77 });
-// });
+cron.schedule( '0 9 * * 6', () => {
+  extractBlogUrl({ startIndex: 52, delimeter: 77 });
+});
 
-// cron.schedule( '0 16 * * 6', () => {
-//   extractBlogUrl({ startIndex: 78, delimeter: 103 });
-// });
+cron.schedule( '0 16 * * 6', () => {
+  extractBlogUrl({ startIndex: 78, delimeter: 103 });
+});
 
-// cron.schedule( '0 23 * * 6', () => {
-//   extractBlogUrl({ startIndex: 104, delimeter: 129 });
-// });
+cron.schedule( '0 23 * * 6', () => {
+  extractBlogUrl({ startIndex: 104, delimeter: 129 });
+});
 
-// cron.schedule( '0 6 * * 7', () => {
-//   extractBlogUrl({ startIndex: 130, delimeter: 155 });
-// });
+cron.schedule( '0 6 * * 7', () => {
+  extractBlogUrl({ startIndex: 130, delimeter: 155 });
+});
 
-// cron.schedule( '0 13 * * 7', () => {
-//   extractBlogUrl({ startIndex: 156, delimeter: 183 });
-// });
+cron.schedule( '0 13 * * 7', () => {
+  extractBlogUrl({ startIndex: 156, delimeter: 183 });
+});
 
 app.listen(port, () => {
   console.log(`app listening on port ${port}`);
