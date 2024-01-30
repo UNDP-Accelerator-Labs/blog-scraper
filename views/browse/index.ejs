@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<%
+	// CREATE ALIASES
+    const total_records = +(locals?.total_records) || 0;
+%>
+<html>
+<head>
+
+<%- include ('../partials/head.ejs') %>
+<%- include ('../partials/menu.ejs') %>
+
+<div class="grid-container fluid content-bottom">
+    <div class="grid-x margin-top-72">
+        <%- include ('../partials/sidebar.ejs') %>
+        <%- include ('../partials/blogs.ejs') %>
+    </div>
+</div>
+
+<%- include ('../partials/footer.ejs') %>
+</body>
+</html>

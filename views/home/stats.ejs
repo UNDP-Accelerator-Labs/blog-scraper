@@ -1,0 +1,99 @@
+<% 
+    // CREATE ALIASES 
+    const totalblogs = locals?.stats[0]?.totalblogs || 0;
+    const countries = locals?.stats[1]?.distinct_country_count || 0;
+    const articles = locals?.stats[1]?.distinct_article_type_count || 0;
+%>
+<div class="grid-x stats-grid">
+    <div class="cell medium-3 delay-2 inviewport" data-viewport="true">
+      <div class="stats-panel">
+        <div class="stats-card medium">
+          <div>
+            <div>
+              <h2
+                class=""
+                tabindex="0"
+                data-viewport="false"
+                style="white-space: nowrap; display: inline-block; font-size: 110px;"
+              >
+                3K+
+              </h2>
+            </div>
+          </div>
+          <div>
+            <h4 class="" tabindex="0" data-viewport="false">Articles</h4>
+            <p>Explore a rich collection of insightful articles covering diverse topics and achievements within the organization.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cell medium-3 delay-3 inviewport" data-viewport="true">
+      <div class="stats-panel">
+        
+        <div class="stats-card medium">
+          <div>
+            <div>
+              <h2
+                class=""
+                tabindex="0"
+                data-viewport="false"
+                style="white-space: nowrap; display: inline-block; font-size: 110px;"
+              >
+                <%= articles %>
+              </h2>
+            </div>
+          </div>
+          <div>
+            <h4 class="" tabindex="0" data-viewport="false">Document Types</h4>
+            <p>Dive into a variety of articles showcasing innovative approaches and achievements across different domains.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cell medium-3 delay-4 inviewport" data-viewport="true">
+      <div class="stats-panel">
+        
+        <div class="stats-card medium">
+          <div>
+            <div>
+              <h2
+                class=""
+                tabindex="0"
+                data-viewport="false"
+                style="white-space: nowrap; display: inline-block; font-size: 110px;"
+              >
+                <%= countries %>
+              </h2>
+            </div>
+          </div>
+          <div>
+            <h4 class="" tabindex="0" data-viewport="false">Countries</h4>
+            <p>Discover content contributed from <%= countries %> different countries, fostering a global perspective.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cell medium-3 delay-5 inviewport" data-viewport="true">
+      <div class="stats-panel">
+        
+        <div class="stats-card medium">
+          <div>
+            <div>
+              <h2
+                class=""
+                tabindex="0"
+                data-viewport="false"
+                style="white-space: nowrap; display: inline-block; font-size: 110px;"
+              >
+                5+
+              </h2>
+            </div>
+          </div>
+          <div>
+            <h4 class="" tabindex="0" data-viewport="false">Years</h4>
+            <p>Embark on a journey spanning more than 5 years of accumulated knowledge and insights within the Accelerator labs network.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>

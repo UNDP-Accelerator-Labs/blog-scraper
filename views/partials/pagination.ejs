@@ -1,0 +1,44 @@
+<%
+  // CREATE ALIASES
+  const total_pages = +(locals?.total_pages) || 0;
+  const current_page = +(locals?.current_page) || 0;
+%>
+
+<nav class="pagination" aria-label="Pagination" role="navigation">
+  <ul>
+    <% if (current_page > 1) { %>
+      <li>
+        <a href="#" role="button" aria-label="Previous" data-page="<%= current_page - 1 %>">
+          Previous
+        </a>
+      </li>
+    <% } else { %>
+      <li class="disabled" aria-disabled="true">
+        <a href="#" role="button" aria-current="true" aria-label="Previous">
+          Previous
+        </a>
+      </li>
+    <% } %>
+
+    <li>
+      Page
+      <span><%= current_page %></span>
+      of
+      <span><%= total_pages %></span>
+    </li>
+
+    <% if (current_page < total_pages) { %>
+      <li>
+        <a href="#" role="button" aria-label="Next" data-page="<%= current_page + 1 %>">
+          Next
+        </a>
+      </li>
+    <% } else { %>
+      <li class="disabled" aria-disabled="true">
+        <a href="#" role="button" aria-label="Next">
+          Next
+        </a>
+      </li>
+    <% } %>
+  </ul>
+</nav>

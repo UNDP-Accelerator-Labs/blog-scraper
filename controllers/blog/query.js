@@ -1,7 +1,4 @@
-const sqlregex = require('../../middleware/search').sqlregex
-const { DB } = require('../../db')
-const { as } = require('pg-promise');
-const format = as.format;
+const { sqlregex } = include('middleware/search')
 
 const theWhereClause = (country, type )=> {
   let whereClause = '';
@@ -27,7 +24,7 @@ const theWhereClause = (country, type )=> {
 }
 
 const searchTextConditionFn = (searchText) => {
-  const search = sqlregex(searchText)
+  const [ search, terms ] = sqlregex(searchText)
   let searchTextCondition = '';
    if (searchText !== null && searchText !== undefined && searchText.length > 0) {
     searchTextCondition = `
@@ -60,6 +57,7 @@ exports.totalUnknownCountries = `
     FROM articles
     WHERE country IS NULL;
 `
+
 exports.searchBlogQuery = (searchText, page, country, type, page_content_limit) => {
   let whereClause = theWhereClause(country, type);
   let values = [
@@ -67,17 +65,25 @@ exports.searchBlogQuery = (searchText, page, country, type, page_content_limit) 
     (page - 1) * page_content_limit,
     page,
   ];
-  const search = sqlregex(searchText);
+
+  const [search, terms] = sqlregex(searchText);
+
   let searchTextCondition = '';
+  let textColumn = 'COALESCE(content, all_html_content)';
 
   if (searchText !== null && searchText !== undefined && searchText.length > 0) {
     searchTextCondition = `
       AND (title ~* ('\\m' || $3 || '\\M')
-        OR content ~* ('\\m' || $3 || '\\M')
-        OR all_html_content ~* ('\\m' || $3 || '\\M')
+        OR ${textColumn} ~* ('\\m' || $3 || '\\M')
         OR country ~* ('\\m' || $3 || '\\M'))
     `;
     values.splice(2, 0, search);
+  } else if (type || country) {
+    searchTextCondition = `
+        AND (content IS NOT NULL
+        AND title IS NOT NULL)
+    `;
+    values.splice(2, 0, '');
   } else {
     searchTextCondition = `
       AND (article_type = 'blog' 
@@ -86,34 +92,21 @@ exports.searchBlogQuery = (searchText, page, country, type, page_content_limit) 
     `;
     values.splice(2, 0, '');
   }
-
   return {
     text: `
       WITH search_results AS (
         SELECT id, url, country, article_type, title, posted_date, posted_date_str, language, created_at,
-        CASE
-          WHEN $3 = '' THEN (
-            SELECT string_agg(substring(sentence, '(.*' || $3 || '.*)'), ' ')
-            FROM (
-              SELECT unnest(string_to_array(content, '.')) AS sentence
-              OFFSET 1 LIMIT 2
-            ) sub
-          )
-          WHEN content ~* $3  THEN (
-            SELECT string_agg(substring(sentence, '(.*' || '.' || '.*)'), ' ')
-            FROM (
-              SELECT unnest(string_to_array(content, '.')) AS sentence
-            ) sub
-            WHERE sentence ~* $3 
-          )
-          WHEN all_html_content ~* $3 THEN (
-            SELECT string_agg(substring(sentence, '(.*' || '.' || '.*)'), ' ')
-            FROM (
-              SELECT unnest(string_to_array(all_html_content, '.')) AS sentence
-            ) sub
-            WHERE sentence ~* $3 
-          )
-        END AS matched_texts
+          regexp_replace(
+            regexp_replace(${textColumn}, E'\\n', ' ', 'g'),
+            E'\\s+', ' ', 'g'
+          ) AS content,
+          CASE
+            WHEN $3 = '' THEN
+              regexp_replace(
+                regexp_replace(${textColumn}, E'\\n', ' ', 'g'),
+                E'\\s+', ' ', 'g'
+              )
+          END AS raw_content
         FROM articles
         WHERE has_lab IS TRUE
         ${searchTextCondition}
@@ -138,7 +131,7 @@ exports.searchBlogQuery = (searchText, page, country, type, page_content_limit) 
 
 exports.articleGroup = (searchText, country, type) => {
   let whereClause = theWhereClause(country, type);
-  const search = sqlregex(searchText);
+  const [ search, terms ] = sqlregex(searchText);
   let searchTextCondition = '';
   const values = [];
   if (searchText !== null && searchText !== undefined && searchText.length > 0) {
@@ -166,7 +159,7 @@ exports.articleGroup = (searchText, country, type) => {
 
 exports.countryGroup = (searchText, country, type) => {
   let whereClause = theWhereClause(country, type);
-  const search = sqlregex(searchText);
+  const [ search, terms ] = sqlregex(searchText);
   let searchTextCondition = '';
   const values = [];
   if (searchText !== null && searchText !== undefined && searchText.length > 0) {
@@ -195,7 +188,7 @@ exports.countryGroup = (searchText, country, type) => {
 
   exports.statsQuery = (searchText, country, type) => {
     let whereClause = theWhereClause(country, type);
-    const search = sqlregex(searchText);
+    const [ search, terms ] = sqlregex(searchText);
     let searchTextCondition = '';
     const values = [];
     if (searchText !== null && searchText !== undefined && searchText.length > 0) {
@@ -251,7 +244,7 @@ exports.countryGroup = (searchText, country, type) => {
   
   exports.extractGeoQuery = (searchText, country, type) => {
     let whereClause = theWhereClause(country, type);
-    const search = sqlregex(searchText);
+    const [ search, terms ] = sqlregex(searchText);
     let searchTextCondition = '';
     const values = [];
     if (searchText !== null && searchText !== undefined && searchText.length > 0) {
