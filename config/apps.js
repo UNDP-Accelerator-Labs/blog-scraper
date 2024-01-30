@@ -9,6 +9,7 @@ exports.own_app_url = 'https://blogs.sdg-innovation-commons.org/';
 const base_host = 'sdg-innovation-commons.org';
 exports.app_base_host = base_host;
 exports.app_suite_url = `https://www.${base_host}/`;
+exports.sso_app_url = 'https://login.sdg-innovation-commons.org' 
 
 exports.acclab_suites = [
     {

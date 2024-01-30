@@ -1,0 +1,39 @@
+<%
+	// CREATE ALIASES
+	const username = locals.metadata.user.name
+	const uuid = locals.metadata.user.uuid
+	const pagedisplay = locals.metadata.page.display
+	const app_suite_url = locals.metadata.site.app_suite_url
+	const menulist = locals.metadata.site.acclab_suites
+    const title = locals.metadata.site.title
+	const login_url = locals.metadata.site.login_url || ''
+%>
+
+<nav id='languages'>
+	<menu class='google-translate-attr'>
+		<!-- TO DO: PASS THIS FROM CONFIG FILE (THERE MIGHT NOT ALWAYS BE A SUITE) -->
+		<li class='home-btn lg xl xxl'>
+			<a href='/'><%= title.toUpperCase() %></a>
+		</li>
+		<li class='options'>
+			<ul>
+				<% menulist.forEach(d => { %>
+					<li id='lang-<%- d.language %>' class='sm m lg xl xxl'>
+						<a target="_blank" href="<%= d.url %>" ><%- d.title.toUpperCase() %></a>
+					</li>
+				<% }) %>
+			</ul>
+		</li>
+		<li class='user-id'>
+			<% if (uuid !== null) { %>
+				<span ><span class='sm m lg xl xxl'></span> <a href='/<%= app_suite_url %>/edit/contributor?id=<%= uuid %>' target="_blank"><u><%= username %></u></a>. | </span><a href='/logout/current' class='logout' data-vocab='log out'></a>
+			<% } else { %>
+				<a href='<%= login_url %>' class='login' target="_blank">LOGIN</a>
+			<% } %>
+		</li>
+	</menu>
+</nav>
+<!-- <button id='expand-nav' class='expand-filters xs sm '>
+	<div class='line l1'></div><div class='line l2'></div><div class='line l3'></div>
+</button> -->
+<div id="loader" class="loader"></div>
