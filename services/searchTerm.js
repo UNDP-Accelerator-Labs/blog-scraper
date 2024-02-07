@@ -3,7 +3,7 @@ exports.searchTerms = {
         "accelerator lab", "innovation-acclab", "acclab", "acceleratorlab", "AccLabGM",
         ],
     fr: [
-        "laboratoire d'acceleration", "accelerateur lab", "laboratoire d'accelerateur", "laboratoires d'acceleration", "laboratoires d'accelerateur",
+        "laboratoire d'acceleration", "accelerateur lab", "laboratoire d'accelerateur", "laboratoires d'acceleration", "laboratoires d'accelerateur", "accelerator lab",
         ],
     es: [
         "laboratorios de aceleracion", "laboratorio de aceleracion", "LabPNUDArg",

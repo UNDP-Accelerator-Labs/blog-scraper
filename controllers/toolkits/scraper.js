@@ -59,7 +59,8 @@ exports.scrapper = async () => {
       while ((match = regex.exec(jsContent)) !== null) {
         const contentString = match[1].trim();
         try {
-          const contentObject = eval(`(${contentString})`);
+          let contentObject = eval(`(${contentString})`);
+          contentObject.content = contentObject?.content?.replace(/\n/g, " ") || null
           if (
             contentObject &&
             typeof contentObject.id === "number" &&
@@ -80,7 +81,6 @@ exports.scrapper = async () => {
               lng: toolkitU.lng,
               ...contentObject,
               tags: [ ...toolkitU.tags, ...contentObject?.tags ?? ''],
-              content: contentObject?.content?.replace(/\n/g, "") || null,
             };
             formattedObject.url = `${toolkitDomain}${formattedObject.url}`;
             matches.push(formattedObject);
