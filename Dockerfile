@@ -58,7 +58,6 @@ RUN npm i
 
 COPY . .
 
-RUN npm run sass-deploy
 EXPOSE 3000
 
 # Start the application
