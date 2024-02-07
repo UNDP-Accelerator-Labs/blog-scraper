@@ -1,7 +1,7 @@
 require("dotenv").config();
 const { firefoxOption, config } = include("/config");
 const { Builder, By } = require("selenium-webdriver");
-
+const firefox = require('selenium-webdriver/firefox');
 const { getDistinctUrls } = require("./scrap-query");
 const { DB } = include("/db");
 const { searchForKeywords } = require("./extract-url");
@@ -10,7 +10,7 @@ const updateMissingUrl = async () => {
   // Set up the WebDriver
   let driver = await new Builder()
     .forBrowser("firefox")
-    .setFirefoxOptions(firefoxOption)
+    .setFirefoxOptions(new firefox.Options().headless())
     .build();
 
   // Navigate to the base website

@@ -1,7 +1,7 @@
 require("dotenv").config();
 const { firefoxOption, config } = include("/config");
 const { Builder, By } = require("selenium-webdriver");
-
+const firefox = require('selenium-webdriver/firefox');
 const { searchTerms, extractLanguageFromUrl } = include("/services");
 const { DB } = include("/db");
 const { checkUrlQuery, saveQuery } = require("./scrap-query");
@@ -12,7 +12,7 @@ const updateRecordsForDistinctCountries = require("./updateRecordWithIso3");
 //Start WebDriver
 const driver = new Builder()
   .forBrowser("firefox")
-  .setFirefoxOptions(firefoxOption)
+  .setFirefoxOptions(new firefox.Options().headless())
   .build();
 
 const searchForKeywords = async (url) => {

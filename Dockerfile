@@ -1,4 +1,4 @@
-# # Use the official Node.js image as a base
+# Use the official Node.js image as a base
 FROM node:16-slim
 
 RUN apt-get update && apt-get -y upgrade && apt-get install -y ca-certificates curl apt-transport-https lsb-release gnupg
@@ -14,11 +14,13 @@ RUN apt-get update \
     git \
     wget \
     unzip \
+    firefox-esr \
     unixodbc-dev \
     fonts-liberation libasound2 libatk-bridge2.0-0 libatk1.0-0  libatspi2.0-0 \
     libcairo2 libcups2 libdbus-1-3 libdrm2 libgbm1 libglib2.0-0 \
     libgtk-3-0 libnspr4 libnss3 libpango-1.0-0 libu2f-udev \
     libvulkan1 libxcomposite1 libxdamage1 libxfixes3 libxkbcommon0 libxrandr2  xdg-utils \
+    && curl -L https://github.com/mozilla/geckodriver/releases/download/v0.30.0/geckodriver-v0.30.0-linux64.tar.gz | tar xz -C /usr/local/bin \
     && rm -rf /var/lib/apt/lists/*
 
 # 2) Install latest stable Chrome
@@ -34,7 +36,7 @@ RUN apt-get install ./google-chrome-stable_current_amd64.deb
 
 # 3) Install the Chromedriver version that corresponds to the installed major Chrome version
 # https://blogs.sap.com/2020/12/01/ui5-testing-how-to-handle-chromedriver-update-in-docker-image/
-# For some reasone, there is a breaking change with Chrome drive and the latest google chrome browser. Hence, the reason for default Chrome driver to the last know working version
+# For some reason, there is a breaking change with Chrome driver and the latest google chrome browser. Hence, the reason for default Chrome driver to the last know working version
 # TODO=> Find fix for breaking change =:)
 RUN google-chrome --version | grep -oE "[0-9]{1,10}.[0-9]{1,10}.[0-9]{1,10}" > /tmp/chromebrowser-main-version.txt
 RUN wget --no-verbose -O /tmp/latest_chromedriver_version.txt https://chromedriver.storage.googleapis.com/LATEST_RELEASE_114.0.5735

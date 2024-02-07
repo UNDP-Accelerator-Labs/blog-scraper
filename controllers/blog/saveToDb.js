@@ -1,6 +1,7 @@
 require("dotenv").config();
 const { firefoxOption, config } = include("/config");
 const { Builder, By } = require("selenium-webdriver");
+const firefox = require('selenium-webdriver/firefox');
 const { DB } = include("/db");
 
 const { evaluateArticleType, extractLanguageFromUrl, article_types } =
@@ -12,7 +13,7 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
   // Start WebDriver
   let driver = await new Builder()
     .forBrowser("firefox")
-    .setFirefoxOptions(firefoxOption)
+    .setFirefoxOptions(new firefox.Options().headless())
     .build();
 
   // Navigate to the URL
