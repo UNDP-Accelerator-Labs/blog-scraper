@@ -36,3 +36,12 @@ ALTER TABLE articles ADD COLUMN IF NOT EXISTS has_lab BOOLEAN;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS lat FLOAT, ADD COLUMN IF NOT EXISTS lng FLOAT;
 
 CREATE EXTENSION IF NOT EXISTS postgis;
+
+ALTER TABLE articles
+ADD COLUMN privilege INT DEFAULT 1,
+ADD COLUMN rights INT DEFAULT 1,
+ADD CONSTRAINT unique_url UNIQUE (url),
+ADD COLUMN tags TEXT[];
+--  privilege 2 - private document
+--  privilege 3 - confidential document
+

@@ -125,6 +125,8 @@ app.get("/version", (req, res) => {
 
 //DEFINE EXTERNAL API ENDPOINTS
 app.get("/blogs/:page_content_limit/:page", verifyToken, routes.api.blog);
+app.get("/toolkit/scrap", verifyToken, routes.api.toolkit);
+
 
 //DEFINE SROUTES TO INITIATE SCRAPPER
 app.post("/initialize", verifyToken, (req, res) => {
@@ -178,14 +180,16 @@ app.use((err, req, res, next) => {
   res.status(500).send("Something broke!");
 });
 
-//TO AVOID AZURE WEB SERVICE MEMORY ISSUE,
-//THE CRON JOB WILL BE SPLIT WITH THE WEEKEND DAYS
-// FROM FRIDAY 7PM EVENING TO 11PM SUNDAY
+/* 
+To prevent memory issues on Azure web service, 
+the cron job will split over weekends, 
+running from Friday 7 PM to Sunday 11 PM.
+With 183 country/language page instances on UNDP websites, 
+the cron job runs 7 times over the weekend 
+to ensure every page is checked.
+It runs every Friday from 7 PM at 7-hour intervals.
+*/
 
-//THERE ARE IN TOTAL 183 COUNTRY/LANGUAGE PAGE INSTANCES ON THE UNDP WEBSITES
-//THE CRON JOBS WILL RUN 7 TIMES OVER THE WEEKEND TO ENSURE THAT EVERY PAGE IS CHECKED
-
-// RUN EVERY FRIDAY FROM 7 PM IN AN INTERVAL OF 7 HOURS
 cron.schedule("0 19 * * 5", () => {
   extractBlogUrl({ startIndex: 0, delimeter: 25 });
 });
@@ -212,6 +216,19 @@ cron.schedule("0 6 * * 7", () => {
 
 cron.schedule("0 13 * * 7", () => {
   extractBlogUrl({ startIndex: 156, delimeter: 183 });
+});
+
+
+
+// Create the cron job to update toolkit content twice a month
+cron.schedule("0 0 1,15 * *", async () => {
+  console.log("Running scrapper...");
+  try {
+    routes.cron.scrapper();
+    console.log("Scrapper started successfully.");
+  } catch (error) {
+    console.error("Error occurred while running scrapper:", error);
+  }
 });
 
 app.listen(port, () => {

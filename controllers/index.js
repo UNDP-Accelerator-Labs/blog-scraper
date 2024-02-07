@@ -1,9 +1,6 @@
-const { getdata } = include("controllers/blog/data");
-const { DB } = include("db");
+const { app: bg_scrap } = require('./blog')
+const { tk_scrap, scrapper } = require('./toolkits')
 
-exports.app = async (req, res) => {
-  const data = await getdata(DB.blog, req, res);
-  if (data) return res.status(200).json(data);
-  else return res.status(500).json(err);
-};
-
+exports.bg_scrap = bg_scrap;
+exports.tk_scrap = tk_scrap;
+exports.scrapper = scrapper;
