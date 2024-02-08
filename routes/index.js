@@ -1,7 +1,9 @@
+const { bg_scrap, tk_scrap, scrapper } = include('/controllers')
 if (!exports.api) { exports.api = {} }
-if (!exports.home) { exports.home = {} }
+if (!exports.cron) { exports.cron = {} }
+
+exports.api.blog = bg_scrap;
+exports.api.toolkit = tk_scrap;
 
 
-exports.api.blog = require("../controllers");
-exports.home.index = require('./home')
-exports.home.browse = require('./browse')
+exports.cron.scrapper = scrapper;

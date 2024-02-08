@@ -1,4 +1,5 @@
 const { chromeOption } = require("./chrome");
+const {optipns : firefoxOption } = require('./firefox')
 const config = require("./config");
 const { csp_links } = require("./csp");
 const {
@@ -16,7 +17,9 @@ const {
 
 exports.config = config;
 exports.chromeOption = chromeOption;
+exports.firefoxOption = firefoxOption;
 exports.csp_links = csp_links;
+
 exports.app_title = app_title;
 exports.app_title_short = app_title_short;
 exports.app_suite = app_suite;

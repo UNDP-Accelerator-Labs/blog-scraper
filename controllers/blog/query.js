@@ -86,8 +86,7 @@ exports.searchBlogQuery = (searchText, page, country, type, page_content_limit) 
     values.splice(2, 0, '');
   } else {
     searchTextCondition = `
-      AND (article_type = 'blog' 
-        AND content IS NOT NULL
+      AND (content IS NOT NULL
         AND title IS NOT NULL)
     `;
     values.splice(2, 0, '');
@@ -111,7 +110,12 @@ exports.searchBlogQuery = (searchText, page, country, type, page_content_limit) 
         WHERE has_lab IS TRUE
         ${searchTextCondition}
         ${whereClause}
-        ORDER BY posted_date DESC
+        ORDER BY 
+            CASE
+                WHEN posted_date IS NOT NULL THEN posted_date
+                WHEN parsed_date IS NOT NULL THEN parsed_date
+                ELSE created_at
+            END DESC
         LIMIT $1 OFFSET $2
       ),
       total_count AS (
