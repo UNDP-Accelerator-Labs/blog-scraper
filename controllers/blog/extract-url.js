@@ -1,7 +1,7 @@
 require("dotenv").config();
 const { firefoxOption, config } = include("/config");
 const { Builder, By } = require("selenium-webdriver");
-const firefox = require('selenium-webdriver/firefox');
+const firefox = require("selenium-webdriver/firefox");
 const { searchTerms, extractLanguageFromUrl } = include("/services");
 const { DB } = include("/db");
 const { checkUrlQuery, saveQuery } = require("./scrap-query");
@@ -80,35 +80,20 @@ const searchForKeywords = async (url) => {
       }
     }
 
-    let loadMoreExists = true;
-    while (loadMoreExists) {
-      try {
-        // Check if 'Load More' button exists
-        let loadMoreButton = await driver.findElement(
-          By.xpath(config["search_result_list.button.country_page.path"])
-        );
-        if (loadMoreButton) {
-          // Scroll to the end of the main div
-          const element = await driver.findElement(
-            By.className(
-              config["scroll_result_list.button.country_page.classname"]
-            )
-          );
-          await driver.executeScript(
-            "arguments[0].scrollTo(0, arguments[0].scrollHeight)",
-            element
-          );
-        }
-      } catch (err) {
-        loadMoreExists = false; // If 'Load More' button doesn't exist, set the flag to false
-      }
-    }
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    try {
+      const allUNDPElement = await driver.findElement(
+        By.xpath("//a[text()='All UNDP']")
+      );
+
+      if (allUNDPElement) await allUNDPElement.click();
+    } catch (err) {}
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // After scrolling to the end, find all URLs in the 'a' elements
     try {
       urlElements = await driver.findElements(
-        By.xpath(config["search_result_list.elements.country_page.path"])
+        By.xpath("//div[@class='search-results-item']//div//a"),
+
       );
     } catch (err) {
       urlElements = [];
@@ -123,7 +108,7 @@ const searchForKeywords = async (url) => {
       for (let k = 0; k < newurls.length; k++) {
         const res = await DB.blog
           .any(checkUrlQuery, [newurls[k]])
-          .catch((err) => null);
+          .catch((err) => console.log("Error occurred ", err));
 
         try {
           countryName = await driver
@@ -136,10 +121,10 @@ const searchForKeywords = async (url) => {
         } catch (err) {
           countryName = null;
         }
-
+// console.log('newurls[k] ', newurls[k])
         if (!res.length) {
           await extractAndSaveData(newurls[k], null, countryName);
-        }
+        } else console.log("Skipping... Record already exist.");
       }
     } catch (error) {}
   }

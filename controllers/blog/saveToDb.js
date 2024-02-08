@@ -441,20 +441,22 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
         )
       )
       .then(async (data) => {
+        console.log('Saving article to table... ', url)
         //save href links in a blog if it exist
-        if (hrefObj.length > 0) {
-          hrefObj.forEach((obj) => (obj.article_id = data.id));
+        // if (hrefObj.length > 0) {
+        //   hrefObj.forEach((obj) => (obj.article_id = data.id));
 
-          await DB.blog
-            .oneOrNone(saveHrefLinks(hrefObj))
-            .then((res) => {
-              hrefObj = [];
-            })
-            .catch((err) => {
-              console.error("Error saving href to table:", err.message);
-              hrefObj = [];
-            });
-        }
+        //   await DB.blog
+        //     .oneOrNone(saveHrefLinks(hrefObj))
+        //     .then((res) => {
+        //       hrefObj = [];
+        //       console.log('saved record to db...')
+        //     })
+        //     .catch((err) => {
+        //       console.error("Error saving href to table:", err.message);
+        //       hrefObj = [];
+        //     });
+        // }
       })
       .catch((err) => {
         console.log("Error while saving content to db ", err.message);
@@ -477,6 +479,7 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
           raw_html
         )
       )
+      .then(()=> console.log('updated record in db...'))
       .catch((err) => {
         console.error("Error occurred while updating content.");
       });
