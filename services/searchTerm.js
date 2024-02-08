@@ -9,7 +9,7 @@ exports.searchTerms = {
         "laboratorios de aceleracion", "laboratorio de aceleracion", "LabPNUDArg",
         ],
     pt: [
-        "laboratorios aceleradores", "laboratorio acelerador", "acclab", 
+        "laboratorios aceleradores", "laboratorio acelerador", "acclab", "Laboratório de Aceleração"  
         ],
     uk: [
         "Лабораторії інноваційного розвитку", "Лабораторія інноваційного розвитку", 

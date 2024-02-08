@@ -68,43 +68,46 @@ exports.scrapper = async () => {
             contentObject.content != null
           ) {
             // Format the contentObject
+            const tagsArray = [...toolkitU.tags, ...(contentObject?.tags ? [contentObject.tags] : [])];
+            const all_html_content = contentObject.content + " " + tagsArray.join(', ') + " " + (contentObject?.sdg ?? '') + " " + (contentObject?.tags ?? '') + " " + (contentObject?.enablers ?? '') + " " + (contentObject?.signature_solutions ?? '') + " " + (contentObject?.rblac_priorities ?? '');
+
             const formattedObject = {
-              country: toolkitU.country,
-              language: "en",
-              posted_date: new Date().toISOString().split("T")[0], 
-              article_type: "toolkit",
-              privilege: 1,
-              rights: 0,
-              iso3: toolkitU.iso3,
-              haslab: true,
-              lat: toolkitU.lat,
-              lng: toolkitU.lng,
-              ...contentObject,
-              tags: [ ...toolkitU.tags, ...contentObject?.tags ?? ''],
+                country: toolkitU.country,
+                language: "en",
+                posted_date: new Date().toISOString().split("T")[0], 
+                article_type: "toolkit",
+                privilege: 1,
+                rights: 0,
+                iso3: toolkitU.iso3,
+                haslab: true,
+                lat: toolkitU.lat,
+                lng: toolkitU.lng,
+                ...contentObject,
+                tags: tagsArray,
+                all_html_content,
             };
+
             formattedObject.url = `${toolkitDomain}${formattedObject.url}`;
             matches.push(formattedObject);
 
             // Perform upsert using INSERT ... ON CONFLICT UPDATE
             await DB.blog.none(
               `
-                INSERT INTO public.articles (url, country, language, title, posted_date, content, article_type, iso3, has_lab, lat, lng, privilege, rights, tags)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+                INSERT INTO public.articles (url, country, language, title, posted_date, content, article_type, iso3, has_lab, lat, lng, privilege, rights, tags, all_html_content)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
                 ON CONFLICT (url) DO UPDATE
                 SET
                   country = $2,
-                  language = $3,
                   title = $4,
-                  posted_date = $5,
                   content = $6,
                   article_type = $7,
                   iso3 = $8,
-                  has_lab = $9,
                   lat = $10,
                   lng = $11,
                   privilege = $12,
                   rights = $13,
-                  tags = $14
+                  tags = $14,
+                  all_html_content = $15
               `,
               [
                 formattedObject.url,
@@ -121,6 +124,7 @@ exports.scrapper = async () => {
                 formattedObject.privilege,
                 formattedObject.rights,
                 formattedObject.tags,
+                formattedObject.all_html_content,
               ]
             );
           }

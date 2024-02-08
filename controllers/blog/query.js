@@ -111,10 +111,11 @@ exports.searchBlogQuery = (searchText, page, country, type, page_content_limit) 
         ${searchTextCondition}
         ${whereClause}
         ORDER BY 
-          CASE
-            WHEN posted_date IS NOT NULL THEN posted_date
-            ELSE created_at
-          END DESC
+            CASE
+                WHEN posted_date IS NOT NULL THEN posted_date
+                WHEN parsed_date IS NOT NULL THEN parsed_date
+                ELSE created_at
+            END DESC
         LIMIT $1 OFFSET $2
       ),
       total_count AS (
