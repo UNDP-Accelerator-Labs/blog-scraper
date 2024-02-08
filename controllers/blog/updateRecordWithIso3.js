@@ -20,7 +20,8 @@ async function updateRecordsForDistinctCountries() {
   try {
     const distinctCountriesQuery = `
       SELECT DISTINCT country
-      FROM articles;
+      FROM articles
+      WHERE article_type != 'toolkit';
     `;
     const countries = await DB.blog.any(distinctCountriesQuery);
     

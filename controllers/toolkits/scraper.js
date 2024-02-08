@@ -107,6 +107,7 @@ exports.scrapper = async () => {
                   privilege = $12,
                   rights = $13,
                   tags = $14,
+                  has_lab = $9,
                   all_html_content = $15
               `,
               [
