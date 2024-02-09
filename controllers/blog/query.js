@@ -94,7 +94,7 @@ exports.searchBlogQuery = (searchText, page, country, type, page_content_limit) 
   return {
     text: `
       WITH search_results AS (
-        SELECT id, url, country, article_type, title, posted_date, posted_date_str, language, created_at,
+        SELECT id, url, country, article_type, title, posted_date, posted_date_str, parsed_date, language, created_at,
           regexp_replace(
             regexp_replace(${textColumn}, E'\\n', ' ', 'g'),
             E'\\s+', ' ', 'g'

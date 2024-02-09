@@ -14,6 +14,7 @@ exports.main = async kwargs => {
 		return t.any(searchBlogQuery(searchText, page, country, type, page_content_limit)).then(async (results) => {
 			const data = await results.map(p=> ({
 				...p,
+				date: convertToDate(p),
 				matched_texts: extractMatchedTexts(p, terms)
 			}))
 
@@ -71,3 +72,19 @@ const extractMatchedTexts = (searchResults, searchWords) => {
 };
 
   
+function convertToDate(data) {
+    if (data.parsed_date instanceof Date && !isNaN(data?.parsed_date)) {
+        return new Date(data.parsed_date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+    }
+    
+    if (data.posted_date instanceof Date && !isNaN(data?.posted_date)) {
+        return new Date(data.posted_date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+    }
+    // const dateFromStr = new Date(data.posted_date_str);
+    // if (!isNaN(dateFromStr)) {
+	// 	console.log('dateFromStr ', dateFromStr)
+    //     return dateFromStr.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+    // }
+    
+    return null;
+}
