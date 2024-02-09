@@ -80,11 +80,10 @@ function convertToDate(data) {
     if (data.posted_date instanceof Date && !isNaN(data?.posted_date)) {
         return new Date(data.posted_date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
     }
-    // const dateFromStr = new Date(data.posted_date_str);
-    // if (!isNaN(dateFromStr)) {
-	// 	console.log('dateFromStr ', dateFromStr)
-    //     return dateFromStr.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-    // }
+
+    if (data.posted_date_str) {
+        return data.posted_date_str
+    }
     
     return null;
 }
