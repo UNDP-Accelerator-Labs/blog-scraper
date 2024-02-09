@@ -62,7 +62,7 @@ const updateMissingUrl = async () => {
 
       //Log needed for debugging
       console.log("url ", k + 1, " out of ", getDistinct.length, "urls");
-      await searchForKeywords(url);
+      await searchForKeywords(url, driver);
     }
 
     //Log needed for debugging

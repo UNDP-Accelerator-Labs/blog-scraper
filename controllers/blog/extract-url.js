@@ -7,15 +7,12 @@ const { DB } = include("/db");
 const { checkUrlQuery, saveQuery } = require("./scrap-query");
 
 const extractAndSaveData = require("./saveToDb");
-const updateRecordsForDistinctCountries = require("./updateRecordWithIso3");
+const updateRecordWithIso3 = require("./updateRecordWithIso3");
 
-//Start WebDriver
-const driver = new Builder()
-  .forBrowser("firefox")
-  .setFirefoxOptions(new firefox.Options().headless())
-  .build();
 
-const searchForKeywords = async (url) => {
+
+const searchForKeywords = async (url, driver) => {
+
   let keywords = searchTerms["en"];
   let lang = await extractLanguageFromUrl(url);
 
@@ -121,7 +118,7 @@ const searchForKeywords = async (url) => {
         } catch (err) {
           countryName = null;
         }
-// console.log('newurls[k] ', newurls[k])
+
         if (!res.length) {
           await extractAndSaveData(newurls[k], null, countryName);
         } else console.log("Skipping... Record already exist.");
@@ -132,6 +129,12 @@ const searchForKeywords = async (url) => {
 };
 
 const extractBlogUrl = async (params) => {
+    //Start WebDriver
+    const driver = new Builder()
+    .forBrowser("firefox")
+    .setFirefoxOptions(new firefox.Options().headless())
+    .build();
+
   const { startIndex, delimeter } = params || {};
 
   await driver.get(config["baseUrl"]);
@@ -172,10 +175,10 @@ const extractBlogUrl = async (params) => {
       const url = validUrls[k];
       // Logging needed for debugging
       console.log("This is running for", k + 1, "out of ", end);
-      await searchForKeywords(url);
+      await searchForKeywords(url, driver);
     }
 
-    updateRecordsForDistinctCountries();
+    updateRecordWithIso3();
   }
 
   await driver.quit();

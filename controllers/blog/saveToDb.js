@@ -486,7 +486,7 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
   }
 
   // Quit WebDriver
-  // driver.quit();
+  driver.quit();
   return;
 };
 
