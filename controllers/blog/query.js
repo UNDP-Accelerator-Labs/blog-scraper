@@ -95,10 +95,7 @@ exports.searchBlogQuery = (searchText, page, country, type, page_content_limit) 
     text: `
       WITH search_results AS (
         SELECT id, url, country, article_type, title, posted_date, posted_date_str, parsed_date, language, created_at,
-          regexp_replace(
-            regexp_replace(${textColumn}, E'\\n', ' ', 'g'),
-            E'\\s+', ' ', 'g'
-          ) AS content,
+          regexp_replace(${textColumn}, E'\\n', ' ', 'g') AS content,
           CASE
             WHEN $3 = '' THEN
               regexp_replace(
