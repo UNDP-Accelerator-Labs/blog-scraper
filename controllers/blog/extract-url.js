@@ -171,7 +171,7 @@ const extractBlogUrl = async (params) => {
     //SETTING SMALL delimeter SHOULD AVOID SERVER CRASHING AFTER RUNNING FOR A LONG TIME
     const start = startIndex ?? 0;
     const end = delimeter ?? validUrls.length;
-    for (let k = start; k < end; k++) {
+    for (let k = start; k <= end; k++) {
       const url = validUrls[k];
       // Logging needed for debugging
       console.log("This is running for", k + 1, "out of ", end);

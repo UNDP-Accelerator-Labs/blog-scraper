@@ -105,5 +105,6 @@ exports.article_types = [
   'article',
   'blog',
   'news',
-  'press-releases'
+  'press-releases',
+  'publications'
 ]
