@@ -80,18 +80,15 @@ exports.searchBlogQuery = (searchText, page, country, type, page_content_limit) 
     values.splice(2, 0, search);
   } else if (type || country) {
     searchTextCondition = `
-        AND (
-          content IS NOT NULL 
-          OR all_html_content IS NOT NULL
-          )
+        AND (content IS NOT NULL
+        OR all_html_content IS NOT NULL)
     `;
     values.splice(2, 0, '');
   } else {
     searchTextCondition = `
-      AND ( content IS NOT NULL 
-          OR all_html_content IS NOT NULL
-          AND article_type != 'webpage'
-        )
+      AND (content IS NOT NULL
+        OR all_html_content IS NOT NULL
+        AND article_type != 'webpage')
     `;
     values.splice(2, 0, '');
   }
@@ -184,11 +181,26 @@ exports.countryGroup = (searchText, country, type) => {
   if (searchText !== null && searchText !== undefined && searchText.length > 0) {
     searchTextCondition = `
       AND (title ~* ('\\m' || $1 || '\\M')
-        OR COALESCE(content, all_html_content)
+        OR COALESCE(content, all_html_content) ~* ('\\m' || $1 || '\\M')
         OR country ~* ('\\m' || $1 || '\\M'))
     `;
     
     values.push(search);
+  }
+  else if(country || type) {
+    searchTextCondition = `
+      AND (content IS NOT NULL 
+          OR all_html_content IS NOT NULL
+        )
+    `;
+  }
+  else {
+    searchTextCondition = `
+      AND (content IS NOT NULL 
+          OR all_html_content IS NOT NULL
+          AND article_type != 'webpage'
+        )
+    `;
   }
 
   return {
@@ -212,11 +224,26 @@ exports.countryGroup = (searchText, country, type) => {
     if (searchText !== null && searchText !== undefined && searchText.length > 0) {
       searchTextCondition = `
         AND (title ~* ('\\m' || $1 || '\\M')
-          OR COALESCE(content, all_html_content)
+          OR COALESCE(content, all_html_content) ~* ('\\m' || $1 || '\\M')
           OR country ~* ('\\m' || $1 || '\\M'))
       `;
       
       values.push(search);
+    }
+    else if(country || type) {
+      searchTextCondition = `
+        AND (content IS NOT NULL 
+            OR all_html_content IS NOT NULL
+          )
+      `;
+    }
+    else {
+      searchTextCondition = `
+        AND (content IS NOT NULL 
+            OR all_html_content IS NOT NULL
+            AND article_type != 'webpage'
+          )
+      `;
     }
 
     return {
@@ -267,11 +294,26 @@ exports.countryGroup = (searchText, country, type) => {
     if (searchText !== null && searchText !== undefined && searchText.length > 0) {
       searchTextCondition = `
         AND (title ~* ('\\m' || $1 || '\\M')
-          OR COALESCE(content, all_html_content)
+          OR COALESCE(content, all_html_content) ~* ('\\m' || $1 || '\\M')
           OR country ~* ('\\m' || $1 || '\\M'))
       `;
       
       values.push(search);
+    }
+    else if(country || type) {
+      searchTextCondition = `
+        AND (content IS NOT NULL 
+            OR all_html_content IS NOT NULL
+          )
+      `;
+    }
+    else {
+      searchTextCondition = `
+        AND (content IS NOT NULL 
+            OR all_html_content IS NOT NULL
+            AND article_type != 'webpage'
+          )
+      `;
     }
 
     return {
