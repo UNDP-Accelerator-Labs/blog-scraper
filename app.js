@@ -25,6 +25,7 @@ const updateRecordsForDistinctCountries = require("./controllers/blog/updateReco
 const updateDbRecord = require("./controllers/blog/updateBlog");
 const updateMissingUrl = require("./controllers/blog/updateMissingCountries");
 const updateDocument = require("./controllers/blog/updateDocumentRecord");
+const acclab_publications = require("./controllers/blog/acclabs");
 const verifyToken = include("/middleware/verifyJwt");
 const routes = include("routes/");
 const app = express();
@@ -168,6 +169,11 @@ app.post("/update-missing-countries", verifyToken, (req, res) => {
 app.post("/update-document-records", verifyToken, (req, res) => {
   updateDocument();
   res.send("Updates to all records with type document started!");
+});
+
+app.post("/acclab-content", verifyToken, (req, res) => {
+    acclab_publications();
+  res.send("Acclab publications scrapping has started!");
 });
 
 //DEFINE ERROR HANDLING ENDPOINTS
