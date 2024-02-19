@@ -1,20 +1,33 @@
 require("dotenv").config();
-const { firefoxOption, config } = include("/config");
+const { firefoxOption, config } = require("../../config");
 const { Builder, By } = require("selenium-webdriver");
 const firefox = require('selenium-webdriver/firefox');
-const { DB } = include("/db");
-
+const { spawn } = require('child_process');
+const { DB } = require("../../db");
+const path = require('path');
 const { evaluateArticleType, extractLanguageFromUrl, article_types } =
-  include("/services");
+  require("../../services");
 const { saveQuery, saveHrefLinks, updateQuery } = require("./scrap-query");
 const getPdfMetadataFromUrl = require("./pdf");
+const fs = require('fs');
 
 const extractAndSaveData = async (url, id = null, countryName = null) => {
   // Start WebDriver
+  let options = new firefox.Options();
+  const downloadsFolder = path.join(__dirname, '../../downloads');
+  options.headless()
+  options.setPreference('browser.download.folderList', 2); 
+  options.setPreference('browser.download.dir', downloadsFolder);
+  // options.setPreference('browser.helperApps.neverAsk.saveToDisk', 'application/pdf'); 
+
   let driver = await new Builder()
-    .forBrowser("firefox")
-    .setFirefoxOptions(new firefox.Options().headless())
-    .build();
+      .forBrowser('firefox')
+      .setFirefoxOptions(options)
+      .build();
+
+      try{
+        await driver.manage().window().maximize();
+      }catch(e){}
 
   // Navigate to the URL
   await driver.get(url);
@@ -211,6 +224,66 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
         const text = await contentElements[i].getText();
         content += text + "\n";
       }
+    }
+
+    let exe_file = false;
+    try {
+      const download = await driver.findElement(By.className('download'));
+      if (download) {
+          exe_file = true;
+          try {
+            await driver.executeScript("arguments[0].scrollIntoView(true);", download);
+            await download.click();
+          } catch (e) {
+            exe_file = false;
+          }
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          const modals = await driver.findElements(By.className('chapter-item download-row'));
+
+          if (modals.length > 0) {
+            let modalToClick;
+
+            for (const modal of modals) {
+              let englishButton;
+                try{
+                   englishButton = await modal.findElement(By.xpath(".//a[.//div[text()='English']]"));
+                } catch(e){}
+                if (englishButton) {
+                    modalToClick = modal;
+                    break; // Stop the loop once we find a modal with English button
+                }
+            }
+            
+            if (!modalToClick && modals.length > 0) {
+                modalToClick = modals[0]; // If no modal with English button is found, click on the first modal
+            }
+            
+            if (modalToClick) {
+                await modalToClick.click();
+            }
+            
+          }
+      }
+  } catch (e) {
+      console.log(url);
+      console.log(e);
+  };
+  
+
+    if(exe_file){
+      await executePythonScriptAndGetMetadata().then(metadata => {
+        if (metadata) {
+          content += metadata?.content + "\n";
+          postedDate = isNaN(new Date(metadata?.created))
+          ? null
+          : new Date(metadata?.created);
+          raw_html = content
+        } else {
+          // Handle case when metadata is null
+          console.log('err ', metadata)
+        }
+      });
+      exe_file = false
     }
   } else if (url.includes(".medium.com")) {
     try {
@@ -489,5 +562,52 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
   driver.quit();
   return;
 };
-
+// extractAndSaveData()
 module.exports = extractAndSaveData;
+
+
+const executePythonScriptAndGetMetadata = async () => {
+  let pythonOutput = '';
+
+  const executePythonScript = async () => {
+    const pythonProcess = await spawn('python3', ['../../scripts/parsers/pdf.py']);
+
+    pythonProcess.stdout.on('data', (data) => {
+      pythonOutput += data; 
+    });
+
+    // Listen for errors from the Python script (stderr)
+    pythonProcess.stderr.on('data', (data) => {
+      console.error(`Python stderr: ${data}`);
+    });
+
+    return new Promise((resolve, reject) => {
+      // Listen for Python script exit
+      pythonProcess.on('close', (code) => {
+        if (code === 0) {
+          resolve(pythonOutput.trim());
+        } else {
+          reject(new Error(`Python process exited with code ${code}`));
+        }
+      });
+    });
+  };
+
+  try {
+    const pythonOutput = await executePythonScript();
+    if (pythonOutput === 'null') {
+      console.log('No metadata found in document files.');
+    } else {
+      try {
+        const metadata = JSON.parse(pythonOutput);
+        return metadata; 
+      } catch (error) {
+        console.error('Error parsing metadata:', pythonOutput);
+      }
+    }
+  } catch (error) {
+    console.error('Error executing Python script:', error);
+  }
+
+  return null; // Return null if any error occurs
+};

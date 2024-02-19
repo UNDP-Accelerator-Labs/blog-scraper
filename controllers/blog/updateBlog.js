@@ -1,14 +1,13 @@
 require('dotenv').config();
 
-const { DB } = include('/db')
-const { getAllDocument } = require('./scrap-query');
+const { DB } = require('../../db')
+const { getAllDocument, getAllPublicaltions } = require('./scrap-query');
 const extractAndSaveData = require('./saveToDb');
 
 const updateDbRecord = async (params) => {
   const { startIndex, delimeter, } = params || {};
 
-  const res = await DB.blog.any(getAllDocument).catch((err)=>  [])
-
+  const res = await DB.blog.any(getAllPublicaltions).catch((err)=>  console.log(err))
   //THIS IS A LONG LOOP, HENCE SEVER USUSALLY RUN OUT OF MEMORY
   //SET START INDEX & delimeter TO LIMIT THE RANGE OF A SINGLE RUN
   //SETTING SMALL delimeter SHOULD AVOID SERVER CRASHING AFTER RUNNING FOR A LONG TIME
@@ -28,5 +27,6 @@ const updateDbRecord = async (params) => {
 //Log needed for debugging purposes
   console.log('Successfully updated all blogs')
 }
+
 
 module.exports = updateDbRecord;

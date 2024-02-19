@@ -87,6 +87,13 @@ const updateDocumentRecord = `
       WHERE id = $1
   `;
 
+const getAllPublicaltions = `
+  SELECT id, url, content, country
+  FROM articles 
+  WHERE article_type = 'publications' 
+  ORDER BY id ASC;
+  `;
+
 module.exports = { 
     checkUrlQuery,
     saveQuery,
@@ -100,4 +107,5 @@ module.exports = {
     getDistinctUrls,
     getAllDocument,
     updateDocumentRecord,
+    getAllPublicaltions
 };
