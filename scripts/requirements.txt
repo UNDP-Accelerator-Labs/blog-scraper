@@ -1,0 +1,6 @@
+doc2python
+docx2python
+pandas
+pikepdf
+python_dateutil
+textract

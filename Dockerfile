@@ -4,8 +4,10 @@ FROM node:16-slim
 # Install essential packages
 RUN apt-get update \
     && apt-get install -y \
-    python3 \
+    python3-setuptools \
     python3-pip \
+    pkg-config \
+    libxslt1-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Set up a working directory
@@ -60,8 +62,8 @@ RUN npm i
 COPY . .
 
 # Install Python dependencies
-RUN pip3 freeze > requirements.txt   
-# RUN pip3 install --no-cache-dir -r requirements.txt
+# RUN pip3 freeze > requirements.txt   
+RUN pip3 install  --no-cache-dir -r scripts/requirements.txt
 
 # Expose port
 EXPOSE 3000
