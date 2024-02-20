@@ -6,10 +6,14 @@ RUN apt-get update \
     && apt-get install -y \
     python3-setuptools \
     python3-pip \
-    pkg-config \
-    libxslt1-dev \
+    libxml2-dev \
+    libxslt-dev \
+    python-dev \
+    python3-lxml \
+    zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
+RUN pip3 install lxml
 # Set up a working directory
 WORKDIR /usr/src/app
 
