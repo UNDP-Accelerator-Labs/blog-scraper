@@ -30,6 +30,7 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
       }catch(e){}
 
   // Navigate to the URL
+  if(!url) return 
   await driver.get(url);
 
   let articleTitle = null;
@@ -228,18 +229,21 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
 
     let exe_file = false;
     try {
-      const download = await driver.findElement(By.className('download'));
+      const download = await driver.findElement(By.css('a.download'));
       if (download) {
           exe_file = true;
           try {
-            await driver.executeScript("arguments[0].scrollIntoView(true);", download);
+            await driver.executeScript("arguments[0].scrollIntoView(false);", download);
+            await driver.sleep(1000);
+
             await download.click();
+            await driver.sleep(1000);
           } catch (e) {
             exe_file = false;
           }
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          await driver.sleep(1000);
           const modals = await driver.findElements(By.className('chapter-item download-row'));
-
+          await driver.sleep(1000);
           if (modals.length > 0) {
             let modalToClick;
 
@@ -260,6 +264,7 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
             
             if (modalToClick) {
                 await modalToClick.click();
+                await driver.sleep(1000);
             }
             
           }
@@ -570,7 +575,7 @@ const executePythonScriptAndGetMetadata = async () => {
   let pythonOutput = '';
 
   const executePythonScript = async () => {
-    const pythonProcess = await spawn('python3', ['../../scripts/parsers/pdf.py']);
+    const pythonProcess = await spawn('python3', ['scripts/parsers/pdf.py']);
 
     pythonProcess.stdout.on('data', (data) => {
       pythonOutput += data; 

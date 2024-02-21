@@ -131,7 +131,10 @@ def extract_first_pdf_from_downloads(download_folder):
 
 
 if __name__ == '__main__':
-    download_folder = '../../downloads'  
+    # Get the directory path of the current script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Define the relative path to the download folder from the project directory
+    download_folder = os.path.join(script_dir, '../../downloads/')
     metadata = extract_first_pdf_from_downloads(download_folder)
     if metadata:
         print(json.dumps(metadata))  
