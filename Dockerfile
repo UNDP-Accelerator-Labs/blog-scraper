@@ -8,12 +8,24 @@ RUN apt-get update \
     python3-pip \
     libxml2-dev \
     libxslt-dev \
+    libjpeg-dev \
+    libpng-dev  \
+    libtiff-dev \
+    libfreetype6-dev \
+    libpq-dev \
+    gcc \
+    linux-libc-dev \
+    libc6-dev \
+    make \
+    gfortran \
+    musl-dev \
+    libffi-dev \
+    python3-numpy \
     python-dev \
     python3-lxml \
     zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install lxml
 # Set up a working directory
 WORKDIR /usr/src/app
 
@@ -34,9 +46,11 @@ RUN apt-get update \
     fonts-liberation libasound2 libatk-bridge2.0-0 libatk1.0-0  libatspi2.0-0 \
     libcairo2 libcups2 libdbus-1-3 libdrm2 libgbm1 libglib2.0-0 \
     libgtk-3-0 libnspr4 libnss3 libpango-1.0-0 libu2f-udev \
-    libvulkan1 libxcomposite1 libxdamage1 libxfixes3 libxkbcommon0 libxrandr2  xdg-utils \
+    libvulkan1 libxcomposite1 libxdamage1 libxfixes3 libxkbcommon0 libxrandr2 xdg-utils \
     && curl -L https://github.com/mozilla/geckodriver/releases/download/v0.30.0/geckodriver-v0.30.0-linux64.tar.gz | tar xz -C /usr/local/bin \
     && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install --no-cache-dir -U pip
 
 RUN echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | \
     tee -a /etc/apt/sources.list.d/google.list
@@ -62,12 +76,15 @@ RUN npm i selenium-webdriver
 COPY package*.json ./
 RUN npm i
 
-# Copy the application code
-COPY . .
+RUN mkdir scripts
+COPY scripts/requirements.txt scripts/
 
 # Install Python dependencies
-# RUN pip3 freeze > requirements.txt   
-RUN pip3 install  --no-cache-dir -r scripts/requirements.txt
+# RUN pip3 freeze > requirements.txt
+RUN pip3 install --no-cache-dir -r scripts/requirements.txt
+
+# Copy the application code
+COPY . .
 
 # Expose port
 EXPOSE 3000
