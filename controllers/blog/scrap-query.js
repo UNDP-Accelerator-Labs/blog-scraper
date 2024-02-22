@@ -94,7 +94,15 @@ const getAllPublicaltions = `
   ORDER BY id ASC;
   `;
 
-const recordSince = `SELECT id, url, content, country
+const recordSince = `
+SELECT 
+    id, 
+    url, 
+    REPLACE(
+        COALESCE(content, all_html_content),
+        E'\n', ' '
+    ) AS content,
+    country
 FROM articles 
 WHERE created_at >= CURRENT_DATE - INTERVAL '4 day';
 `

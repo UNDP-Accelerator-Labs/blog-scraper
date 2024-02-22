@@ -1,6 +1,10 @@
 require("dotenv").config();
 const axios = require("axios");
-const { getAllDocument, updateDocumentRecord, recordSince } = require("./scrap-query");
+const {
+  getAllDocument,
+  updateDocumentRecord,
+  recordSince,
+} = require("./scrap-query");
 const { DB } = include("/db");
 
 const { NLP_API_URL, API_TOKEN } = process.env;
@@ -9,38 +13,40 @@ const updateDocument = async () => {
   const res = await DB.blog.any(recordSince).catch((err) => []);
 
   // Loop through each document and update country name
-  for (let k = 0; k < res.length; k++) {
-    let loc = await getDocumentCountryName(res[k]["content"]);
-    let lang = await getDocumentLanguage(res[k]["content"]);
+  res.forEach(async (p) => {
+    if (p.content) {
+      let loc = await getDocumentCountryName(p["content"]);
+      let lang = await getDocumentLanguage(p["content"]);
 
-    //check has_lab record from the genral database
-    const hasLabQuery = `
-        SELECT has_lab
-        FROM countries
-        WHERE iso3 = $1;
-      `;
-    const hasLabResult = await DB.general
-      .one(hasLabQuery, [loc?.iso3])
-      .catch(() => ({ has_lab: false }));
+      //check has_lab record from the genral database
+      const hasLabQuery = `
+          SELECT has_lab
+          FROM countries
+          WHERE iso3 = $1;
+        `;
+      const hasLabResult = await DB.general
+        .one(hasLabQuery, [loc?.iso3])
+        .catch(() => ({ has_lab: false }));
 
-    try {
-      await DB.blog
-        .none(updateDocumentRecord, [
-          res[k]["id"],
-          loc?.country,
-          lang,
-          loc?.lat,
-          loc?.lng,
-          loc?.iso3,
-          hasLabResult?.has_lab,
-        ])
-        .catch((err) => {
-          throw new Error(err);
-        });
-    } catch (err) {
-      console.log("Error occurred while updating document record ", err);
+      try {
+        await DB.blog
+          .none(updateDocumentRecord, [
+            p["id"],
+            loc?.country,
+            lang,
+            loc?.lat,
+            loc?.lng,
+            loc?.iso3,
+            hasLabResult?.has_lab,
+          ])
+          .catch((err) => {
+            throw new Error(err);
+          });
+      } catch (err) {
+        console.log("Error occurred while updating document record ", err);
+      }
     }
-  }
+  });
 
   //Log needed for debugging
   console.log("Successfully updated all document record");
