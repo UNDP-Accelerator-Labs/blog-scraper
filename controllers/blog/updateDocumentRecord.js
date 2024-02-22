@@ -13,10 +13,11 @@ const updateDocument = async () => {
   const res = await DB.blog.any(recordSince).catch((err) => []);
 
   // Loop through each document and update country name
-  res.forEach(async (p) => {
+  await res.forEach(async (p, i) => {
     if (p.content) {
-      let loc = await getDocumentCountryName(p["content"]);
-      let lang = await getDocumentLanguage(p["content"]);
+      let cont = p["content"].slice(0, 100 * 1024)
+      let loc = await getDocumentCountryName(cont);
+      let lang = await getDocumentLanguage(cont);
 
       //check has_lab record from the genral database
       const hasLabQuery = `
@@ -53,11 +54,15 @@ const updateDocument = async () => {
 };
 
 const getDocumentCountryName = async (content) => {
-  return axios
-    .post(`${NLP_API_URL}/locations`, {
-      token: API_TOKEN,
-      input: content,
-    })
+  let body = {
+    token: API_TOKEN,
+    input: content,
+  }
+  return axios({
+    method: 'post',
+    url: `${NLP_API_URL}/locations`,
+    data: JSON.stringify(body)
+  })
     .then(({ data }) => {
       let location = data["entites"][0]["location"];
       return {
@@ -74,11 +79,15 @@ const getDocumentCountryName = async (content) => {
 };
 
 const getDocumentLanguage = async (content) => {
-  return axios
-    .post(`${NLP_API_URL}/language`, {
-      token: API_TOKEN,
-      input: content,
-    })
+  let body = {
+    token: API_TOKEN,
+    input: content,
+  }
+  return axios({
+    method: 'post',
+    url: `${NLP_API_URL}/language`,
+    data: JSON.stringify(body)
+  })
     .then(({ data }) => {
       return data?.languages[0]["lang"] || "en";
     })
