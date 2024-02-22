@@ -1,12 +1,12 @@
 require("dotenv").config();
 const axios = require("axios");
-const { getAllDocument, updateDocumentRecord } = require("./scrap-query");
+const { getAllDocument, updateDocumentRecord, recordSince } = require("./scrap-query");
 const { DB } = include("/db");
 
 const { NLP_API_URL, API_TOKEN } = process.env;
 
 const updateDocument = async () => {
-  const res = await DB.blog.any(getAllDocument).catch((err) => []);
+  const res = await DB.blog.any(recordSince).catch((err) => []);
 
   // Loop through each document and update country name
   for (let k = 0; k < res.length; k++) {
