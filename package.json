@@ -15,7 +15,6 @@
     "azure-functions-core-tools": "^4.0.5148",
     "body-parser": "^1.20.2",
     "child_process": "^1.0.2",
-    "chromedriver": "^116.0.0",
     "connect-pg-simple": "^9.0.1",
     "cookie-parser": "^1.4.6",
     "crypto": "^1.0.1",

@@ -20,6 +20,9 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
   options.setPreference('browser.download.dir', downloadsFolder);
   // options.setPreference('browser.helperApps.neverAsk.saveToDisk', 'application/pdf'); 
 
+  // Navigate to the URL
+  if(!url) return 
+
   let driver = await new Builder()
       .forBrowser('firefox')
       .setFirefoxOptions(options)
@@ -29,8 +32,6 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
         await driver.manage().window().maximize();
       }catch(e){}
 
-  // Navigate to the URL
-  if(!url) return 
   await driver.get(url);
 
   let articleTitle = null;
