@@ -1,5 +1,5 @@
 require("dotenv").config();
-const axios = require("axios");
+const fetch = require("node-fetch");
 const {
   getAllDocument,
   updateDocumentRecord,
@@ -13,88 +13,96 @@ const updateDocument = async () => {
   const res = await DB.blog.any(recordSince).catch((err) => []);
 
   // Loop through each document and update country name
-  await res.forEach(async (p, i) => {
-    if (p.content) {
-      let cont = p["content"].slice(0, 100 * 1024)
-      let loc = await getDocumentCountryName(cont);
-      let lang = await getDocumentLanguage(cont);
+  for (const p of res) {
+    if (p.content && p.content.length) {
+      const content = p["content"]
+      const meta = await getDocumentMeta(content);
 
-      //check has_lab record from the genral database
-      const hasLabQuery = `
+      if (meta) {
+        // Extract language with maximum score
+        const languages = meta?.language?.languages;
+        const maxLanguage = languages?.reduce(
+          (maxLang, lang) => (lang?.score > maxLang?.score ? lang : maxLang),
+          languages[0]
+        );
+
+        // Extract country with highest confidence
+        const entities = meta?.location.entities;
+        const maxConfidenceEntity = entities?.reduce(
+          (maxEntity, entity) =>
+            entity?.location?.confidence > maxEntity?.location?.confidence
+              ? entity
+              : maxEntity,
+          entities[0]
+        );
+
+        //check has_lab record from the genral database
+        const hasLabQuery = `
           SELECT has_lab
           FROM countries
           WHERE iso3 = $1;
         `;
-      const hasLabResult = await DB.general
-        .one(hasLabQuery, [loc?.iso3])
-        .catch(() => ({ has_lab: false }));
+        const hasLabResult = await DB.general
+          .one(hasLabQuery, [maxConfidenceEntity?.location?.country])
+          .catch(() => ({ has_lab: false }));
 
-      try {
-        await DB.blog
-          .none(updateDocumentRecord, [
-            p["id"],
-            loc?.country,
-            lang,
-            loc?.lat,
-            loc?.lng,
-            loc?.iso3,
-            hasLabResult?.has_lab,
-          ])
-          .catch((err) => {
-            throw new Error(err);
-          });
-      } catch (err) {
-        console.log("Error occurred while updating document record ", err);
+        try {
+          await DB.blog
+            .none(updateDocumentRecord, [
+              p["id"],
+              maxConfidenceEntity?.location?.formatted,
+              maxLanguage.lang,
+              maxConfidenceEntity?.location?.lat,
+              maxConfidenceEntity?.location?.lng,
+              maxConfidenceEntity?.location?.country,
+              hasLabResult?.has_lab,
+            ])
+            .catch((err) => {
+              throw new Error(err);
+            });
+        } catch (err) {
+          console.log("Error occurred while updating document record ", err);
+        }
       }
     }
-  });
+  }
 
   //Log needed for debugging
   console.log("Successfully updated all document record");
 };
 
-const getDocumentCountryName = async (content) => {
+const getDocumentMeta = async (content) => {
   let body = {
+    modules: [{ name: "location" }, { name: "language" }],
     token: API_TOKEN,
     input: content,
-  }
-  return axios({
-    method: 'post',
-    url: `${NLP_API_URL}/locations`,
-    data: JSON.stringify(body)
-  })
-    .then(({ data }) => {
-      let location = data["entites"][0]["location"];
-      return {
-        lat: location?.lat || 0,
-        lng: location?.lng || 0,
-        country: location?.formatted || "",
-        iso3: location?.country || null,
-      };
-    })
-    .catch((error) => {
-      console.log(error);
-      return null;
-    });
-};
+  };
 
-const getDocumentLanguage = async (content) => {
-  let body = {
-    token: API_TOKEN,
-    input: content,
-  }
-  return axios({
-    method: 'post',
-    url: `${NLP_API_URL}/language`,
-    data: JSON.stringify(body)
-  })
-    .then(({ data }) => {
-      return data?.languages[0]["lang"] || "en";
-    })
-    .catch((error) => {
-      console.log(error);
-      return null;
+  try {
+    const response = await fetch(NLP_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
     });
+
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      console.error(
+        "Network response was not ok: ",
+        response.statusText,
+        errorMessage
+      );
+      throw new Error("Network response was not ok ");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error);
+    return null;
+  }
 };
 
 module.exports = updateDocument;
