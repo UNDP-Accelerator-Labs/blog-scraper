@@ -104,7 +104,7 @@ SELECT
     ) AS content,
     country
 FROM articles 
-WHERE created_at >= CURRENT_DATE - INTERVAL '4 day';
+WHERE created_at >= CURRENT_DATE - INTERVAL '6 day';
 `
 
 module.exports = { 
