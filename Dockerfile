@@ -47,6 +47,8 @@ RUN apt-get update \
     libcairo2 libcups2 libdbus-1-3 libdrm2 libgbm1 libglib2.0-0 \
     libgtk-3-0 libnspr4 libnss3 libpango-1.0-0 libu2f-udev \
     libvulkan1 libxcomposite1 libxdamage1 libxfixes3 libxkbcommon0 libxrandr2 xdg-utils \
+    libxslt1-dev antiword unrtf poppler-utils tesseract-ocr \
+    flac ffmpeg lame libmad0 libsox-fmt-mp3 sox swig libpulse-dev \
     && curl -L https://github.com/mozilla/geckodriver/releases/download/v0.30.0/geckodriver-v0.30.0-linux64.tar.gz | tar xz -C /usr/local/bin \
     && rm -rf /var/lib/apt/lists/*
 

@@ -51,7 +51,7 @@ const updateDocument = async () => {
             .none(updateDocumentRecord, [
               p["id"],
               maxConfidenceEntity?.location?.formatted,
-              maxLanguage.lang,
+              maxLanguage?.lang || 'en',
               maxConfidenceEntity?.location?.lat,
               maxConfidenceEntity?.location?.lng,
               maxConfidenceEntity?.location?.country,
