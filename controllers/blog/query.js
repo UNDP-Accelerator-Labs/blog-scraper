@@ -121,7 +121,7 @@ exports.searchBlogQuery = (
             CASE
                 WHEN posted_date IS NOT NULL THEN posted_date
                 WHEN parsed_date IS NOT NULL THEN parsed_date
-                ELSE created_at
+                ELSE '1970-01-01'
             END DESC
         LIMIT $1 OFFSET $2
       ),
