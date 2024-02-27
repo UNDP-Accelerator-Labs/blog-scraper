@@ -40,8 +40,9 @@ async function updateRecordsForDistinctCountries() {
         WHERE iso3 = $1;
       `;
       const hasLabResult = await DB.general.one(hasLabQuery, [iso3Result?.[0]?.iso3]).catch(()=> ({ has_lab : false }) );
-      
-      await updateRecords(country.country, iso3Result?.[0]?.iso3, hasLabResult.has_lab, hasLabResult.lat, hasLabResult.lng);
+      if(hasLabResult?.has_lab){
+        await updateRecords(country.country, iso3Result?.[0]?.iso3, hasLabResult.has_lab, hasLabResult.lat, hasLabResult.lng);
+      }
     }
     
     console.log('All records updated successfully.');
