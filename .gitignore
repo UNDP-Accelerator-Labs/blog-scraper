@@ -12,5 +12,8 @@ public/css/
 .env
 
 .ipynb_checkpoints/
+
 scripts/myenv/
 myenv/
+scripts/output/
+scripts/local.*
