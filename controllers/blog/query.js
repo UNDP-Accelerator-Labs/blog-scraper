@@ -78,14 +78,14 @@ exports.searchBlogQuery = (
     text: `
       WITH search_results AS (
         SELECT id, url, country, article_type, title, posted_date, posted_date_str, parsed_date, language, created_at,
-          regexp_replace(${textColumn}, E'\\n', ' ', 'g') AS content,
-          CASE
-            WHEN $3 = '' THEN
-              regexp_replace(
-                regexp_replace(${textColumn}, E'\\n', ' ', 'g'),
-                E'\\s+', ' ', 'g'
-              )
-          END AS raw_content
+          regexp_replace(${textColumn}, E'\\n', ' ', 'g') AS content
+          -- CASE
+          --  WHEN $3 = '' THEN
+          --   regexp_replace(
+          --     regexp_replace(${textColumn}, E'\\n', ' ', 'g'),
+          --     E'\\s+', ' ', 'g'
+          --   )
+          -- END AS raw_content
         FROM articles
         WHERE has_lab IS TRUE
         ${searchTextCondition}
@@ -105,8 +105,7 @@ exports.searchBlogQuery = (
         ${searchTextCondition}
         ${whereClause}
       )
-      SELECT sr.*, tc.total_records, (CEIL(tc.total_records::numeric / $1)) AS total_pages, ${"$3"
-      }  AS current_page
+      SELECT sr.*, tc.total_records, (CEIL(tc.total_records::numeric / $1)) AS total_pages, ${"$3"}  AS current_page
       FROM search_results sr
       CROSS JOIN total_count tc;
     `,
@@ -134,7 +133,7 @@ exports.articleGroup = (searchText, country, type) => {
 
 exports.countryGroup = (searchText, country, type) => {
   let whereClause = theWhereClause(country, type);
-  let searchTextCondition = searchTextConditionFn(searchText);;
+  let searchTextCondition = searchTextConditionFn(searchText);
   const values = [];
 
   return {
