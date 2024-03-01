@@ -176,10 +176,8 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
     }
   } else if (article_type == "publications") {
     try {
-      articleTitle =
-        (await driver
-          .findElement(By.css(config["itle.element.publication.css_selector"]))
-          .getText()) || null;
+      let titleElement = await driver.findElement(By.css('.publication-card__title .coh-heading'));
+      articleTitle = await titleElement.getText();
     } catch (err) {
       articleTitle = null;
     }

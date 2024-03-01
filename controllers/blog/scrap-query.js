@@ -134,11 +134,13 @@ const updateDocumentRecord = `
   `;
 
 const getAllPublicaltions = `
-  SELECT id, url, content, country
-  FROM articles 
-  WHERE article_type = 'publications' 
+  SELECT *
+  FROM articles
+  WHERE article_type = 'publications'
+  -- AND created_at < CURRENT_DATE - INTERVAL '10 day' 
+  -- AND updated_at < CURRENT_DATE - INTERVAL '10 day'
   ORDER BY id ASC;
-  `;
+`;
 
 const recordSince = `
 SELECT 

@@ -71,36 +71,9 @@ exports.searchBlogQuery = (
   let whereClause = theWhereClause(country, type);
   let values = [page_content_limit, (page - 1) * page_content_limit, page];
 
-  const [search, terms] = sqlregex(searchText);
-
-  let searchTextCondition = "";
+  let searchTextCondition = searchTextConditionFn(searchText);
   let textColumn = "COALESCE(content, all_html_content)";
 
-  if (
-    searchText !== null &&
-    searchText !== undefined &&
-    searchText.length > 0
-  ) {
-    searchTextCondition = `
-      AND (title ~* ('\\m' || $3 || '\\M')
-        OR ${textColumn} ~* ('\\m' || $3 || '\\M')
-        OR country ~* ('\\m' || $3 || '\\M'))
-    `;
-    values.splice(2, 0, search);
-  } else if (type || country) {
-    searchTextCondition = `
-        AND (content IS NOT NULL
-        OR all_html_content IS NOT NULL)
-    `;
-    values.splice(2, 0, "");
-  } else {
-    searchTextCondition = `
-      AND (content IS NOT NULL
-        OR all_html_content IS NOT NULL
-        AND article_type != 'webpage')
-    `;
-    values.splice(2, 0, "");
-  }
   return {
     text: `
       WITH search_results AS (
@@ -132,8 +105,7 @@ exports.searchBlogQuery = (
         ${searchTextCondition}
         ${whereClause}
       )
-      SELECT sr.*, tc.total_records, (CEIL(tc.total_records::numeric / $1)) AS total_pages, ${
-        searchTextCondition ? "$4" : "$3"
+      SELECT sr.*, tc.total_records, (CEIL(tc.total_records::numeric / $1)) AS total_pages, ${"$3"
       }  AS current_page
       FROM search_results sr
       CROSS JOIN total_count tc;
@@ -144,34 +116,8 @@ exports.searchBlogQuery = (
 
 exports.articleGroup = (searchText, country, type) => {
   let whereClause = theWhereClause(country, type);
-  const [search, terms] = sqlregex(searchText);
-  let searchTextCondition = "";
+  let searchTextCondition = searchTextConditionFn(searchText);
   const values = [];
-  if (
-    searchText !== null &&
-    searchText !== undefined &&
-    searchText.length > 0
-  ) {
-    searchTextCondition = `
-      AND (COALESCE(content, all_html_content) ~* ('\\m' || $1 || '\\M')
-        OR country ~* ('\\m' || $1 || '\\M'))
-    `;
-
-    values.push(search);
-  } else if (country || type) {
-    searchTextCondition = `
-      AND (content IS NOT NULL 
-          OR all_html_content IS NOT NULL
-        )
-    `;
-  } else {
-    searchTextCondition = `
-      AND (content IS NOT NULL 
-          OR all_html_content IS NOT NULL
-          AND article_type != 'webpage'
-        )
-    `;
-  }
 
   return {
     text: `
@@ -188,35 +134,8 @@ exports.articleGroup = (searchText, country, type) => {
 
 exports.countryGroup = (searchText, country, type) => {
   let whereClause = theWhereClause(country, type);
-  const [search, terms] = sqlregex(searchText);
-  let searchTextCondition = "";
+  let searchTextCondition = searchTextConditionFn(searchText);;
   const values = [];
-  if (
-    searchText !== null &&
-    searchText !== undefined &&
-    searchText.length > 0
-  ) {
-    searchTextCondition = `
-      AND (title ~* ('\\m' || $1 || '\\M')
-        OR COALESCE(content, all_html_content) ~* ('\\m' || $1 || '\\M')
-        OR country ~* ('\\m' || $1 || '\\M'))
-    `;
-
-    values.push(search);
-  } else if (country || type) {
-    searchTextCondition = `
-      AND (content IS NOT NULL 
-          OR all_html_content IS NOT NULL
-        )
-    `;
-  } else {
-    searchTextCondition = `
-      AND (content IS NOT NULL 
-          OR all_html_content IS NOT NULL
-          AND article_type != 'webpage'
-        )
-    `;
-  }
 
   return {
     text: `
@@ -233,35 +152,8 @@ exports.countryGroup = (searchText, country, type) => {
 
 exports.statsQuery = (searchText, country, type) => {
   let whereClause = theWhereClause(country, type);
-  const [search, terms] = sqlregex(searchText);
-  let searchTextCondition = "";
+  let searchTextCondition = searchTextConditionFn(searchText);
   const values = [];
-  if (
-    searchText !== null &&
-    searchText !== undefined &&
-    searchText.length > 0
-  ) {
-    searchTextCondition = `
-        AND (title ~* ('\\m' || $1 || '\\M')
-          OR COALESCE(content, all_html_content) ~* ('\\m' || $1 || '\\M')
-          OR country ~* ('\\m' || $1 || '\\M'))
-      `;
-
-    values.push(search);
-  } else if (country || type) {
-    searchTextCondition = `
-        AND (content IS NOT NULL 
-            OR all_html_content IS NOT NULL
-          )
-      `;
-  } else {
-    searchTextCondition = `
-        AND (content IS NOT NULL 
-            OR all_html_content IS NOT NULL
-            AND article_type != 'webpage'
-          )
-      `;
-  }
 
   return {
     text: `
@@ -305,35 +197,8 @@ exports.statsQuery = (searchText, country, type) => {
 
 exports.extractGeoQuery = (searchText, country, type) => {
   let whereClause = theWhereClause(country, type);
-  const [search, terms] = sqlregex(searchText);
-  let searchTextCondition = "";
+  let searchTextCondition = searchTextConditionFn(searchText);
   const values = [];
-  if (
-    searchText !== null &&
-    searchText !== undefined &&
-    searchText.length > 0
-  ) {
-    searchTextCondition = `
-        AND (title ~* ('\\m' || $1 || '\\M')
-          OR COALESCE(content, all_html_content) ~* ('\\m' || $1 || '\\M')
-          OR country ~* ('\\m' || $1 || '\\M'))
-      `;
-
-    values.push(search);
-  } else if (country || type) {
-    searchTextCondition = `
-        AND (content IS NOT NULL 
-            OR all_html_content IS NOT NULL
-          )
-      `;
-  } else {
-    searchTextCondition = `
-        AND (content IS NOT NULL 
-            OR all_html_content IS NOT NULL
-            AND article_type != 'webpage'
-          )
-      `;
-  }
 
   return {
     text: `
