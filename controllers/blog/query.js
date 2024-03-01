@@ -167,13 +167,11 @@ exports.statsQuery = (searchText, country, type) => {
         total_country_count AS (
           SELECT country, COUNT(*) AS count
           FROM search_results
-          WHERE country IS NOT NULL AND has_lab IS TRUE
           GROUP BY country
         ),
         total_null_country_count AS (
           SELECT COUNT(*) AS count
           FROM search_results
-          WHERE country IS NULL AND has_lab IS TRUE
         ),
         total_article_type_count AS (
           SELECT article_type, COUNT(*) AS count
@@ -183,7 +181,6 @@ exports.statsQuery = (searchText, country, type) => {
         total_count AS (
           SELECT COUNT(*) AS total_records
           FROM search_results
-          WHERE has_lab IS TRUE
         )
         SELECT 
           (SELECT COUNT(DISTINCT country) FROM total_country_count) AS distinct_country_count,
