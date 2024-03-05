@@ -52,7 +52,7 @@ exports.checkSearchTerm = (content) => {
     .flat()
     .forEach((term) => {
       const lowerCaseTerm = term.toLowerCase();
-      if (lowerCaseContent.includes(lowerCaseTerm)) {
+      if (lowerCaseContent?.includes(lowerCaseTerm)) {
         foundTerms.push(term);
       }
     });
