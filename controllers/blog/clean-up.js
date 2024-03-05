@@ -31,6 +31,7 @@ const cleanup = async (conn, req, res) => {
             "press-releases",
             "speeches",
             "stories",
+            'projects',
           ].includes(bg.article_type)
         ) {
           const $ = cheerio.load(bg.raw_html);
@@ -39,7 +40,7 @@ const cleanup = async (conn, req, res) => {
           ).replaceWith("");
           const mainContent = $("article").text();
 
-          await matched(mainContent, t, bg);
+          await matched(mainContent || bg.all_html_content, t, bg);
         } else if (["publications", "document"].includes(bg.article_type)) {
           await matched(bg.all_html_content, t, bg);
         } else if (bg.article_type == "webpage") {
@@ -48,7 +49,7 @@ const cleanup = async (conn, req, res) => {
           $("header").replaceWith("");
           const mainContent = $("body").text();
 
-          await matched(mainContent, t, bg);
+          await matched(mainContent || bg.all_html_content, t, bg);
         }
       }
     });

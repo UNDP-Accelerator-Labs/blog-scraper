@@ -46,7 +46,7 @@ exports.searchTerms = {
 
 exports.checkSearchTerm = (content) => {
   const foundTerms = [];
-  const lowerCaseContent = content.toLowerCase();
+  const lowerCaseContent = content?.toLowerCase();
 
   Object.values(this.searchTerms)
     .flat()
