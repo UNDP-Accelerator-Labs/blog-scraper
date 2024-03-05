@@ -1,36 +1,42 @@
 require("dotenv").config();
 const { firefoxOption, config } = require("../../config");
 const { Builder, By } = require("selenium-webdriver");
-const firefox = require('selenium-webdriver/firefox');
-const { spawn } = require('child_process');
+const firefox = require("selenium-webdriver/firefox");
+const { spawn } = require("child_process");
 const { DB } = require("../../db");
-const path = require('path');
-const { evaluateArticleType, extractLanguageFromUrl, article_types } =
-  require("../../services");
+const path = require("path");
+
+const {
+  evaluateArticleType,
+  extractLanguageFromUrl,
+  article_types,
+  checkSearchTerm,
+  getDocumentMeta,
+} = include("services/");
 const { saveQuery, saveHrefLinks, updateQuery } = require("./scrap-query");
 const getPdfMetadataFromUrl = require("./pdf");
-const fs = require('fs');
+const fs = require("fs");
 
 const extractAndSaveData = async (url, id = null, countryName = null) => {
   // Start WebDriver
   let options = new firefox.Options();
-  const downloadsFolder = path.join(__dirname, '../../downloads');
-  options.headless()
-  options.setPreference('browser.download.folderList', 2); 
-  options.setPreference('browser.download.dir', downloadsFolder);
-  // options.setPreference('browser.helperApps.neverAsk.saveToDisk', 'application/pdf'); 
+  const downloadsFolder = path.join(__dirname, "../../downloads");
+  options.headless();
+  options.setPreference("browser.download.folderList", 2);
+  options.setPreference("browser.download.dir", downloadsFolder);
+  // options.setPreference('browser.helperApps.neverAsk.saveToDisk', 'application/pdf');
 
   // Navigate to the URL
-  if(!url) return 
+  if (!url) return;
 
   let driver = await new Builder()
-      .forBrowser('firefox')
-      .setFirefoxOptions(options)
-      .build();
+    .forBrowser("firefox")
+    .setFirefoxOptions(options)
+    .build();
 
-      try{
-        await driver.manage().window().maximize();
-      }catch(e){}
+  try {
+    await driver.manage().window().maximize();
+  } catch (e) {}
 
   await driver.get(url);
 
@@ -176,7 +182,9 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
     }
   } else if (article_type == "publications") {
     try {
-      let titleElement = await driver.findElement(By.css('.publication-card__title .coh-heading'));
+      let titleElement = await driver.findElement(
+        By.css(".publication-card__title .coh-heading")
+      );
       articleTitle = await titleElement.getText();
     } catch (err) {
       articleTitle = null;
@@ -228,66 +236,71 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
 
     let exe_file = false;
     try {
-      const download = await driver.findElement(By.css('a.download'));
+      const download = await driver.findElement(By.css("a.download"));
       if (download) {
-          exe_file = true;
-          try {
-            await driver.executeScript("arguments[0].scrollIntoView(false);", download);
-            await driver.sleep(1000);
-
-            await download.click();
-            await driver.sleep(1000);
-          } catch (e) {
-            exe_file = false;
-          }
+        exe_file = true;
+        try {
+          await driver.executeScript(
+            "arguments[0].scrollIntoView(false);",
+            download
+          );
           await driver.sleep(1000);
-          const modals = await driver.findElements(By.className('chapter-item download-row'));
-          await driver.sleep(1000);
-          if (modals.length > 0) {
-            let modalToClick;
 
-            for (const modal of modals) {
-              let englishButton;
-                try{
-                   englishButton = await modal.findElement(By.xpath(".//a[.//div[text()='English']]"));
-                } catch(e){}
-                if (englishButton) {
-                    modalToClick = modal;
-                    break; // Stop the loop once we find a modal with English button
-                }
+          await download.click();
+          await driver.sleep(1000);
+        } catch (e) {
+          exe_file = false;
+        }
+        await driver.sleep(1000);
+        const modals = await driver.findElements(
+          By.className("chapter-item download-row")
+        );
+        await driver.sleep(1000);
+        if (modals.length > 0) {
+          let modalToClick;
+
+          for (const modal of modals) {
+            let englishButton;
+            try {
+              englishButton = await modal.findElement(
+                By.xpath(".//a[.//div[text()='English']]")
+              );
+            } catch (e) {}
+            if (englishButton) {
+              modalToClick = modal;
+              break; // Stop the loop once we find a modal with English button
             }
-            
-            if (!modalToClick && modals.length > 0) {
-                modalToClick = modals[0]; // If no modal with English button is found, click on the first modal
-            }
-            
-            if (modalToClick) {
-                await modalToClick.click();
-                await driver.sleep(1000);
-            }
-            
           }
+
+          if (!modalToClick && modals.length > 0) {
+            modalToClick = modals[0]; // If no modal with English button is found, click on the first modal
+          }
+
+          if (modalToClick) {
+            await modalToClick.click();
+            await driver.sleep(1000);
+          }
+        }
       }
-  } catch (e) {
+    } catch (e) {
       console.log(url);
       console.log(e);
-  };
-  
+    }
 
-    if(exe_file){
-      await executePythonScriptAndGetMetadata().then(metadata => {
+    if (exe_file) {
+      await executePythonScriptAndGetMetadata().then((metadata) => {
         if (metadata) {
           content += metadata?.content + "\n";
           postedDate = isNaN(new Date(metadata?.created))
-          ? null
-          : new Date(metadata?.created);
-          raw_html = content
+            ? null
+            : new Date(metadata?.created);
+          raw_html = content;
         } else {
           // Handle case when metadata is null
-          console.log('err ', metadata)
+          console.log("err ", metadata);
         }
       });
-      exe_file = false
+      exe_file = false;
     }
   } else if (url.includes(".medium.com")) {
     try {
@@ -500,6 +513,14 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
     }
   }
 
+  //check relevance of document
+  if (!checkSearchTerm(content).length || !checkSearchTerm(html_content).length)
+    return;
+
+  const [lang, location, meta] = await getDocumentMeta(html_content);
+  const iso3 = location?.location?.country;
+  const language = lang?.lang;
+
   // Save the data to the database if id = null
   if (id == null || isNaN(id) == true) {
     await DB.blog
@@ -507,18 +528,20 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
         saveQuery(
           url,
           country,
-          languageName,
+          language,
           articleTitle,
           postedDate,
           content,
           article_type,
           postedDateStr,
           html_content,
-          raw_html
+          raw_html,
+          iso3,
+          '2'
         )
       )
       .then(async (data) => {
-        console.log('Saving article to table... ', url)
+        console.log("Saving article to table... ", url);
         //save href links in a blog if it exist
         // if (hrefObj.length > 0) {
         //   hrefObj.forEach((obj) => (obj.article_id = data.id));
@@ -553,10 +576,12 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
           article_type,
           postedDateStr,
           html_content,
-          raw_html
+          raw_html,
+          iso3,
+          '2'
         )
       )
-      .then(()=> console.log('updated record in db...'))
+      .then(() => console.log("updated record in db..."))
       .catch((err) => {
         console.error("Error occurred while updating content.");
       });
@@ -569,25 +594,24 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
 // extractAndSaveData()
 module.exports = extractAndSaveData;
 
-
 const executePythonScriptAndGetMetadata = async () => {
-  let pythonOutput = '';
+  let pythonOutput = "";
 
   const executePythonScript = async () => {
-    const pythonProcess = await spawn('python3', ['scripts/parsers/pdf.py']);
+    const pythonProcess = await spawn("python3", ["scripts/parsers/pdf.py"]);
 
-    pythonProcess.stdout.on('data', (data) => {
-      pythonOutput += data; 
+    pythonProcess.stdout.on("data", (data) => {
+      pythonOutput += data;
     });
 
     // Listen for errors from the Python script (stderr)
-    pythonProcess.stderr.on('data', (data) => {
+    pythonProcess.stderr.on("data", (data) => {
       console.error(`Python stderr: ${data}`);
     });
 
     return new Promise((resolve, reject) => {
       // Listen for Python script exit
-      pythonProcess.on('close', (code) => {
+      pythonProcess.on("close", (code) => {
         if (code === 0) {
           resolve(pythonOutput.trim());
         } else {
@@ -599,18 +623,18 @@ const executePythonScriptAndGetMetadata = async () => {
 
   try {
     const pythonOutput = await executePythonScript();
-    if (pythonOutput === 'null') {
-      console.log('No metadata found in document files.');
+    if (pythonOutput === "null") {
+      console.log("No metadata found in document files.");
     } else {
       try {
         const metadata = JSON.parse(pythonOutput);
-        return metadata; 
+        return metadata;
       } catch (error) {
-        console.error('Error parsing metadata:', pythonOutput);
+        console.error("Error parsing metadata:", pythonOutput);
       }
     }
   } catch (error) {
-    console.error('Error executing Python script:', error);
+    console.error("Error executing Python script:", error);
   }
 
   return null; // Return null if any error occurs

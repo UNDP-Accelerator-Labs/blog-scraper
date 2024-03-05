@@ -45,3 +45,14 @@ ADD COLUMN tags TEXT[];
 --  privilege 2 - private document
 --  privilege 3 - confidential document
 
+ALTER TABLE articles
+ADD COLUMN relevance INT DEFAULT 0,
+
+
+CREATE TABLE IF NOT EXISTS public.nlp_fallback (
+    id SERIAL PRIMARY KEY,
+    article_id integer NOT NULL,
+    col VARCHAR(50),
+    CONSTRAINT nlp_article_id_fkey FOREIGN KEY (article_id)
+    REFERENCES articles (id) MATCH SIMPLE
+);

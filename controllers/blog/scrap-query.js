@@ -11,10 +11,12 @@ const saveQuery = (
   article_type,
   posted_date_str,
   html_content,
-  raw_html
+  raw_html,
+  relevance,
+  iso3
 ) => ({
   text: `
-    INSERT INTO articles (url, country, language, title, posted_date, content, article_type, posted_date_str, all_html_content, raw_html)
+    INSERT INTO articles (url, country, language, title, posted_date, content, article_type, posted_date_str, all_html_content, raw_html, relevance, iso3)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
     RETURNING *
 `,
@@ -29,6 +31,8 @@ const saveQuery = (
     posted_date_str,
     html_content,
     raw_html,
+    relevance,
+    iso3,
   ],
 });
 
@@ -83,11 +87,25 @@ const updateQuery = (
   article_type,
   posted_date_str,
   html_content,
-  raw_html
+  raw_html,
+  relevance,
+  iso3
 ) => ({
   text: `
       UPDATE articles
-      SET url = $2, country = $3, language = $4, title = $5, posted_date = $6, content = $7, article_type = $8, posted_date_str = $9, all_html_content = $10, raw_html = $11, updated_at = now()
+      SET url = $2, 
+        country = $3, 
+        language = $4, 
+        title = $5, 
+        posted_date = $6, 
+        content = $7, 
+        article_type = $8, 
+        posted_date_str = $9, 
+        all_html_content = $10, 
+        raw_html = $11, 
+        updated_at = now(),
+        relevance = $12,
+        iso3 = $13,
       WHERE id = $1
       RETURNING *
   `,
@@ -103,6 +121,8 @@ const updateQuery = (
     posted_date_str,
     html_content,
     raw_html,
+    relevance,
+    iso3,
   ],
 });
 

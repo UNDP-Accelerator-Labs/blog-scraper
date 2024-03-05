@@ -1,5 +1,6 @@
 const { spawn } = require('child_process');
 const { config } = require('../config')
+const fetch = require("node-fetch");
 
 exports.evaluateArticleType = async (url) => {
     if(url.includes('news')){
@@ -95,6 +96,55 @@ exports.extractPdfContent = async (url) => {
   });
 };
 
+
+exports.getDocumentMeta = async (content) => {
+  let body = {
+    modules: [{ name: "location" }, { name: "language" }],
+    token: process.env.API_TOKEN,
+    input: content,
+  };
+
+  try {
+    const response = await fetch(process.env.NLP_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      console.error(
+        "Network response was not ok: ",
+        response.statusText,
+        errorMessage
+      );
+      throw new Error("Network response was not ok ");
+    }
+
+    const data = await response.json();
+    const languages = data?.language?.languages;
+    const maxLanguage = languages?.reduce(
+      (maxLang, lang) => (lang?.score > maxLang?.score ? lang : maxLang),
+      languages[0]
+    );
+
+    // Extract country with highest confidence
+    const entities = data?.location.entities;
+    const maxConfidenceEntity = entities?.reduce(
+      (maxEntity, entity) =>
+        entity?.location?.confidence > maxEntity?.location?.confidence
+          ? entity
+          : maxEntity,
+      entities[0]
+    );
+    return [maxLanguage, maxConfidenceEntity, data];
+  } catch (error) {
+    console.error("Error:", error);
+    return [null, null, null];
+  }
+};
 
 exports.article_types = [
   'project',

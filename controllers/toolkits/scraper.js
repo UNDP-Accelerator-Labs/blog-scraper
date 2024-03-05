@@ -4,24 +4,24 @@ const { DB } = include("/db");
 const toolkit_list = [
   {
     url: "https://nie.sdg-innovation-commons.org/assets/js/lunr-feed.js",
-    country: "United States of America",
-    iso3: "USA",
-    lat: 37.0902,
-    lng: 95.7129,
+    country: "Accelerator Labs",
+    iso3: null,
+    lat: null,
+    lng: null,
     tags: ['toolkit', 'NIE']
   },
   {
     url: "https://undp-accelerator-labs.github.io/Financial-inclusion-toolkit/assets/lunr-feed.js",
-    country: "United States of America",
-    iso3: "USA",
-    lat: 37.0902,
-    lng: 95.7129,
+    country: "Accelerator Labs",
+    iso3: null,
+    lat: null,
+    lng: null,
     tags: ['toolkit', 'Digital Financial Inclusion', 'DFI']
   },
   {
     url: "https://undp-accelerator-labs.github.io/Innovation-Toolkit-for-UNDP-Signature-Solutions/assets/lunr-feed.js",
-    country: "United States of America",
-    iso3: "USA",
+    country: "Bureau for Latin America and the Caribbean",
+    iso3: "LAC",
     lat: 37.0902,
     lng: 95.7129,
     tags: ['toolkit', 'Signature Solution' ]

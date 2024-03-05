@@ -1,13 +1,8 @@
 require("dotenv").config();
-const fetch = require("node-fetch");
-const {
-  getAllDocument,
-  updateDocumentRecord,
-  recordSince,
-} = require("./scrap-query");
+const { updateDocumentRecord, recordSince } = require("./scrap-query");
 const { DB } = include("/db");
 
-const { NLP_API_URL, API_TOKEN } = process.env;
+const { getDocumentMeta } = include('services/');
 
 const updateDocument = async () => {
   const res = await DB.blog.any(recordSince).catch((err) => []);
@@ -15,8 +10,8 @@ const updateDocument = async () => {
   // Loop through each document and update country name
   for (const p of res) {
     if (p.content && p.content.length) {
-      const content = p["content"]
-      const meta = await getDocumentMeta(content);
+      const content = p["content"];
+      const [lan, loc, meta] = await getDocumentMeta(content);
 
       if (meta) {
         // Extract language with maximum score
@@ -51,7 +46,7 @@ const updateDocument = async () => {
             .none(updateDocumentRecord, [
               p["id"],
               maxConfidenceEntity?.location?.formatted,
-              maxLanguage?.lang || 'en',
+              maxLanguage?.lang || "en",
               maxConfidenceEntity?.location?.lat,
               maxConfidenceEntity?.location?.lng,
               maxConfidenceEntity?.location?.country,
@@ -71,38 +66,5 @@ const updateDocument = async () => {
   console.log("Successfully updated all document record");
 };
 
-const getDocumentMeta = async (content) => {
-  let body = {
-    modules: [{ name: "location" }, { name: "language" }],
-    token: API_TOKEN,
-    input: content,
-  };
-
-  try {
-    const response = await fetch(NLP_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      const errorMessage = await response.text();
-      console.error(
-        "Network response was not ok: ",
-        response.statusText,
-        errorMessage
-      );
-      throw new Error("Network response was not ok ");
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error:", error);
-    return null;
-  }
-};
 
 module.exports = updateDocument;
