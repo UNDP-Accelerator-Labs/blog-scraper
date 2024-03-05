@@ -46,7 +46,7 @@ ADD COLUMN tags TEXT[];
 --  privilege 3 - confidential document
 
 ALTER TABLE articles
-ADD COLUMN relevance INT DEFAULT 0,
+ADD COLUMN relevance INT DEFAULT 0;
 
 
 CREATE TABLE IF NOT EXISTS public.nlp_fallback (

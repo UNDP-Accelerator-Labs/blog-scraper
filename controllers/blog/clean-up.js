@@ -15,6 +15,7 @@ const cleanup = async (conn, req, res) => {
         `
           SELECT id, url, title, country, raw_html, article_type, language, all_html_content
           FROM articles
+          WHERE country != 'Accelerator Labs'
           ORDER BY id DESC
           LIMIT $1 OFFSET $2
         `,
