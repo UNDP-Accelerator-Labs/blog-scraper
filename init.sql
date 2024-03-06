@@ -56,3 +56,5 @@ CREATE TABLE IF NOT EXISTS public.nlp_fallback (
     CONSTRAINT nlp_article_id_fkey FOREIGN KEY (article_id)
     REFERENCES articles (id) MATCH SIMPLE
 );
+
+create table iso_languages (Name VARCHAR(99),Set1 VARCHAR (2),Set2T VARCHAR(3),Set2B VARCHAR (3),Set3 VARCHAR(9),Notes VARCHAR(199));
