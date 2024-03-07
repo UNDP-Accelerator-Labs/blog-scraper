@@ -6,7 +6,7 @@ exports.evaluateArticleType = async (url) => {
     if(url.includes('news')){
         return 'news'
     }
-    else if(url.includes('/blog')){
+    else if(url.includes('/blog') || url.includes('.medium.com')){
         return 'blog'
     }
     else if(url.includes('/article')){

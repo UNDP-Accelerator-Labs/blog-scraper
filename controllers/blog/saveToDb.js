@@ -283,7 +283,6 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
         }
       }
     } catch (e) {
-      console.log(url);
       console.log(e);
     }
 
@@ -303,12 +302,40 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
       exe_file = false;
     }
   } else if (url.includes(".medium.com")) {
+    // Try to find and click on the close button if it exists
+    try {
+      const closeButton = await driver.findElement(By.css('[data-testid="close-button"]'));
+      await closeButton.click();
+      await driver.sleep(2000);
+    } catch (error) {
+      console.error("Modal not found or could not be closed:", error);
+    }
+
+    try {
+      const closeButton = await driver.findElement(By.css('[data-testid="close-button"]'));
+      await closeButton.click();
+      await driver.sleep(2000);
+    } catch (error) {
+      console.error("Modal not found or could not be closed:", error);
+    }
+
+    // Scroll to the bottom of the page
+    let lastHeight = await driver.executeScript("return document.body.scrollHeight");
+    while (true) {
+      await driver.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+      await driver.sleep(2000); // Adjust the interval as needed
+      let newHeight = await driver.executeScript("return document.body.scrollHeight");
+      if (newHeight === lastHeight) {
+        // If the scroll position no longer changes, break out of the loop
+        break;
+      }
+      lastHeight = newHeight;
+    }
+
     try {
       postedDateStr =
         (await driver
-          .findElement(
-            By.css(config["posted_date_str.element.medium_post.css_selector"])
-          )
+          .findElement(By.css('[data-testid="storyPublishDate"]'))
           .getText()) || null;
     } catch (err) {
       postedDateStr = null;
@@ -321,9 +348,7 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
     try {
       articleTitle =
         (await driver
-          .findElement(
-            By.className(config["title.element.medium_post.classname"])
-          )
+          .findElement(By.css('[data-testid="storyTitle"]'))
           .getText()) || null;
     } catch (err) {
       articleTitle = null;
@@ -342,7 +367,7 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
 
     try {
       contentElements = await driver.findElements(
-        By.css(config["content.elements.medium_post.css_selector"])
+        By.css("[data-selectable-paragraph]")
       );
     } catch (err) {
       contentElements = [];
@@ -524,67 +549,114 @@ const extractAndSaveData = async (url, id = null, countryName = null) => {
   // Save the data to the database if id = null
   if (id == null || isNaN(id) == true) {
     await DB.blog
-      .oneOrNone(
-        saveQuery(
-          url,
-          country,
-          language,
-          articleTitle,
-          postedDate,
-          content,
-          article_type,
-          postedDateStr,
-          html_content,
-          raw_html,
-          iso3,
-          '2'
-        )
-      )
-      .then(async (data) => {
-        console.log("Saving article to table... ", url);
-        //save href links in a blog if it exist
-        // if (hrefObj.length > 0) {
-        //   hrefObj.forEach((obj) => (obj.article_id = data.id));
+      .tx(async (t) => {
+        const batch = [];
 
-        //   await DB.blog
-        //     .oneOrNone(saveHrefLinks(hrefObj))
-        //     .then((res) => {
-        //       hrefObj = [];
-        //       console.log('saved record to db...')
-        //     })
-        //     .catch((err) => {
-        //       console.error("Error saving href to table:", err.message);
-        //       hrefObj = [];
-        //     });
-        // }
+        const record = await
+        t.oneOrNone(
+          saveQuery(
+            url,
+            language,
+            articleTitle,
+            postedDate,
+            article_type,
+            postedDateStr,
+            "2",
+            iso3,
+          )
+        );
+        batch.push(
+          t.any(
+            `
+        INSERT INTO article_content (article_id, content)
+        VALUES ($1, $2)
+      `,
+            [record?.id, content]
+          )
+        );
+
+        batch.push(
+          t.any(
+            `
+            INSERT INTO  article_html_content (article_id, html_content)
+            VALUES ($1, $2)
+      `,
+            [record?.id, html_content]
+          )
+        );
+
+        batch.push(
+          t.any(
+            `
+            INSERT INTO  raw_html (article_id, raw_html)
+            VALUES ($1, $2)
+          `,
+                [record?.id, raw_html]
+              )
+        );
+
+        return t.batch(batch).catch((err) => console.log(err));
       })
-      .catch((err) => {
-        console.log("Error while saving content to db ", err.message);
-      });
+      .then(r=> console.log('Saving record successful.'))
+      .catch((err) => console.log(err));
   } else {
     //update the record in db
     await DB.blog
-      .any(
-        updateQuery(
-          id,
-          url,
-          country,
-          languageName,
-          articleTitle,
-          postedDate,
-          content,
-          article_type,
-          postedDateStr,
-          html_content,
-          raw_html,
-          iso3,
-          '2'
-        )
-      )
-      .then(() => console.log("updated record in db..."))
-      .catch((err) => {
-        console.error("Error occurred while updating content.");
-      });
+      .tx(async (t) => {
+        const batch = [];
+
+        batch.push(
+          t.oneOrNone(
+            updateQuery(
+              id,
+              url,
+              language,
+              articleTitle,
+              postedDate,
+              article_type,
+              postedDateStr,
+              iso3,
+              "2"
+            )
+          )
+        );
+
+        batch.push(
+          t.any(
+            `
+        UPDATE article_content
+        SET content = $2
+        WHERE article_id = $1
+      `,
+            [id, content]
+          )
+        );
+
+        batch.push(
+          t.any(
+            `
+        UPDATE article_html_content
+        SET html_content = $2
+        WHERE article_id = $1
+      `,
+            [id, html_content]
+          )
+        );
+
+        batch.push(
+          t.any(
+            `
+        UPDATE raw_html
+        SET raw_html = $2
+        WHERE article_id = $1
+      `,
+            [id, raw_html]
+          )
+        );
+        return t.batch(batch).catch((err) => console.log(err));
+      })
+      .then(r=> console.log('Updating record successful.'))
+      .catch((err) => console.log(err));
   }
 
   // Quit WebDriver

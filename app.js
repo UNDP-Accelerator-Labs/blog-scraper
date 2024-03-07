@@ -127,6 +127,7 @@ app.get("/version", (req, res) => {
 //DEFINE EXTERNAL API ENDPOINTS
 app.get("/blogs/:page_content_limit/:page", verifyToken, routes.api.blog);
 app.get("/blogs/cleanup", verifyToken, routes.api.cleanup);
+app.get("/blogs/medium", verifyToken, routes.api.medium_posts);
 app.get("/toolkit/scrap", verifyToken, routes.api.toolkit);
 
 
@@ -235,6 +236,25 @@ cron.schedule("0 0 1,15 * *", async () => {
     console.log("Scrapper started successfully.");
   } catch (error) {
     console.error("Error occurred while running scrapper:", error);
+  }
+});
+
+// Create the cron job to update acclab medium content weekly
+cron.schedule("0 * * * 7", async () => {
+  try {
+    routes.cron.medium_posts();
+    console.log("Medium Scrapper started successfully.");
+  } catch (error) {
+    console.error("Error occurred while running Medium scrapper:", error);
+  }
+});
+
+cron.schedule("0 23 * * 7", async () => {
+  try {
+    acclab_publications();
+    console.log("Official webpage Scrapper started successfully.");
+  } catch (error) {
+    console.error("Error occurred while running Medium scrapper:", error);
   }
 });
 

@@ -3,34 +3,26 @@ const checkUrlQuery = "SELECT * FROM articles WHERE url = $1";
 
 const saveQuery = (
   url,
-  countryName,
   languageName,
   title,
   postedDate,
-  content,
   article_type,
   posted_date_str,
-  html_content,
-  raw_html,
   relevance,
   iso3
 ) => ({
   text: `
-    INSERT INTO articles (url, country, language, title, posted_date, content, article_type, posted_date_str, all_html_content, raw_html, relevance, iso3)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    INSERT INTO articles (url, language, title, posted_date, article_type, posted_date_str, relevance, iso3)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     RETURNING *
 `,
   values: [
     url,
-    countryName,
     languageName,
     title,
     postedDate,
-    content,
     article_type,
     posted_date_str,
-    html_content,
-    raw_html,
     relevance,
     iso3,
   ],
@@ -79,48 +71,36 @@ const getDistinctUrls = (validUrls) => ({
 const updateQuery = (
   id,
   url,
-  countryName,
   languageName,
   title,
   postedDate,
-  content,
   article_type,
   posted_date_str,
-  html_content,
-  raw_html,
   relevance,
   iso3
 ) => ({
   text: `
       UPDATE articles
       SET url = $2, 
-        country = $3, 
-        language = $4, 
-        title = $5, 
-        posted_date = $6, 
-        content = $7, 
-        article_type = $8, 
-        posted_date_str = $9, 
-        all_html_content = $10, 
-        raw_html = $11, 
+        language = $3, 
+        title = $4, 
+        posted_date = $5, 
+        article_type = $6, 
+        posted_date_str = $7, 
         updated_at = now(),
-        relevance = $12,
-        iso3 = $13,
+        relevance = $8,
+        iso3 = $9,
       WHERE id = $1
       RETURNING *
   `,
   values: [
     id,
     url,
-    countryName,
     languageName,
     title,
     postedDate,
-    content,
     article_type,
     posted_date_str,
-    html_content,
-    raw_html,
     relevance,
     iso3,
   ],
