@@ -1,8 +1,8 @@
 require('dotenv').config();
 
-const { DB } = require('../../db')
-const { getAllDocument, getAllPublicaltions } = require('./scrap-query');
-const extractAndSaveData = require('./saveToDb');
+const { DB } = include('db/')
+const { getAllPublicaltions } = require('./scrap-query');
+const extractAndSaveData = require('./save');
 
 const updateDbRecord = async (params) => {
   const { startIndex, delimeter, } = params || {};

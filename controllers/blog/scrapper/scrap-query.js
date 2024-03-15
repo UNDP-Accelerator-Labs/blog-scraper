@@ -28,14 +28,6 @@ const saveQuery = (
   ],
 });
 
-const saveAsArrayQuery = (articles) => ({
-  text: `
-    INSERT INTO articles (url, country, language, title, posted_date, content, article_type)
-    VALUES ${articles.map(() => "(?, ?, ?, ?, ?, ?, ?)").join(",")}
-`,
-  values: articles.flat(),
-});
-
 const saveHrefLinks = (arrObj) => {
   const values = arrObj
     .map((obj) => `(${obj.article_id}, '${obj.href}', '${obj.linktext}')`)
@@ -51,7 +43,6 @@ const getAllBlogs = () => ({
     AND DATE(created_at) != CURRENT_DATE 
     AND article_type NOT IN ('document')
   ORDER BY id ASC;
-  
   `,
 });
 
@@ -106,25 +97,6 @@ const updateQuery = (
   ],
 });
 
-const getAllBlogsWithNull = () => ({
-  text: `SELECT id, url 
-  FROM articles 
-  WHERE title IS NULL 
-    OR content IS NULL 
-    AND DATE(updated_at) != CURRENT_DATE 
-  ORDER BY id ASC;
-  
-  `,
-});
-
-const getAllDocument = `
-  SELECT id, url, content, country
-  FROM articles 
-  WHERE article_type != 'document' 
-  AND has_lab = true
-  AND DATE(updated_at) != CURRENT_DATE 
-  ORDER BY id ASC;
-  `;
 
 const updateDocumentRecord = `
       UPDATE articles
@@ -144,29 +116,28 @@ const getAllPublicaltions = `
 
 const recordSince = `
 SELECT 
-    id, 
-    url, 
+    a.id, 
+    a.url, 
     REPLACE(
-        COALESCE(content, all_html_content),
+        COALESCE(b.content, c.all_html_content),
         E'\n', ' '
     ) AS content,
-    country
-FROM articles 
+    a.iso3
+FROM articles a
+JOIN article_content b ON b.article_id = a.id 
+JOIN article_html_content c ON c.article_id = a.id
 WHERE created_at >= CURRENT_DATE - INTERVAL '6 day';
 `;
 
 module.exports = {
   checkUrlQuery,
   saveQuery,
-  saveAsArrayQuery,
   saveHrefLinks,
 
   getAllBlogs,
-  getAllBlogsWithNull,
   updateQuery,
 
   getDistinctUrls,
-  getAllDocument,
   updateDocumentRecord,
   getAllPublicaltions,
 

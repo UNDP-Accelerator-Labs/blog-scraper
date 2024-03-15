@@ -1,7 +1,7 @@
-const { getdata } = include("controllers/blog/data");
+const { getdata } = include("controllers/blog/api/data");
 const { DB } = include("db");
-const cleanup = require('./clean-up')
-const medium_posts = require('./medium')
+const cleanup = require('./scrapper/clean-up')
+const medium_posts = require('./blog_type/medium')
 
 exports.app = async (req, res) => {
   const data = await getdata(DB.blog, req, res);

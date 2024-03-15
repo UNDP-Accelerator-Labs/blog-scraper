@@ -1,5 +1,5 @@
-const { blogAggQuery, statsQuery } = require('./query')
-const { DB } = require('../../db')
+const { statsQuery } = require('./query')
+const { DB } = include('db/')
 
 exports.main = async kwargs => {
 	const conn = kwargs.connection ? kwargs.connection : DB.conn
@@ -8,9 +8,6 @@ exports.main = async kwargs => {
 
 	return conn.task(t => {
         const batch = []
-
-		batch.push(t.any(blogAggQuery).then(async (results) => results)
-        .catch(err => console.log(err)))
 
         batch.push(t.any(statsQuery(search?.trim(), country, type)).then(async (results) => results)
         .catch(err => console.log(err)))

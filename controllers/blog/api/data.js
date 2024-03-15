@@ -1,6 +1,6 @@
-const loadAggValues = include("controllers/blog/loadAgg");
-const searchBlogs = include("controllers/blog/searchBlogs");
-const filter = include("controllers/blog/filters");
+const loadAggValues = require("./loadAgg");
+const searchBlogs = require("./searchBlogs");
+const filter = require("./filters");
 
 exports.getdata = async (conn, req, res) => {
   let { page_content_limit, page } = req.params;
