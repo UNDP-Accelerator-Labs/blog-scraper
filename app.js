@@ -14,71 +14,26 @@ const cookieParser = require("cookie-parser");
 const cron = require("node-cron");
 const crypto = require("crypto");
 
-const { app_suite, app_base_host, app_suite_secret, csp_links } =
+const { app_suite, app_base_host, app_suite_secret, csp_config } =
   include("config/");
 const { DB } = include("db/");
 const { getVersionString } = include("middleware");
 const port = process.env.PORT || 3000;
 
-const { extractBlogUrl } = require("./controllers/blog/extract-url");
-const updateRecordsForDistinctCountries = require("./controllers/blog/updateRecordWithIso3");
-const updateDbRecord = require("./controllers/blog/updateBlog");
-const updateMissingUrl = require("./controllers/blog/updateMissingCountries");
-const updateDocument = require("./controllers/blog/updateDocumentRecord");
-const acclab_publications = require("./controllers/blog/acclabs");
+const { extractBlogUrl } = require("./controllers/blog/scrapper/extract-url");
+const updateDbRecord = require("./controllers/blog/scrapper/updateBlog");
+const acclab_publications = require("./controllers/blog/scrapper/acclabs");
 const verifyToken = include("/middleware/verifyJwt");
 const routes = include("routes/");
 const app = express();
-app.disable("x-powered-by");
 
+app.disable("x-powered-by");
 app.use(bodyParser.json());
 app.use((req, res, next) => {
   res.locals.nonce = crypto.randomBytes(32).toString("hex");
   next();
 });
-
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        "img-src": csp_links,
-        "script-src": csp_links.concat([
-          (req, res) => `'nonce-${res.locals.nonce}'`,
-          "sha256-NNiElek2Ktxo4OLn2zGTHHeUR6b91/P618EXWJXzl3s=",
-          "strict-dynamic",
-        ]),
-        "script-src-attr": [
-          "'self'",
-          "*.sdg-innovation-commons.org",
-          "sdg-innovation-commons.org",
-        ],
-        "style-src": csp_links,
-        "connect-src": csp_links,
-        "frame-src": [
-          "'self'",
-          "*.sdg-innovation-commons.org",
-          "sdg-innovation-commons.org",
-          "https://www.youtube.com/",
-          "https://youtube.com/",
-          "https://web.microsoftstream.com",
-        ],
-        "form-action": [
-          "'self'",
-          "*.sdg-innovation-commons.org",
-          "sdg-innovation-commons.org",
-        ],
-      },
-    },
-    referrerPolicy: {
-      policy: ["strict-origin-when-cross-origin", "same-origin"],
-    },
-    xPoweredBy: false,
-    strictTransportSecurity: {
-      maxAge: 123456,
-    },
-  })
-);
-
+app.use(helmet(csp_config));
 app.use(function (req, res, next) {
   res.setHeader("Access-Control-Allow-Origin", "same-origin");
   next();
@@ -145,10 +100,6 @@ app.post("/initialize", verifyToken, (req, res) => {
   res.send("The blog extract as started!");
 });
 
-app.post("/update-iso3-codes", verifyToken, (req, res) => {
-  updateRecordsForDistinctCountries();
-  res.send("ISO3 code update of all records started!");
-});
 
 app.post("/update-record", verifyToken, (req, res) => {
   const { startIndex, delimeter } = req.body;
@@ -163,15 +114,6 @@ app.post("/update-record", verifyToken, (req, res) => {
   res.send("Updates to articles records has started!");
 });
 
-app.post("/update-missing-countries", verifyToken, (req, res) => {
-  updateMissingUrl();
-  res.send("Updates to blogs with missing countries started!");
-});
-
-app.post("/update-document-records", verifyToken, (req, res) => {
-  updateDocument();
-  res.send("Updates to all records with type document started!");
-});
 
 app.post("/acclab-content", verifyToken, (req, res) => {
     acclab_publications();

@@ -1,18 +1,12 @@
 require("dotenv").config();
-const { firefoxOption, config } = include("/config");
-const { Builder, By } = require("selenium-webdriver");
-const firefox = require("selenium-webdriver/firefox");
+const setupWebDriver = require("../partial/webdriver");
+const { By } = require("selenium-webdriver");
 const { searchTerms, extractLanguageFromUrl } = include("/services");
 const { DB } = include("/db");
-const { checkUrlQuery, saveQuery } = require("./scrap-query");
-
-const extractAndSaveData = require("./saveToDb");
-const updateRecordWithIso3 = require("./updateRecordWithIso3");
-
-
+const { checkUrlQuery } = require("./scrap-query");
+const extractAndSaveData = require("./save");
 
 const searchForKeywords = async (url, driver) => {
-
   let keywords = searchTerms["en"];
   let lang = await extractLanguageFromUrl(url);
 
@@ -89,8 +83,7 @@ const searchForKeywords = async (url, driver) => {
     // After scrolling to the end, find all URLs in the 'a' elements
     try {
       urlElements = await driver.findElements(
-        By.xpath("//div[@class='search-results-item']//div//a"),
-
+        By.xpath("//div[@class='search-results-item']//div//a")
       );
     } catch (err) {
       urlElements = [];
@@ -129,11 +122,14 @@ const searchForKeywords = async (url, driver) => {
 };
 
 const extractBlogUrl = async (params) => {
-    //Start WebDriver
-    const driver = new Builder()
-    .forBrowser("firefox")
-    .setFirefoxOptions(new firefox.Options().headless())
-    .build();
+  // Setup WebDriver
+  let driver;
+  try {
+    driver = await setupWebDriver();
+  } catch (error) {
+    console.error("Error setting up WebDriver:", error);
+    return;
+  }
 
   const { startIndex, delimeter } = params || {};
 
@@ -178,7 +174,6 @@ const extractBlogUrl = async (params) => {
       await searchForKeywords(url, driver);
     }
 
-    updateRecordWithIso3();
   }
 
   await driver.quit();

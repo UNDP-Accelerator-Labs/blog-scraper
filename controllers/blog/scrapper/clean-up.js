@@ -13,9 +13,12 @@ const cleanup = async (conn, req, res) => {
     await conn.tx(async (t) => {
       const blogs = await t.any(
         `
-          SELECT id, url, title, country, raw_html, article_type, language, all_html_content
-          FROM articles
-          WHERE country != 'Accelerator Labs'
+          SELECT a.id, a.url, a.title, d.raw_html, a.article_type, a.language, c.html_content as all_html_content
+          FROM articles a
+          JOIN article_content b ON b.article_id = a.id 
+          JOIN article_html_content c ON c.article_id = a.id
+          JOIN raw_html d ON d.article_id = a.id
+          WHERE a.iso3 IS NULL
           ORDER BY id DESC
           LIMIT $1 OFFSET $2
         `,

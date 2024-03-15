@@ -1,22 +1,23 @@
 require("dotenv").config();
-const { Builder, By, until } = require("selenium-webdriver");
-const firefox = require("selenium-webdriver/firefox");
-const extractAndSaveData = require("./saveToDb");
-const { DB } = require("../../db");
-const { checkUrlQuery } = require("./scrap-query");
+const { By } = require("selenium-webdriver");
+const setupWebDriver = require("../partial/webdriver");
+const extractAndSaveData = require("../scrapper/save");
+const { DB } = include("db");
+const { checkUrlQuery } = require("../scrapper/scrap-query");
 
 const medium_posts = async () => {
   const baseurls = [
     "https://acclabs.medium.com/",
   ];
 
-  // Set up the WebDriver
-  let options = new firefox.Options();
-//   options.headless();
-  let driver = await new Builder()
-    .forBrowser("firefox")
-    .setFirefoxOptions(options)
-    .build();
+  // Setup WebDriver
+  let driver;
+  try {
+    driver = await setupWebDriver();
+  } catch (error) {
+    console.error("Error setting up WebDriver:", error);
+    return;
+  }
 
   await driver.manage().window().maximize();
 

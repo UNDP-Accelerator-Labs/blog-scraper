@@ -1,6 +1,6 @@
 require("dotenv").config();
-const { updateDocumentRecord, recordSince } = require("./scrap-query");
-const { DB } = include("/db");
+const { updateDocumentRecord, recordSince } = require("./scapper/scrap-query");
+const { DB } = include("db/");
 
 const { getDocumentMeta } = include('services/');
 
