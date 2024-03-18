@@ -5,6 +5,6 @@ if (!exports.cron) { exports.cron = {} }
 exports.api.blog = bg_scrap;
 exports.api.toolkit = tk_scrap;
 exports.api.cleanup = cleanup;
-exports.api.medium_posts = medium_posts;
 
+exports.cron.medium_posts = medium_posts;
 exports.cron.scrapper = scrapper;

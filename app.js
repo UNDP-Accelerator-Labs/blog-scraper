@@ -82,7 +82,7 @@ app.get("/version", (req, res) => {
 //DEFINE EXTERNAL API ENDPOINTS
 app.get("/blogs/:page_content_limit/:page", verifyToken, routes.api.blog);
 app.get("/blogs/cleanup", verifyToken, routes.api.cleanup);
-app.get("/blogs/medium", verifyToken, routes.api.medium_posts);
+app.get("/blogs/medium", verifyToken, routes.cron.medium_posts);
 app.get("/toolkit/scrap", verifyToken, routes.api.toolkit);
 
 
