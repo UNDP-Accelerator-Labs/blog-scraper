@@ -309,7 +309,6 @@ if (data.article_type === "document") {
      
          data.content = "";
          for (let i = 0; i < contentElements.length; i++) {
-            console.log('content 1 ', contentElements.length)
            const text = await contentElements[i].getText();
            data.content += text + "\n";
          }

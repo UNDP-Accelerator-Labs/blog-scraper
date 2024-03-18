@@ -5,7 +5,7 @@ const path = require("path");
 const setupWebDriver = async () => {
   let options = new firefox.Options();
   const downloadsFolder = path.join(__dirname, "../../../downloads");
-//   options.headless();
+  options.headless();
   options.setPreference("browser.download.folderList", 2);
   options.setPreference("browser.download.dir", downloadsFolder);
   return await new Builder()
