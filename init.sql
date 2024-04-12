@@ -82,3 +82,20 @@ CREATE TABLE IF NOT EXISTS raw_html (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE article_content
+ADD CONSTRAINT unique_article_content_id UNIQUE (article_id);
+
+ALTER TABLE article_html_content
+ADD CONSTRAINT unique_article_html_content_id UNIQUE (article_id);
+
+ALTER TABLE raw_html
+ADD CONSTRAINT unique_raw_html_id UNIQUE (article_id);
+
+ALTER TABLE nlp_fallback
+DROP CONSTRAINT nlp_article_id_fkey;
+
+ALTER TABLE nlp_fallback
+ADD CONSTRAINT nlp_article_id_fkey FOREIGN KEY (article_id)
+REFERENCES articles (id)
+ON DELETE CASCADE;

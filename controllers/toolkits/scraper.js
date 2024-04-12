@@ -8,7 +8,7 @@ const toolkit_list = [
     iso3: null,
     lat: null,
     lng: null,
-    tags: ['toolkit', 'NIE']
+    tags: ["toolkit", "NIE"],
   },
   {
     url: "https://undp-accelerator-labs.github.io/Financial-inclusion-toolkit/assets/lunr-feed.js",
@@ -16,7 +16,7 @@ const toolkit_list = [
     iso3: null,
     lat: null,
     lng: null,
-    tags: ['toolkit', 'Digital Financial Inclusion', 'DFI']
+    tags: ["toolkit", "Digital Financial Inclusion", "DFI"],
   },
   {
     url: "https://undp-accelerator-labs.github.io/Innovation-Toolkit-for-UNDP-Signature-Solutions/assets/lunr-feed.js",
@@ -24,7 +24,7 @@ const toolkit_list = [
     iso3: "LAC",
     lat: 37.0902,
     lng: 95.7129,
-    tags: ['toolkit', 'Signature Solution' ]
+    tags: ["toolkit", "Signature Solution"],
   },
 ];
 
@@ -60,82 +60,143 @@ exports.scrapper = async () => {
         const contentString = match[1].trim();
         try {
           let contentObject = eval(`(${contentString})`);
-          contentObject.content = contentObject?.content?.replace(/\n/g, " ") || null
+          contentObject.content =
+            contentObject?.content?.replace(/\n/g, " ") || null;
           if (
             contentObject &&
             typeof contentObject.id === "number" &&
             !isNaN(contentObject.id) &&
-            contentObject.content != null
+            contentObject.content != null &&
+            contentObject.title != "Contributors" &&
+            !contentObject.url.includes("/contributors/")
           ) {
             // Format the contentObject
-            const tagsArray = [...toolkitU.tags, ...(contentObject?.tags ? [contentObject.tags] : [])];
-            const all_html_content = contentObject.content + " " + tagsArray.join(', ') + " " + (contentObject?.sdg ?? '') + " " + (contentObject?.tags ?? '') + " " + (contentObject?.enablers ?? '') + " " + (contentObject?.signature_solutions ?? '') + " " + (contentObject?.rblac_priorities ?? '');
+            const tagsArray = [
+              ...toolkitU.tags,
+              ...(contentObject?.tags ? [contentObject.tags] : []),
+            ];
+            const all_html_content =
+              contentObject.content +
+              " " +
+              tagsArray.join(", ") +
+              " " +
+              (contentObject?.sdg ?? "") +
+              " " +
+              (contentObject?.tags ?? "") +
+              " " +
+              (contentObject?.enablers ?? "") +
+              " " +
+              (contentObject?.signature_solutions ?? "") +
+              " " +
+              (contentObject?.rblac_priorities ?? "");
 
             const formattedObject = {
-                country: toolkitU.country,
-                language: "en",
-                posted_date: new Date().toISOString().split("T")[0], 
-                article_type: "toolkit",
-                privilege: 1,
-                rights: 0,
-                iso3: toolkitU.iso3,
-                haslab: true,
-                lat: toolkitU.lat,
-                lng: toolkitU.lng,
-                ...contentObject,
-                tags: tagsArray,
-                all_html_content,
+              country: toolkitU.country,
+              language: "en",
+              posted_date: new Date().toISOString().split("T")[0],
+              article_type: "toolkit",
+              privilege: 1,
+              rights: 0,
+              iso3: toolkitU.iso3,
+              haslab: true,
+              lat: toolkitU.lat,
+              lng: toolkitU.lng,
+              ...contentObject,
+              tags: tagsArray,
+              all_html_content,
             };
 
             formattedObject.url = `${toolkitDomain}${formattedObject.url}`;
             matches.push(formattedObject);
 
             // Perform upsert using INSERT ... ON CONFLICT UPDATE
-            await DB.blog.none(
-              `
-                INSERT INTO public.articles (url, country, language, title, posted_date, content, article_type, iso3, has_lab, lat, lng, privilege, rights, tags, all_html_content)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
-                ON CONFLICT (url) DO UPDATE
+            await DB.blog
+              .tx(async (t) => {
+                const batch = [];
+
+                const record = await t.oneOrNone(
+                  `
+              INSERT INTO articles (url, language, title, posted_date, article_type, posted_date_str, relevance, iso3, has_lab, lat, lng, privilege, rights, tags)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+              ON CONFLICT (url) DO UPDATE
                 SET
-                  country = $2,
-                  title = $4,
-                  content = $6,
-                  article_type = $7,
+                  title = $3,
+                  article_type = $5,
                   iso3 = $8,
                   lat = $10,
-                  lng = $11,
-                  privilege = $12,
-                  rights = $13,
-                  tags = $14,
-                  has_lab = $9,
-                  all_html_content = $15
+                  lng = $11
               `,
-              [
-                formattedObject.url,
-                formattedObject.country,
-                formattedObject.language,
-                formattedObject.title,
-                formattedObject.posted_date,
-                formattedObject.content,
-                formattedObject.article_type,
-                formattedObject.iso3,
-                formattedObject.haslab,
-                formattedObject.lat,
-                formattedObject.lng,
-                formattedObject.privilege,
-                formattedObject.rights,
-                formattedObject.tags,
-                formattedObject.all_html_content,
-              ]
-            );
+                  [
+                    formattedObject.url,
+                    formattedObject.language,
+                    formattedObject.title,
+                    formattedObject.posted_date,
+                    formattedObject.article_type,
+                    formattedObject.posted_date,
+                    2,
+                    formattedObject.iso3,
+                    formattedObject.haslab,
+                    formattedObject.lat,
+                    formattedObject.lng,
+                    formattedObject.privilege,
+                    formattedObject.rights,
+                    formattedObject.tags,
+                  ]
+                );
+
+                batch.push(
+                  t.any(
+                    `
+                INSERT INTO article_content (article_id, content)
+                VALUES ($1, $2)
+                ON CONFLICT (article_id) DO UPDATE
+                SET
+                content = $2
+              `,
+                    [record?.id, formattedObject.content]
+                  )
+                );
+
+                batch.push(
+                  t.any(
+                    `
+                  INSERT INTO  article_html_content (article_id, html_content)
+                  VALUES ($1, $2)
+                  ON CONFLICT (article_id) DO UPDATE
+                  SET
+                  html_content = $2
+              `,
+                    [record?.id, formattedObject.all_html_content]
+                  )
+                );
+
+                batch.push(
+                  t.any(
+                    `
+                  INSERT INTO  raw_html (article_id, raw_html)
+                  VALUES ($1, $2)
+                  ON CONFLICT (article_id) DO UPDATE
+                  SET
+                  raw_html = $2
+                `,
+                    [record?.id, formattedObject.all_html_content]
+                  )
+                );
+
+                return t.batch(batch).catch((err) => console.log(err));
+              })
+              .then(() => console.log("Successfully saved."))
+              .catch((error) => {
+                console.error("Error saving content:", error);
+              });
           }
         } catch (error) {
-          console.error("Error parsing content:", error);
+          console.error("Error scraping content:", error);
         }
       }
     }
   } catch (error) {
-    console.error("Error scraping content:", error);
+    console.error("Error fetching content page:", error);
   }
 
   return matches;
