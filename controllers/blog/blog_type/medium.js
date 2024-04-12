@@ -43,8 +43,8 @@ const medium_posts = async () => {
     // Extract URLs of articles
     const articleElements = await driver.findElements(By.tagName('article'));
     for (const article of articleElements) {
-      const linkElement = await article.findElement(By.tagName('a'));
-      const url = await linkElement.getAttribute('href');
+      const linkElement = await article.findElement(By.css('div[role="link"]'));
+      const url = await linkElement.getAttribute('data-href');
       urls.push(url)
     }
 
@@ -53,7 +53,7 @@ const medium_posts = async () => {
         const res = await DB.blog
           .any(checkUrlQuery, [href])
           .catch((err) => console.log("Error occurred ", err));
-        
+        console.log('href ', href)
         if (!res.length) {
           await extractAndSaveData(href);
         } else console.log("Skipping... Record already exist.");
