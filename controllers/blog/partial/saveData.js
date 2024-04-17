@@ -65,7 +65,7 @@ const saveDataToDatabase = async (data, id) => {
               data.postedDate,
               data.article_type,
               data.postedDateStr,
-              data.iso3,
+              data.iso3 || null,
               "2"
             )
           )

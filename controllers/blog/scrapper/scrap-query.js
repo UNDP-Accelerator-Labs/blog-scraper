@@ -67,8 +67,8 @@ const updateQuery = (
   postedDate,
   article_type,
   posted_date_str,
-  relevance,
-  iso3
+  iso3,
+  relevance
 ) => ({
   text: `
       UPDATE articles
@@ -80,7 +80,7 @@ const updateQuery = (
         posted_date_str = $7, 
         updated_at = now(),
         relevance = $8,
-        iso3 = $9,
+        iso3 = $9
       WHERE id = $1
       RETURNING *
   `,
