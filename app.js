@@ -182,7 +182,7 @@ cron.schedule("0 0 1,15 * *", async () => {
 });
 
 // Create the cron job to update acclab medium content weekly
-cron.schedule("0 * * * 7", async () => {
+cron.schedule("0 * * * 4", async () => {
   try {
     routes.cron.medium_posts();
     console.log("Medium Scrapper started successfully.");
@@ -191,7 +191,7 @@ cron.schedule("0 * * * 7", async () => {
   }
 });
 
-cron.schedule("0 23 * * 7", async () => {
+cron.schedule("0 * * * 5", async () => {
   try {
     acclab_publications();
     console.log("Official webpage Scrapper started successfully.");
