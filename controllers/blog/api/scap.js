@@ -19,6 +19,7 @@ const getWebContent = async (req, res) => {
     const data = await extractDataFromUrl(driver, url, true);
 
     if (embed_data) {
+        //TODO: INTEGRATE EMBED NLP API
       // Save data to database
       await saveDataToDatabase(data);
     }
