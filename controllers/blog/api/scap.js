@@ -31,6 +31,7 @@ const getWebContent = async (req, res) => {
     // Quit WebDriver
     if (driver) {
       driver.quit();
+      console.log('webdrive quit successfully.')
     }
   }
 };
