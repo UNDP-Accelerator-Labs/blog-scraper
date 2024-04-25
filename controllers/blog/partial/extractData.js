@@ -3,13 +3,14 @@ const {
   extractLanguageFromUrl,
   checkSearchTerm,
   getDocumentMeta,
+  article_types
 } = include("services/");
 const executePythonScriptAndGetMetadata = require("./executePython");
 const { By } = require("selenium-webdriver");
 const { config } = include("config/");
 const cheerio = require("cheerio");
 
-const extractDataFromUrl = async (driver, url) => {
+const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck=false) => {
   let data = {
     url,
     articleTitle: null,
@@ -100,48 +101,6 @@ const extractDataFromUrl = async (driver, url) => {
         data.postedDate = isNaN(new Date(data.postedDateStr))
           ? null
           : new Date(data.postedDateStr);
-
-        const contentElements = await driver.findElements(
-          By.css(config["content.element.project_page.css_selector"])
-        );
-
-        const archorTags = await driver.findElements(
-          By.css(config["content_url_list.elements.project_page.css_selector"])
-        );
-
-        data.content = "";
-        for (let i = 0; i < contentElements.length; i++) {
-          const hasFeaturedClass = await contentElements[i]
-            .getAttribute("class")
-            .then((classes) => classes.includes("featured-stories"));
-          if (!hasFeaturedClass) {
-            const text = await contentElements[i].getText();
-            data.content += text + "\n";
-          }
-        }
-
-        //extract href link and text in a blog if it exist
-        for (let i = 0; i < archorTags?.length; i++) {
-          const hasFeaturedClass = await archorTags[i]
-            .getAttribute("class")
-            .then((classes) => classes.includes("featured-stories"));
-          if (!hasFeaturedClass) {
-            const linktext = await archorTags[i].getText();
-
-            try {
-              href = await archorTags[i].getAttribute(
-                config["content_url.element.project_page.attribute"]
-              );
-            } catch (err) {
-              href = "";
-            }
-
-            hrefObj.push({
-              linktext,
-              href,
-            });
-          }
-        }
       } catch (error) {
         console.error("Error extracting project metadata:", error);
       }
@@ -163,28 +122,6 @@ const extractDataFromUrl = async (driver, url) => {
         data.postedDate = isNaN(new Date(data.postedDateStr))
           ? null
           : new Date(data.postedDateStr);
-
-        data.country =
-          (await driver
-            .findElement(
-              By.css(config["country_name.element.publication.css_selector"])
-            )
-            .getText()) || null;
-
-        const contentElements = await driver.findElements(
-          By.css(config["content.elements.publication.css_selector"])
-        );
-
-        data.content = "";
-        for (let i = 0; i < contentElements.length; i++) {
-          const hasFeaturedClass = await contentElements[i]
-            .getAttribute("class")
-            .then((classes) => classes.includes("featured-stories"));
-          if (!hasFeaturedClass) {
-            const text = await contentElements[i].getText();
-            data.content += text + "\n";
-          }
-        }
 
         let exe_file = false;
         try {
@@ -316,7 +253,7 @@ const extractDataFromUrl = async (driver, url) => {
         console.error("Error extracting Medium post metadata:", error);
       }
     } // Extract article metadata based on type
-    else if (config.article_types.filter((p) => url.includes(p)).length > 0) {
+    else if (article_types.filter((p) => url.includes(p)).length > 0) {
       try {
         data.articleTitle =
           (await driver
@@ -333,53 +270,6 @@ const extractDataFromUrl = async (driver, url) => {
         data.postedDate = isNaN(new Date(data.postedDateStr))
           ? null
           : new Date(data.postedDateStr);
-
-        data.country =
-          (await driver
-            .findElement(
-              By.css(config["country_name.element.blog.css_selector"])
-            )
-            .getText()) || null;
-
-        const contentElements =
-          (await driver.findElements(
-            By.css(config["content.elements.blog.css_selector"])
-          )) || [];
-
-        const archorTags =
-          (await driver.findElements(
-            By.css(config["content_url.elements.blog.css_selector"])
-          )) || [];
-
-        // Extract content of a blog
-        data.content = "";
-        for (let i = 0; i < contentElements.length; i++) {
-          const hasFeaturedClass = await contentElements[i]
-            .getAttribute("class")
-            .then((classes) => classes.includes("featured-stories"));
-          if (!hasFeaturedClass) {
-            const text = await contentElements[i].getText();
-            data.content += text + "\n";
-          }
-        }
-
-        // Extract href links and text in a blog if they exist
-        for (let i = 0; i < archorTags?.length; i++) {
-          const linktext = await archorTags[i].getText();
-          let href;
-          try {
-            href = await archorTags[i].getAttribute(
-              config["content_url.element.project_page.attribute"]
-            );
-          } catch (err) {
-            href = "";
-          }
-
-          data.hrefObj.push({
-            linktext,
-            href,
-          });
-        }
       } catch (error) {
         console.error("Error extracting blog metadata:", error);
       }
@@ -398,41 +288,33 @@ const extractDataFromUrl = async (driver, url) => {
 
         data.postedDateStr = null;
         data.postedDate = null;
-
-        data.country =
-          (await driver
-            .findElement(
-              By.css(config["country_name.element.blog.css_selector"])
-            )
-            .getText()) || null;
-
-        const archorTags = await driver.findElements(By.css("a"));
-
-        data.content = null;
-
-        // Extract href links and text in a blog if they exist
-        for (let i = 0; i < archorTags?.length; i++) {
-          const linktext = await archorTags[i].getText();
-          try {
-            href = await archorTags[i].getAttribute(
-              config["content_url.element.project_page.attribute"]
-            );
-          } catch (err) {
-            href = "";
-          }
-
-          data.hrefObj.push({
-            linktext,
-            href,
-          });
-        }
       } catch (error) {
         console.error("Error extracting default metadata:", error);
       }
     }
 
+    if (data.content == null) {
+      const $ = cheerio.load(data.raw_html);
+      $(
+        "section.featured-stories.recent-news.featured-card-container"
+      ).replaceWith("");
+      $("header").replaceWith("");
+      $("footer").replaceWith("");
+      $("script").replaceWith("");
+      $("style").replaceWith("");
+      $("meta").replaceWith("");
+
+      const content = $("body").text();
+      data.html_content = content;
+      data.content = content;
+    }
+
     // Check relevance of document content
-    if (!checkSearchTerm(data.content).length || !checkSearchTerm(data.html_content).length) {
+    if (
+      (!checkSearchTerm(data.content).length ||
+      !checkSearchTerm(data.html_content).length)
+      && !ignoreRelevanceCheck
+    ) {
       return null;
     }
 
@@ -440,17 +322,6 @@ const extractDataFromUrl = async (driver, url) => {
     const [lang, location, meta] = await getDocumentMeta(data.html_content);
     data.iso3 = location?.location?.country;
     data.language = lang?.lang;
-
-    const $ = cheerio.load(data.raw_html);
-    $(
-      "section.featured-stories.recent-news.featured-card-container"
-    ).replaceWith("");
-    $("header").replaceWith("");
-    $("footer").replaceWith("");
-    $("script").replaceWith("");
-    $("style").replaceWith("");
-
-    data.html_content = $("body").text();
 
     return data;
   } catch (error) {

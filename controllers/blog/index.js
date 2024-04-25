@@ -17,3 +17,5 @@ exports.medium_posts = async (req, res) => {
   medium_posts(DB.blog, req, res);
   res.status(200).send('Medium scrapping has started.')
 };
+
+exports.getWebContent = require('../blog/api/scap')
