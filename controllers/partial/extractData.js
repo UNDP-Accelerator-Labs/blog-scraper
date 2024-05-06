@@ -166,7 +166,7 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck=false) => {
         if (exe_file) {
           await executePythonScriptAndGetMetadata().then((metadata) => {
             if (metadata) {
-              data.content += metadata?.content + "\n";
+              data.content += `${metadata?.content} || ''` + "\n";
               data.postedDate = isNaN(new Date(metadata?.created))
                 ? null
                 : new Date(metadata?.created);
