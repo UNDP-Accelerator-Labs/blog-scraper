@@ -105,7 +105,7 @@ exports.getDocumentMeta = async (content) => {
   };
 
   try {
-    const response = await fetch(process.env.NLP_API_URL, {
+    const response = await fetch(`${process.env.NLP_API_URL}/api/extract`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -157,4 +157,39 @@ exports.article_types = [
   'news',
   'press-releases',
   'publications'
-]
+];
+
+
+exports.getDate = async (_kwarq) => {
+  const { raw_html, language, posted_date_str } = _kwarq
+  let body = {
+    token: process.env.API_TOKEN,
+    raw_html, language, posted_date_str
+  };
+
+  try {
+    const response = await fetch(`${process.env.NLP_API_URL}/api/date`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      console.error(
+        "Network response was not ok: ",
+        response.statusText,
+        errorMessage
+      );
+      throw new Error("Network response was not ok ");
+    }
+
+    const { date } = await response.json();
+    return date;
+  } catch (error) {
+    console.error("Error:", error);
+    return null
+  }
+};

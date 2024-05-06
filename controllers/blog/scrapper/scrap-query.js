@@ -9,11 +9,12 @@ const saveQuery = (
   article_type,
   posted_date_str,
   relevance,
-  iso3
+  iso3,
+  parsed_date
 ) => ({
   text: `
-    INSERT INTO articles (url, language, title, posted_date, article_type, posted_date_str, relevance, iso3)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    INSERT INTO articles (url, language, title, posted_date, article_type, posted_date_str, relevance, iso3, parsed_date)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     RETURNING *
 `,
   values: [
@@ -25,6 +26,7 @@ const saveQuery = (
     posted_date_str,
     relevance,
     iso3,
+    parsed_date
   ],
 });
 

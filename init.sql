@@ -99,3 +99,5 @@ ALTER TABLE nlp_fallback
 ADD CONSTRAINT nlp_article_id_fkey FOREIGN KEY (article_id)
 REFERENCES articles (id)
 ON DELETE CASCADE;
+
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS parsed_date DATE;

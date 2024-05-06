@@ -3,6 +3,7 @@ const {
   cleanup,
   medium_posts,
   getWebContent,
+  ce_rave: get_ce_rave
 } = require("./blog");
 const { tk_scrap, scrapper } = require("./toolkits");
 
@@ -16,4 +17,5 @@ exports.medium_posts = medium_posts;
 exports.getWebContent = getWebContent;
 
 exports.extract_ce = require('./ce_rave/extract').extract_ce
+exports.get_ce_rave = get_ce_rave;
 

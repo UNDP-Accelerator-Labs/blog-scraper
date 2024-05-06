@@ -87,6 +87,9 @@ app.get("/blogs/medium", verifyToken, routes.cron.medium_posts);
 app.get("/toolkit/scrap", verifyToken, routes.api.toolkit);
 app.post("/get-webpage-content", verifyToken, routes.api.getWebContent);
 
+app.get("/rave/circular-economy/:page_content_limit/:page", verifyToken, routes.api.get_ce_rave);
+
+
 //DEFINE SROUTES TO INITIATE SCRAPPER
 app.post("/initialize", verifyToken, (req, res) => {
   const { startIndex, delimeter } = req.body;

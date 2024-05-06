@@ -3,7 +3,8 @@ const {
   extractLanguageFromUrl,
   checkSearchTerm,
   getDocumentMeta,
-  article_types
+  article_types,
+  getDate
 } = include("services/");
 const executePythonScriptAndGetMetadata = require("./executePython");
 const { By } = require("selenium-webdriver");
@@ -23,6 +24,7 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck=false) => {
     raw_html: null,
     languageName: null,
     iso3: null,
+    parsed_date: null
   };
 
   try {
@@ -309,6 +311,7 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck=false) => {
     const [lang, location, meta] = await getDocumentMeta(data.html_content);
     data.iso3 = location?.location?.country;
     data.language = lang?.lang;
+    // data.parsed_date = await getDate(data.raw_html);
 
     return data;
   } catch (error) {

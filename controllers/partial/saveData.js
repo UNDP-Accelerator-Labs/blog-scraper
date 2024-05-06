@@ -23,7 +23,8 @@ const saveDataToDatabase = async (_kwarq) => {
             data.article_type,
             data.postedDateStr,
             "2",
-            data.iso3
+            data.iso3,
+            data.parsed_date
           )
         );
         batch.push(

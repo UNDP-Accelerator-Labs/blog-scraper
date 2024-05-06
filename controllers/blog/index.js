@@ -21,3 +21,9 @@ exports.medium_posts = async (req, res) => {
 };
 
 exports.getWebContent = require('../blog/api/scap')
+
+exports.ce_rave = async (req, res) => {
+  const data = await getdata(DB.ce_rave, req, res);
+  if (data) return res.status(200).json(data);
+  else return res.status(500).json("Error occurred...");
+};
