@@ -1,8 +1,9 @@
-const setupWebDriver = require("../partial/webdriver");
-const extractDataFromUrl = require("../partial/extractData");
-const saveDataToDatabase = require("../partial/saveData");
+const setupWebDriver = require("../../partial/webdriver");
+const extractDataFromUrl = require("../../partial/extractData");
+const saveDataToDatabase = require("../../partial/saveData");
 
-const extractAndSaveData = async (url, id = null) => {
+const extractAndSaveData = async (_kwarq) => {
+  const { url, id, defaultDB, ignoreRelevanceCheck } = _kwarq;
   // Setup WebDriver
   let driver;
   try {
@@ -14,10 +15,10 @@ const extractAndSaveData = async (url, id = null) => {
 
   try {
     // Extract data from URL
-    const data = await extractDataFromUrl(driver, url);
+    const data = await extractDataFromUrl(driver, url, ignoreRelevanceCheck);
 
     // Save data to database
-    await saveDataToDatabase(data, id);
+    await saveDataToDatabase({ data, id, defaultDB });
   } catch (error) {
     console.error("Error extracting and saving data:", error);
   } finally {

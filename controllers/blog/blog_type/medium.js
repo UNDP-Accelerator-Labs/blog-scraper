@@ -1,6 +1,6 @@
 require("dotenv").config();
 const { By } = require("selenium-webdriver");
-const setupWebDriver = require("../partial/webdriver");
+const setupWebDriver = require("../../partial/webdriver");
 const extractAndSaveData = require("../scrapper/save");
 const { DB } = include("db");
 const { checkUrlQuery } = require("../scrapper/scrap-query");
@@ -55,7 +55,7 @@ const medium_posts = async () => {
           .catch((err) => console.log("Error occurred ", err));
         console.log('href ', href)
         if (!res.length) {
-          await extractAndSaveData(href);
+          await extractAndSaveData({ url: href });
         } else console.log("Skipping... Record already exist.");
       }
 

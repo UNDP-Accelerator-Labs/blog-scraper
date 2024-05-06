@@ -1,13 +1,16 @@
 require("dotenv").config();
-const setupWebDriver = require("../partial/webdriver");
+const setupWebDriver = require("../../partial/webdriver");
 const { By } = require("selenium-webdriver");
 const { searchTerms, extractLanguageFromUrl } = include("/services");
 const { DB } = include("/db");
 const { checkUrlQuery } = require("./scrap-query");
 const extractAndSaveData = require("./save");
+const { config } = include('/config');
 
-const searchForKeywords = async (url, driver) => {
-  let keywords = searchTerms["en"];
+const searchForKeywords = async (_kwarq) => {
+  const { url, driver, defaultTerms, defaultDB, ignoreRelevanceCheck } = _kwarq;
+
+  let keywords = defaultTerms ?? searchTerms["en"];
   let lang = await extractLanguageFromUrl(url);
 
   let countryName = null;
@@ -16,9 +19,7 @@ const searchForKeywords = async (url, driver) => {
     urlElements,
     globeButton,
     typeSeachText = null;
-  let resultList = [];
-  let list,
-    newurls = [];
+  newurls = [];
 
   if (lang !== null) {
     keywords = (await searchTerms[lang]) || searchTerms["en"];
@@ -95,8 +96,9 @@ const searchForKeywords = async (url, driver) => {
     }
 
     try {
+      let db = defaultDB ?? DB.blog;
       for (let k = 0; k < newurls.length; k++) {
-        const res = await DB.blog
+        const res = await db
           .any(checkUrlQuery, [newurls[k]])
           .catch((err) => console.log("Error occurred ", err));
 
@@ -113,7 +115,11 @@ const searchForKeywords = async (url, driver) => {
         }
 
         if (!res.length) {
-          await extractAndSaveData(newurls[k], null, countryName);
+          await extractAndSaveData({
+            url: newurls[k],
+            defaultDB,
+            ignoreRelevanceCheck
+          });
         } else console.log("Skipping... Record already exist.");
       }
     } catch (error) {}
@@ -171,9 +177,8 @@ const extractBlogUrl = async (params) => {
       const url = validUrls[k];
       // Logging needed for debugging
       console.log("This is running for", k + 1, "out of ", end);
-      await searchForKeywords(url, driver);
+      await searchForKeywords({ url, driver });
     }
-
   }
 
   await driver.quit();

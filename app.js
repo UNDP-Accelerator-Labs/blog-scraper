@@ -23,6 +23,7 @@ const port = process.env.PORT || 3000;
 const { extractBlogUrl } = require("./controllers/blog/scrapper/extract-url");
 const updateDbRecord = require("./controllers/blog/scrapper/updateBlog");
 const acclab_publications = require("./controllers/blog/scrapper/acclabs");
+const { extract_ce } = require("./controllers");
 const verifyToken = include("/middleware/verifyJwt");
 const routes = include("routes/");
 const app = express();
@@ -86,7 +87,6 @@ app.get("/blogs/medium", verifyToken, routes.cron.medium_posts);
 app.get("/toolkit/scrap", verifyToken, routes.api.toolkit);
 app.post("/get-webpage-content", verifyToken, routes.api.getWebContent);
 
-
 //DEFINE SROUTES TO INITIATE SCRAPPER
 app.post("/initialize", verifyToken, (req, res) => {
   const { startIndex, delimeter } = req.body;
@@ -101,7 +101,6 @@ app.post("/initialize", verifyToken, (req, res) => {
   res.send("The blog extract as started!");
 });
 
-
 app.post("/update-record", verifyToken, (req, res) => {
   const { startIndex, delimeter } = req.body;
   if (
@@ -115,9 +114,21 @@ app.post("/update-record", verifyToken, (req, res) => {
   res.send("Updates to articles records has started!");
 });
 
+app.post("/scrap/rave/circular-economy", verifyToken, (req, res) => {
+  const { startIndex, delimeter } = req.body;
+  if (
+    typeof startIndex === "number" &&
+    typeof delimeter === "number" &&
+    startIndex < delimeter
+  ) {
+    extract_ce({ startIndex, delimeter });
+  } else extract_ce();
+
+  res.send("Rave circular economy scrapping has started!");
+});
 
 app.post("/acclab-content", verifyToken, (req, res) => {
-    acclab_publications();
+  acclab_publications();
   res.send("Acclab publications scrapping has started!");
 });
 
@@ -168,8 +179,6 @@ cron.schedule("0 6 * * 7", () => {
 cron.schedule("0 13 * * 7", () => {
   extractBlogUrl({ startIndex: 156, delimeter: 183 });
 });
-
-
 
 // Create the cron job to update toolkit content twice a month
 cron.schedule("0 0 1,15 * *", async () => {

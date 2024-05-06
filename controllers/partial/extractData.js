@@ -54,21 +54,7 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck=false) => {
             pdfContent?.text?.substring(0, 100) ||
             null;
           data.country = countryName;
-        } else if (
-          url.includes(".docx") ||
-          url.includes(".doc") ||
-          url.includes(".odt") ||
-          url.includes(".rtf") ||
-          url.includes(".txt") ||
-          url.includes("docs.goo")
-        ) {
-          // Extract DOCX content and metadata
-          // const docxContent = await getWordDocumentMetadataFromUrl(url);
-          // data.content = docxContent?.text || '';
-          // data.postedDate = docxContent?.metadata?.creationDate || new Date();
-          // data.postedDateStr = docxContent?.metadata?.creationDate || '';
-          // data.articleTitle = docxContent?.metadata?.title ||  '';
-        }
+        } 
       } catch (error) {
         console.error("Error extracting document metadata:", error);
       }
@@ -303,6 +289,7 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck=false) => {
       $("script").replaceWith("");
       $("style").replaceWith("");
       $("meta").replaceWith("");
+      $("iframe").replaceWith("");
 
       const content = $("body").text();
       data.html_content = content;

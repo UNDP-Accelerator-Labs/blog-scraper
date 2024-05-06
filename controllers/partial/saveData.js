@@ -1,13 +1,15 @@
 const { DB } = include("db/");
-const { saveQuery, updateQuery } = require("../scrapper/scrap-query");
+const { saveQuery, updateQuery } = require("../blog/scrapper/scrap-query");
 
-const saveDataToDatabase = async (data, id) => {
+const saveDataToDatabase = async (_kwarq) => {
+  const { data, id, defaultDB } = _kwarq;
   if (!data)
     return console.log(
       "Skipping saving record. Content is not relevant to Accelerator lab."
     );
   try {
-    await DB.blog.tx(async (t) => {
+    let db = defaultDB ?? DB.blog;
+    await db.tx(async (t) => {
       const batch = [];
 
       if (id == null || isNaN(id)) {

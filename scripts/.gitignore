@@ -4,5 +4,6 @@ package-lock.json
 node_modules/
 scripts/
 scripts/myenv/
+scripts/.*
 myenv/
 *.sublime-*

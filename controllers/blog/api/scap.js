@@ -1,6 +1,6 @@
-const setupWebDriver = require("../partial/webdriver");
-const extractDataFromUrl = require("../partial/extractData");
-const saveDataToDatabase = require("../partial/saveData");
+const setupWebDriver = require("../../partial/webdriver");
+const extractDataFromUrl = require("../../partial/extractData");
+const saveDataToDatabase = require("../../partial/saveData");
 
 const getWebContent = async (req, res) => {
   const { url, embed_data } = req.body;
@@ -21,7 +21,7 @@ const getWebContent = async (req, res) => {
     if (embed_data) {
         //TODO: INTEGRATE EMBED NLP API
       // Save data to database
-      await saveDataToDatabase(data);
+      await saveDataToDatabase({data});
     }
     res.status(200).json(data);
   } catch (error) {

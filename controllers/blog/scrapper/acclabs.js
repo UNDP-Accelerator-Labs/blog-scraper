@@ -3,7 +3,7 @@ const { Builder, By, until } = require("selenium-webdriver");
 const extractAndSaveData = require("./save");
 const { DB } = include("db");
 const { checkUrlQuery } = require("./scrap-query");
-const setupWebDriver = require("../partial/webdriver");
+const setupWebDriver = require("../../partial/webdriver");
 
 const acclab_publications = async () => {
   const baseurls = [
@@ -96,7 +96,7 @@ await driver.manage().window().maximize();
           .catch((err) => console.log("Error occurred ", err));
         
         if (!res.length) {
-          await extractAndSaveData(href);
+          await extractAndSaveData({ url : href });
         } else console.log("Skipping... Record already exist.");
       }
     } catch (error) {

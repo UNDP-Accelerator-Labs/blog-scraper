@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS articles (
     deleted_at TIMESTAMP,
     deleted BOOLEAN DEFAULT FALSE
 
-)
+);
 
  CREATE TABLE IF NOT EXISTS public.links (
         id SERIAL PRIMARY KEY,
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS articles (
         REFERENCES articles (id) MATCH SIMPLE
         ON UPDATE CASCADE
         ON DELETE CASCADE
-)
+);
 
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS raw_html TEXT;
 
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS public.nlp_fallback (
     REFERENCES articles (id) MATCH SIMPLE
 );
 
-create table iso_languages (Name VARCHAR(99),Set1 VARCHAR (2),Set2T VARCHAR(3),Set2B VARCHAR (3),Set3 VARCHAR(9),Notes VARCHAR(199));
+CREATE TABLE iso_languages (Name VARCHAR(99),Set1 VARCHAR (2),Set2T VARCHAR(3),Set2B VARCHAR (3),Set3 VARCHAR(9),Notes VARCHAR(199));
 
 CREATE TABLE IF NOT EXISTS article_content (
     id SERIAL PRIMARY KEY,

@@ -14,3 +14,6 @@ exports.cleanup = cleanup;
 exports.medium_posts = medium_posts;
 
 exports.getWebContent = getWebContent;
+
+exports.extract_ce = require('./ce_rave/extract').extract_ce
+
