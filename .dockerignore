@@ -1,2 +1,10 @@
-.*
+.env
+
+.ipynb_checkpoints/
+
+scripts/myenv/*
 scripts/.*
+myenv/
+scripts/output/*
+scripts/local.*
+blogs_live.sql
