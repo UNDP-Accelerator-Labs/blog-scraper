@@ -155,63 +155,97 @@ to ensure every page is checked.
 It runs every Friday from 7 PM at 7-hour intervals.
 */
 
-cron.schedule("0 19 * * 5", () => {
-  extractBlogUrl({ startIndex: 0, delimeter: 25 });
-});
+if(process.env.APP_ID === 'ce_rave'){
+  cron.schedule("0 * * * 4", () => {
+    extract_ce({ startIndex: 0, delimeter: 25 });
+  });
+  
+  cron.schedule("0 * * * 5", () => {
+    extract_ce({ startIndex: 26, delimeter: 51 });
+  });
+  
+  cron.schedule("0 * * * 6", () => {
+    extract_ce({ startIndex: 52, delimeter: 77 });
+  });
+  
+  cron.schedule("0 * * * 7", () => {
+    extract_ce({ startIndex: 78, delimeter: 103 });
+  });
+  
+  cron.schedule("0 * * * 1", () => {
+    extract_ce({ startIndex: 104, delimeter: 129 });
+  });
+  
+  cron.schedule("0 * * * 2", () => {
+    extract_ce({ startIndex: 130, delimeter: 155 });
+  });
+  
+  cron.schedule("0 * * * 3", () => {
+    extract_ce({ startIndex: 156, delimeter: 183 });
+  });
 
-cron.schedule("0 2 * * 6", () => {
-  extractBlogUrl({ startIndex: 26, delimeter: 51 });
-});
+} else{
 
-cron.schedule("0 9 * * 6", () => {
-  extractBlogUrl({ startIndex: 52, delimeter: 77 });
-});
+  cron.schedule("0 19 * * 5", () => {
+    extractBlogUrl({ startIndex: 0, delimeter: 25 });
+  });
+  
+  cron.schedule("0 2 * * 6", () => {
+    extractBlogUrl({ startIndex: 26, delimeter: 51 });
+  });
+  
+  cron.schedule("0 9 * * 6", () => {
+    extractBlogUrl({ startIndex: 52, delimeter: 77 });
+  });
+  
+  cron.schedule("0 16 * * 6", () => {
+    extractBlogUrl({ startIndex: 78, delimeter: 103 });
+  });
+  
+  cron.schedule("0 23 * * 6", () => {
+    extractBlogUrl({ startIndex: 104, delimeter: 129 });
+  });
+  
+  cron.schedule("0 6 * * 7", () => {
+    extractBlogUrl({ startIndex: 130, delimeter: 155 });
+  });
+  
+  cron.schedule("0 13 * * 7", () => {
+    extractBlogUrl({ startIndex: 156, delimeter: 183 });
+  });
+  
+  // Create the cron job to update toolkit content twice a month
+  cron.schedule("0 0 1,15 * *", async () => {
+    console.log("Running scrapper...");
+    try {
+      routes.cron.scrapper();
+      console.log("Scrapper started successfully.");
+    } catch (error) {
+      console.error("Error occurred while running scrapper:", error);
+    }
+  });
+  
+  // Create the cron job to update acclab medium content weekly
+  cron.schedule("0 * * * 4", async () => {
+    try {
+      routes.cron.medium_posts();
+      console.log("Medium Scrapper started successfully.");
+    } catch (error) {
+      console.error("Error occurred while running Medium scrapper:", error);
+    }
+  });
+  
+  cron.schedule("0 * * * 5", async () => {
+    try {
+      acclab_publications();
+      console.log("Official webpage Scrapper started successfully.");
+    } catch (error) {
+      console.error("Error occurred while running Medium scrapper:", error);
+    }
+  });
+}
 
-cron.schedule("0 16 * * 6", () => {
-  extractBlogUrl({ startIndex: 78, delimeter: 103 });
-});
 
-cron.schedule("0 23 * * 6", () => {
-  extractBlogUrl({ startIndex: 104, delimeter: 129 });
-});
-
-cron.schedule("0 6 * * 7", () => {
-  extractBlogUrl({ startIndex: 130, delimeter: 155 });
-});
-
-cron.schedule("0 13 * * 7", () => {
-  extractBlogUrl({ startIndex: 156, delimeter: 183 });
-});
-
-// Create the cron job to update toolkit content twice a month
-cron.schedule("0 0 1,15 * *", async () => {
-  console.log("Running scrapper...");
-  try {
-    routes.cron.scrapper();
-    console.log("Scrapper started successfully.");
-  } catch (error) {
-    console.error("Error occurred while running scrapper:", error);
-  }
-});
-
-// Create the cron job to update acclab medium content weekly
-cron.schedule("0 * * * 4", async () => {
-  try {
-    routes.cron.medium_posts();
-    console.log("Medium Scrapper started successfully.");
-  } catch (error) {
-    console.error("Error occurred while running Medium scrapper:", error);
-  }
-});
-
-cron.schedule("0 * * * 5", async () => {
-  try {
-    acclab_publications();
-    console.log("Official webpage Scrapper started successfully.");
-  } catch (error) {
-    console.error("Error occurred while running Medium scrapper:", error);
-  }
-});
 
 app.listen(port, () => {
   console.log(`app listening on port ${port}`);

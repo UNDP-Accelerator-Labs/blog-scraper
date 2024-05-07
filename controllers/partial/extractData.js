@@ -281,7 +281,7 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck=false) => {
       }
     }
 
-    if (data.content == null) {
+    if (data.content == null || !data.content.length) {
       const $ = cheerio.load(data.raw_html);
       $(
         "section.featured-stories.recent-news.featured-card-container"
@@ -308,7 +308,7 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck=false) => {
     }
 
     // Extract document meta
-    const [lang, location, meta] = await getDocumentMeta(data.html_content);
+    const [lang, location, meta] = await getDocumentMeta(data.content);
     data.iso3 = location?.location?.country;
     data.language = lang?.lang;
     // data.parsed_date = await getDate(data.raw_html);
