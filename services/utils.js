@@ -2,6 +2,9 @@ const { spawn } = require('child_process');
 const { config } = require('../config')
 const fetch = require("node-fetch");
 
+
+const { NLP_WRITE_TOKEN, API_TOKEN, NODE_ENV, NLP_API_URL } = process.env;
+
 exports.evaluateArticleType = async (url) => {
     if(url.includes('news')){
         return 'news'
@@ -100,12 +103,12 @@ exports.extractPdfContent = async (url) => {
 exports.getDocumentMeta = async (content) => {
   let body = {
     modules: [{ name: "location" }, { name: "language" }],
-    token: process.env.API_TOKEN,
+    token: API_TOKEN,
     input: content,
   };
 
   try {
-    const response = await fetch(`${process.env.NLP_API_URL}/api/extract`, {
+    const response = await fetch(`${NLP_API_URL}/api/extract`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -163,12 +166,12 @@ exports.article_types = [
 exports.getDate = async (_kwarq) => {
   const { raw_html, language, posted_date_str } = _kwarq
   let body = {
-    token: process.env.API_TOKEN,
+    token: API_TOKEN,
     raw_html, language, posted_date_str
   };
 
   try {
-    const response = await fetch(`${process.env.NLP_API_URL}/api/date`, {
+    const response = await fetch(`${NLP_API_URL}/api/date`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -191,5 +194,38 @@ exports.getDate = async (_kwarq) => {
   } catch (error) {
     console.error("Error:", error);
     return null
+  }
+};
+
+
+exports.embedDocument = async (id) => {
+  let body = {
+    token: API_TOKEN,
+    write_access: NLP_WRITE_TOKEN,
+    db: NODE_ENV === 'production' ? "main" : "test",
+    main_id: `blog:${id}`
+  };
+
+  try {
+    const response = await fetch(`${NLP_API_URL}/embed/add`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      return console.error(
+        "Network response was not ok: ",
+        response.statusText,
+        errorMessage
+      );
+    }
+
+    return console.log('Embedding successfully added');
+  } catch (error) {
+    return console.error("Error:", error);
   }
 };

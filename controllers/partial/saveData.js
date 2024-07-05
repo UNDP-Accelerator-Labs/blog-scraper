@@ -1,4 +1,5 @@
 const { DB } = include("db/");
+const { embedDocument } = include("services/utils");
 const { saveQuery, updateQuery } = require("../blog/scrapper/scrap-query");
 
 const saveDataToDatabase = async (_kwarq) => {
@@ -56,6 +57,10 @@ const saveDataToDatabase = async (_kwarq) => {
             [record?.id, data.raw_html]
           )
         );
+
+        // Embed document using the NLP API
+        await embedDocument(record?.id)
+
       } else {
         // Update existing record
         batch.push(

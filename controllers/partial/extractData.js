@@ -4,14 +4,18 @@ const {
   checkSearchTerm,
   getDocumentMeta,
   article_types,
-  getDate
+  getDate,
 } = include("services/");
 const executePythonScriptAndGetMetadata = require("./executePython");
 const { By } = require("selenium-webdriver");
 const { config } = include("config/");
 const cheerio = require("cheerio");
 
-const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck=false) => {
+const extractDataFromUrl = async (
+  driver,
+  url,
+  ignoreRelevanceCheck = false
+) => {
   let data = {
     url,
     articleTitle: null,
@@ -24,7 +28,7 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck=false) => {
     raw_html: null,
     languageName: null,
     iso3: null,
-    parsed_date: null
+    parsed_date: null,
   };
 
   try {
@@ -56,14 +60,14 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck=false) => {
             pdfContent?.text?.substring(0, 100) ||
             null;
           data.country = countryName;
-        } 
+        }
       } catch (error) {
         console.error("Error extracting document metadata:", error);
       }
     } // Extract article metadata based on type
     else if (data.article_type === "project") {
       try {
-        // Your logic for extracting project metadata
+        // Logic for extracting project metadata
         data.articleTitle =
           (await driver
             .findElement(
@@ -75,7 +79,8 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck=false) => {
               By.css(config["title_2.element.project_page.css_selector"])
             )
             .getText()) ||
-          null;
+            ( await await driver.findElement(By.css('section.innerBannerNoImage__JX6zS.scrolledBanner__XJxL5 .title__n-lM8')))
+          || null;
 
         data.postedDateStr =
           (await driver
@@ -237,6 +242,8 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck=false) => {
           const text = await contentElements[i].getText();
           data.content += text + "\n";
         }
+        data.html_content = data.content;
+
       } catch (error) {
         console.error("Error extracting Medium post metadata:", error);
       }
@@ -281,19 +288,55 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck=false) => {
       }
     }
 
-    if (data.content == null || !data.content.length) {
+    if (data.content === null || !data.content.length) {
+      const cheerio = require("cheerio");
       const $ = cheerio.load(data.raw_html);
+
+      // Remove specific sections
       $(
         "section.featured-stories.recent-news.featured-card-container"
-      ).replaceWith("");
-      $("header").replaceWith("");
-      $("footer").replaceWith("");
-      $("script").replaceWith("");
-      $("style").replaceWith("");
-      $("meta").replaceWith("");
-      $("iframe").replaceWith("");
+      ).remove();
+      $(
+        "div.country-switcher-ajax-wrapper"
+      ).remove();
+      $(
+        "div.related-publications"
+      ).remove();
 
-      const content = $("body").text();
+      // Remove unwanted tags from anywhere in the document
+      $("header, footer, script, style, meta, iframe").remove();
+
+      // Ensure nested occurrences are also removed from the body
+      $("body")
+        .find("header, footer, script, style, meta, iframe, noscript")
+        .replaceWith(" ");
+      $("body")
+        .find(
+          "div.dialog-off-canvas-main-canvas.layout-container"
+        )
+        .replaceWith(" ");
+        $("body")
+        .find(
+          "div.dialog-off-canvas-main-canvas.mega-wrapper"
+        )
+        .replaceWith(" ");
+        $("body")
+        .find(
+          "div.dialog-off-canvas-main-canvas.footer"
+        )
+        .replaceWith(" ");
+
+      $("body").find("a.skip-link").replaceWith(" ");
+      $("body footer").replaceWith(" ");
+      let content;
+
+      // Extract the cleaned text content from the body
+      if(['blog','publications'].includes(data.article_type)){
+        content = $("body article").text().trim();
+      } else {
+        content = $("body").text().trim();
+      }
+
       data.html_content = content;
       data.content = content;
     }
@@ -301,8 +344,8 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck=false) => {
     // Check relevance of document content
     if (
       (!checkSearchTerm(data.content).length ||
-      !checkSearchTerm(data.html_content).length)
-      && !ignoreRelevanceCheck
+        !checkSearchTerm(data.html_content).length) &&
+      !ignoreRelevanceCheck
     ) {
       return null;
     }
