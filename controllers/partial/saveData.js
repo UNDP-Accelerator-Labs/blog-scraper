@@ -10,6 +10,7 @@ const saveDataToDatabase = async (_kwarq) => {
     );
   try {
     let db = defaultDB ?? DB.blog;
+    let embedding_id;
     await db.tx(async (t) => {
       const batch = [];
 
@@ -58,16 +59,7 @@ const saveDataToDatabase = async (_kwarq) => {
           )
         );
 
-        // Embed document using the NLP API
-        embedDocument(id)
-        .then(() => {
-          console.log('Document embedded successfully.');
-        })
-        .catch((error) => {
-          console.error('Error executing function:', error);
-          //Todo: what happens when a document embedding fails? 
-        });
-
+        embedding_id = record?.id
       } else {
         // Update existing record
         batch.push(
@@ -123,6 +115,18 @@ const saveDataToDatabase = async (_kwarq) => {
       return t.batch(batch).catch((err) => console.log(err));
     });
     console.log("Saving record successful.");
+
+     // Embed document using the NLP API
+     if(embedding_id){
+      embedDocument(embedding_id)
+       .then(() => {
+         console.log('Document embedded successfully.');
+       })
+       .catch((error) => {
+         console.error('Error executing function:', error);
+         //Todo: what happens when a document embedding fails? 
+       });
+     }
   } catch (error) {
     console.error("Error saving data to database:", error);
   }

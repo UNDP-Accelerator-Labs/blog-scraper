@@ -1,87 +1,81 @@
-const { spawn } = require('child_process');
-const { config } = require('../config')
+const { spawn } = require("child_process");
+const { config } = require("../config");
 const fetch = require("node-fetch");
 
-
-const { NLP_WRITE_TOKEN, API_TOKEN, NODE_ENV, NLP_API_URL } = process.env;
+const {
+  NLP_WRITE_TOKEN,
+  API_TOKEN,
+  NODE_ENV,
+  NLP_API_URL,
+  EMBEDDING_DB,
+  EMBEDDING_PREFIX,
+} = process.env;
 
 exports.evaluateArticleType = async (url) => {
-    if(url.includes('news')){
-        return 'news'
-    }
-    else if(url.includes('/blog') || url.includes('.medium.com')){
-        return 'blog'
-    }
-    else if(url.includes('/article')){
-        return 'article'
-    }
-    else if(url.includes('/press-releases')){
-        return 'press release'
-    }
-    else if (url.includes('/white-paper')){
-        return 'white paper'
-    }
-    else if (url.includes('/stories')){
-        return 'stories'
-    }
-    else if (url.includes('/publications')){
-        return 'publications'
-    }
-    else if (url.includes('.pdf') 
-        || url.includes('.doc')
-        || url.includes('.docx')
-        || url.includes('.ppt')
-        || url.includes('.odt') 
-        || url.includes('.rtf') 
-        || url.includes('.txt')
-        || url.includes('docs.goo') 
-    ){
-        return 'document'
-    }
-    else if(url.includes('/speeches')){
-        return 'speeches'
-    }
-    else if(url.includes('/event')){
-      return 'event'
-  }
-    else if(url.includes('/project')){
-        return 'project'
-    }
-    else return 'webpage'
-
-}
+  if (url.includes("news")) {
+    return "news";
+  } else if (url.includes("/blog") || url.includes(".medium.com")) {
+    return "blog";
+  } else if (url.includes("/article")) {
+    return "article";
+  } else if (url.includes("/press-releases")) {
+    return "press release";
+  } else if (url.includes("/white-paper")) {
+    return "white paper";
+  } else if (url.includes("/stories")) {
+    return "stories";
+  } else if (url.includes("/publications")) {
+    return "publications";
+  } else if (
+    url.includes(".pdf") ||
+    url.includes(".doc") ||
+    url.includes(".docx") ||
+    url.includes(".ppt") ||
+    url.includes(".odt") ||
+    url.includes(".rtf") ||
+    url.includes(".txt") ||
+    url.includes("docs.goo")
+  ) {
+    return "document";
+  } else if (url.includes("/speeches")) {
+    return "speeches";
+  } else if (url.includes("/event")) {
+    return "event";
+  } else if (url.includes("/project")) {
+    return "project";
+  } else return "webpage";
+};
 
 exports.extractLanguageFromUrl = (url) => {
-    const urlParts = url.split('/');
-    const languageIndex = urlParts.indexOf(config['baseUrl.basic']) + 1;
-    
-    if (languageIndex >= urlParts.length) {
-      return null;
-    }
-    
-    const languageCode = urlParts[languageIndex];
-    
-    if (languageCode.length !== 2) {
-      return null;
-    }
+  const urlParts = url.split("/");
+  const languageIndex = urlParts.indexOf(config["baseUrl.basic"]) + 1;
 
-    return languageCode;
-}
+  if (languageIndex >= urlParts.length) {
+    return null;
+  }
 
+  const languageCode = urlParts[languageIndex];
+
+  if (languageCode.length !== 2) {
+    return null;
+  }
+
+  return languageCode;
+};
 
 exports.extractPdfContent = async (url) => {
   return new Promise((resolve, reject) => {
-    const python = spawn('python', ['-u', 'pdf.py', url]);
-    
-    let output = '';
-    python.stdout.on('data', (data) => {
+    const python = spawn("python", ["-u", "pdf.py", url]);
+
+    let output = "";
+    python.stdout.on("data", (data) => {
       output += data.toString();
     });
 
-    python.stderr.on('data', (data) => {
+    python.stderr.on("data", (data) => {
       console.error(data.toString());
     });
-    python.on('close', (code) => {
+    python.on("close", (code) => {
       if (code === 0) {
         try {
           const result = JSON.parse(output);
@@ -93,12 +87,11 @@ exports.extractPdfContent = async (url) => {
         reject(new Error(`python script exited with code ${code}`));
       }
     });
-    python.on('error', (error) => {
+    python.on("error", (error) => {
       reject(error);
     });
   });
 };
-
 
 exports.getDocumentMeta = async (content) => {
   let body = {
@@ -150,24 +143,25 @@ exports.getDocumentMeta = async (content) => {
 };
 
 exports.article_types = [
-  'project',
-  'event',
-  'speeches',
-  'stories',
-  'white-paper',
-  'article',
-  'blog',
-  'news',
-  'press-releases',
-  'publications'
+  "project",
+  "event",
+  "speeches",
+  "stories",
+  "white-paper",
+  "article",
+  "blog",
+  "news",
+  "press-releases",
+  "publications",
 ];
 
-
 exports.getDate = async (_kwarq) => {
-  const { raw_html, language, posted_date_str } = _kwarq
+  const { raw_html, language, posted_date_str } = _kwarq;
   let body = {
     token: API_TOKEN,
-    raw_html, language, posted_date_str
+    raw_html,
+    language,
+    posted_date_str,
   };
 
   try {
@@ -193,17 +187,16 @@ exports.getDate = async (_kwarq) => {
     return date;
   } catch (error) {
     console.error("Error:", error);
-    return null
+    return null;
   }
 };
-
 
 exports.embedDocument = async (id) => {
   let body = {
     token: API_TOKEN,
     write_access: NLP_WRITE_TOKEN,
-    db: NODE_ENV === 'production' ? "main" : "test",
-    main_id: `blog:${id}`
+    db: NODE_ENV === "production" ? EMBEDDING_DB : "test",
+    main_id: `${EMBEDDING_PREFIX}:${id}`,
   };
 
   try {
@@ -217,7 +210,7 @@ exports.embedDocument = async (id) => {
 
     if (!response.ok) {
       const errorMessage = await response.text();
-       console.error(
+      console.error(
         "Network response was not ok: ",
         response.statusText,
         errorMessage
@@ -225,7 +218,7 @@ exports.embedDocument = async (id) => {
       throw Error("Network response was not ok ");
     }
 
-    return console.log('Embedding successfully added');
+    return console.log("Embedding successfully added");
   } catch (error) {
     throw Error(error);
   }
