@@ -110,6 +110,8 @@ const saveDataToDatabase = async (_kwarq) => {
             [id, data.raw_html]
           )
         );
+        
+        embedding_id = id
       }
 
       return t.batch(batch).catch((err) => console.log(err));
