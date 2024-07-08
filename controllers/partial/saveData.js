@@ -1,4 +1,5 @@
 const { DB } = include("db/");
+const { embedDocument } = include("services/utils");
 const { saveQuery, updateQuery } = require("../blog/scrapper/scrap-query");
 
 const saveDataToDatabase = async (_kwarq) => {
@@ -9,6 +10,7 @@ const saveDataToDatabase = async (_kwarq) => {
     );
   try {
     let db = defaultDB ?? DB.blog;
+    let embedding_id;
     await db.tx(async (t) => {
       const batch = [];
 
@@ -56,6 +58,8 @@ const saveDataToDatabase = async (_kwarq) => {
             [record?.id, data.raw_html]
           )
         );
+
+        embedding_id = record?.id
       } else {
         // Update existing record
         batch.push(
@@ -106,11 +110,25 @@ const saveDataToDatabase = async (_kwarq) => {
             [id, data.raw_html]
           )
         );
+        
+        embedding_id = id
       }
 
       return t.batch(batch).catch((err) => console.log(err));
     });
     console.log("Saving record successful.");
+
+     // Embed document using the NLP API
+     if(embedding_id){
+      embedDocument(embedding_id)
+       .then(() => {
+         console.log('Document embedded successfully.');
+       })
+       .catch((error) => {
+         console.error('Error executing function:', error);
+         //Todo: what happens when a document embedding fails? 
+       });
+     }
   } catch (error) {
     console.error("Error saving data to database:", error);
   }
