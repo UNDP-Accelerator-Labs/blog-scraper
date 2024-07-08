@@ -254,7 +254,11 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck = false) => 
 
     //USE NLP API TO GE ARTICLE DATE IF DATE EXTRACTION FROM DOM IS NULL
     if (data.postedDate == null) {
-      data.parsed_date = await getDate(data.raw_html);
+      let date = await getDate(data.raw_html);
+      if(date && extractPostedDate(date)){
+        data.parsed_date = date;
+        data.postedDate = date;
+      }
     }
 
     return data;
