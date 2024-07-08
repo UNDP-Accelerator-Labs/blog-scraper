@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { DB } = require("../db");
+const { DB } = require("../../db");
 
 const app = async () => {
   await DB.blog
