@@ -59,7 +59,14 @@ const saveDataToDatabase = async (_kwarq) => {
         );
 
         // Embed document using the NLP API
-        await embedDocument(record?.id)
+        embedDocument(id)
+        .then(() => {
+          console.log('Document embedded successfully.');
+        })
+        .catch((error) => {
+          console.error('Error executing function:', error);
+          //Todo: what happens when a document embedding fails? 
+        });
 
       } else {
         // Update existing record

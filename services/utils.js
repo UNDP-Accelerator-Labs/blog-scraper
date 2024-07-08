@@ -217,15 +217,16 @@ exports.embedDocument = async (id) => {
 
     if (!response.ok) {
       const errorMessage = await response.text();
-      return console.error(
+       console.error(
         "Network response was not ok: ",
         response.statusText,
         errorMessage
       );
+      throw Error("Network response was not ok ");
     }
 
     return console.log('Embedding successfully added');
   } catch (error) {
-    return console.error("Error:", error);
+    throw Error(error);
   }
 };

@@ -7,15 +7,43 @@ const {
   getDate,
 } = include("services/");
 const executePythonScriptAndGetMetadata = require("./executePython");
-const { By } = require("selenium-webdriver");
+const { By, until } = require("selenium-webdriver");
 const { config } = include("config/");
 const cheerio = require("cheerio");
 
-const extractDataFromUrl = async (
-  driver,
-  url,
-  ignoreRelevanceCheck = false
-) => {
+const extractTitle = async (driver, selectors) => {
+  for (const selector of selectors) {
+    try {
+      const element = await driver.findElement(By.css(selector));
+      return await element.getText();
+    } catch (error) {
+      // continue to the next selector
+    }
+  }
+  return null;
+};
+
+const extractContent = async (driver, selectors) => {
+  let content = "";
+  for (const selector of selectors) {
+    try {
+      const elements = await driver.findElements(By.css(selector));
+      for (const element of elements) {
+        content += await element.getText() + "\n";
+      }
+    } catch (error) {
+      // continue to the next selector
+    }
+  }
+  return content.trim();
+};
+
+const extractPostedDate = (dateStr) => {
+  const date = new Date(dateStr);
+  return isNaN(date) ? null : date;
+};
+
+const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck = false) => {
   let data = {
     url,
     articleTitle: null,
@@ -32,93 +60,49 @@ const extractDataFromUrl = async (
   };
 
   try {
-    // Navigate to the URL
     await driver.get(url);
 
-    // Evaluate article type
     data.article_type = await evaluateArticleType(url);
-
-    // Extract language from URL
     data.languageName = (await extractLanguageFromUrl(url)) || "en";
-
-    // Extract HTML content
     data.raw_html = await driver.getPageSource();
 
-    // Extract article metadata based on type
-    if (data.article_type === "document") {
+    if (data.article_type === "document" && (url.includes(".pdf") || url.includes(".PDF"))) {
       try {
-        if (url.includes(".pdf") || url.includes(".PDF")) {
-          // Extract PDF content and metadata
-          const pdfContent = await getPdfMetadataFromUrl(url);
-          data.content = pdfContent?.text || null;
-          data.postedDate =
-            new Date(pdfContent?.metadata?._metadata["xmp:createdate"]) || null;
-          data.postedDateStr =
-            pdfContent?.metadata?._metadata["xmp:createdate"] || null;
-          data.articleTitle =
-            pdfContent?.metadata?._metadata["dc:title"] ||
-            pdfContent?.text?.substring(0, 100) ||
-            null;
-          data.country = countryName;
-        }
+        const pdfContent = await getPdfMetadataFromUrl(url);
+        data.content = pdfContent?.text || null;
+        data.postedDateStr = pdfContent?.metadata?._metadata["xmp:createdate"] || null;
+        data.postedDate = extractPostedDate(data.postedDateStr);
+        data.articleTitle = pdfContent?.metadata?._metadata["dc:title"] || data.content?.substring(0, 100) || null;
       } catch (error) {
         console.error("Error extracting document metadata:", error);
       }
-    } // Extract article metadata based on type
-    else if (data.article_type === "project") {
+    } else if (data.article_type === "project") {
       try {
-        // Logic for extracting project metadata
-        data.articleTitle =
-          (await driver
-            .findElement(
-              By.css(config["title.element.project_page.css_selector"])
-            )
-            .getText()) ||
-          (await driver
-            .findElement(
-              By.css(config["title_2.element.project_page.css_selector"])
-            )
-            .getText()) ||
-          (await await driver.findElement(
-            By.css(
-              "section.innerBannerNoImage__JX6zS.scrolledBanner__XJxL5 .title__n-lM8"
-            )
-          )) ||
-          null;
+        data.articleTitle = await extractTitle(driver, [
+          config["title.element.project_page.css_selector"],
+          config["title_2.element.project_page.css_selector"],
+          "section.innerBannerNoImage__JX6zS.scrolledBanner__XJxL5 .title__n-lM8",
+        ]);
 
-        data.postedDateStr =
-          (await driver
-            .findElement(
-              By.css(
-                config["posted_date_str.element.project_page.css_selector"]
-              )
-            )
-            .getText()) || null;
+        data.postedDateStr = await extractTitle(driver, [
+          config["posted_date_str.element.project_page.css_selector"],
+        ]);
+        data.postedDate = extractPostedDate(data.postedDateStr);
 
-        data.postedDate = isNaN(new Date(data.postedDateStr))
-          ? null
-          : new Date(data.postedDateStr);
+        if (data.articleTitle == null) {
+          let element = await driver.wait(until.elementLocated(By.css('.title__n-lM8')), 10000);
+          data.articleTitle = await element.getText();
+        }
       } catch (error) {
         console.error("Error extracting project metadata:", error);
       }
-    } // Extract article metadata based on type
-    else if (data.article_type === "publications") {
+    } else if (data.article_type === "publications") {
       try {
-        let titleElement = await driver.findElement(
-          By.css(".publication-card__title .coh-heading")
-        );
-        data.articleTitle = await titleElement.getText();
-
-        data.postedDateStr =
-          (await driver
-            .findElement(
-              By.css(config["posted_date_str.element.publication.css_selector"])
-            )
-            .getText()) || null;
-
-        data.postedDate = isNaN(new Date(data.postedDateStr))
-          ? null
-          : new Date(data.postedDateStr);
+        data.articleTitle = await extractTitle(driver, [".publication-card__title .coh-heading"]);
+        data.postedDateStr = await extractTitle(driver, [
+          config["posted_date_str.element.publication.css_selector"],
+        ]);
+        data.postedDate = extractPostedDate(data.postedDateStr);
 
         let exe_file = false;
         try {
@@ -126,42 +110,31 @@ const extractDataFromUrl = async (
           if (download) {
             exe_file = true;
             try {
-              await driver.executeScript(
-                "arguments[0].scrollIntoView(false);",
-                download
-              );
+              await driver.executeScript("arguments[0].scrollIntoView(false);", download);
               await driver.sleep(1000);
-
               await download.click();
               await driver.sleep(1000);
             } catch (e) {
               exe_file = false;
             }
             await driver.sleep(1000);
-            const modals = await driver.findElements(
-              By.className("chapter-item download-row")
-            );
+            const modals = await driver.findElements(By.className("chapter-item download-row"));
             await driver.sleep(1000);
             if (modals.length > 0) {
               let modalToClick;
-
               for (const modal of modals) {
                 let englishButton;
                 try {
-                  englishButton = await modal.findElement(
-                    By.xpath(".//a[.//div[text()='English']]")
-                  );
+                  englishButton = await modal.findElement(By.xpath(".//a[.//div[text()='English']]"));
                 } catch (e) {}
                 if (englishButton) {
                   modalToClick = modal;
-                  break; // Stop the loop once we find a modal with English button
+                  break;
                 }
               }
-
               if (!modalToClick && modals.length > 0) {
-                modalToClick = modals[0]; // If no modal with English button is found, click on the first modal
+                modalToClick = modals[0];
               }
-
               if (modalToClick) {
                 await modalToClick.click();
                 await driver.sleep(1000);
@@ -176,12 +149,9 @@ const extractDataFromUrl = async (
           await executePythonScriptAndGetMetadata().then((metadata) => {
             if (metadata) {
               data.content += `${metadata?.content} || ''` + "\n";
-              data.postedDate = isNaN(new Date(metadata?.created))
-                ? null
-                : new Date(metadata?.created);
+              data.postedDate = extractPostedDate(metadata?.created);
               data.raw_html = data.content;
             } else {
-              // Handle case when metadata is null
               console.log("err ", metadata);
             }
           });
@@ -190,100 +160,53 @@ const extractDataFromUrl = async (
       } catch (error) {
         console.error("Error extracting publications metadata:", error);
       }
-    } // Extract article metadata based on type
-    else if (url.includes(".medium.com")) {
+    } else if (url.includes(".medium.com")) {
       try {
-        // Try to find and click on the close button if it exists
         try {
-          const closeButton = await driver.findElement(
-            By.css('[data-testid="close-button"]')
-          );
+          const closeButton = await driver.findElement(By.css('[data-testid="close-button"]'));
           await closeButton.click();
           await driver.sleep(2000);
         } catch (error) {
           console.error("Modal not found or could not be closed:", error);
         }
 
-        // Scroll to the bottom of the page
-        let lastHeight = await driver.executeScript(
-          "return document.body.scrollHeight"
-        );
+        let lastHeight = await driver.executeScript("return document.body.scrollHeight");
         while (true) {
-          await driver.executeScript(
-            "window.scrollTo(0, document.body.scrollHeight);"
-          );
-          await driver.sleep(2000); // Adjust the interval as needed
-          let newHeight = await driver.executeScript(
-            "return document.body.scrollHeight"
-          );
-          if (newHeight === lastHeight) {
-            // If the scroll position no longer changes, break out of the loop
-            break;
-          }
+          await driver.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+          await driver.sleep(2000);
+          let newHeight = await driver.executeScript("return document.body.scrollHeight");
+          if (newHeight === lastHeight) break;
           lastHeight = newHeight;
         }
 
-        data.postedDateStr =
-          (await driver
-            .findElement(By.css('[data-testid="storyPublishDate"]'))
-            .getText()) || null;
-        data.postedDate = isNaN(new Date(data.postedDateStr))
-          ? null
-          : new Date(data.postedDateStr);
+        data.postedDateStr = await extractTitle(driver, ['[data-testid="storyPublishDate"]']);
+        data.postedDate = extractPostedDate(data.postedDateStr);
         data.languageName = null;
-
-        data.articleTitle =
-          (await driver
-            .findElement(By.css('[data-testid="storyTitle"]'))
-            .getText()) || null;
-
-        const contentElements = await driver.findElements(
-          By.css("[data-selectable-paragraph]")
-        );
-
-        data.content = "";
-        for (let i = 0; i < contentElements.length; i++) {
-          const text = await contentElements[i].getText();
-          data.content += text + "\n";
-        }
+        data.articleTitle = await extractTitle(driver, ['[data-testid="storyTitle"]']);
+        data.content = await extractContent(driver, ["[data-selectable-paragraph]"]);
         data.html_content = data.content;
       } catch (error) {
         console.error("Error extracting Medium post metadata:", error);
       }
-    } // Extract article metadata based on type
-    else if (article_types.filter((p) => url.includes(p)).length > 0) {
+    } else if (article_types.some((p) => url.includes(p))) {
       try {
-        data.articleTitle =
-          (await driver
-            .findElement(By.className(config["title.element.blog.classname"]))
-            .getText()) || null;
+        data.articleTitle = await extractTitle(driver, [
+          By.className(config["title.element.blog.classname"]),
+        ]);
 
-        data.postedDateStr =
-          (await driver
-            .findElement(
-              By.className(config["posted_date_str.element.blog.classname"])
-            )
-            .getText()) || null;
-
-        data.postedDate = isNaN(new Date(data.postedDateStr))
-          ? null
-          : new Date(data.postedDateStr);
+        data.postedDateStr = await extractTitle(driver, [
+          By.className(config["posted_date_str.element.blog.classname"]),
+        ]);
+        data.postedDate = extractPostedDate(data.postedDateStr);
       } catch (error) {
         console.error("Error extracting blog metadata:", error);
       }
     } else {
       try {
-        // Default logic for extracting metadata
-
-        data.articleTitle =
-          (await driver
-            .findElement(By.css(config["title.element.webpage.css_selector"]))
-            .getText()) ||
-          (await driver
-            .findElement(By.css(config["title2.element.webpage.css_selector"]))
-            .getText()) ||
-          null;
-
+        data.articleTitle = await extractTitle(driver, [
+          config["title.element.webpage.css_selector"],
+          config["title2.element.webpage.css_selector"],
+        ]);
         data.postedDateStr = null;
         data.postedDate = null;
       } catch (error) {
@@ -291,21 +214,13 @@ const extractDataFromUrl = async (
       }
     }
 
+    //USE CHEERIO TO EXTRACT WEBPAGE CONTENT IF CONTENT IS NULL FROM SELENIUM CLASS/ELEMENT SELECTIONS
     if (data.content === null || !data.content.length) {
-      const cheerio = require("cheerio");
       const $ = cheerio.load(data.raw_html);
-
-      // Remove specific sections
-      $(
-        "section.featured-stories.recent-news.featured-card-container"
-      ).remove();
+      $("section.featured-stories.recent-news.featured-card-container").remove();
       $("div.country-switcher-ajax-wrapper").remove();
       $("div.related-publications").remove();
-
-      // Remove unwanted tags from anywhere in the document
       $("header, footer, script, style, meta, iframe").remove();
-
-      // Ensure nested occurrences are also removed from the body
       $("body")
         .find("header, footer, script, style, meta, iframe, noscript")
         .replaceWith(" ");
@@ -318,31 +233,17 @@ const extractDataFromUrl = async (
       $("body")
         .find("div.dialog-off-canvas-main-canvas.footer")
         .replaceWith(" ");
-
       $("body").find("a.skip-link").replaceWith(" ");
       $("body footer").replaceWith(" ");
-      let content;
-
-      // Extract the cleaned text content from the body
-      if (
-        ["blog", "publications"].includes(data.article_type) ||
-        $("body article").length > 0
-      ) {
-        content = $("body article").text().trim();
-      } else {
-        content = $("body").text().trim();
-      }
-
+      let content = ["blog", "publications"].includes(data.article_type) || $("body article").length > 0
+        ? $("body article").text().trim()
+        : $("body").text().trim();
       data.html_content = content;
       data.content = content;
     }
 
     // Check relevance of document content
-    if (
-      (!checkSearchTerm(data.content).length ||
-        !checkSearchTerm(data.html_content).length) &&
-      !ignoreRelevanceCheck
-    ) {
+    if ((!checkSearchTerm(data.content).length || !checkSearchTerm(data.html_content).length) && !ignoreRelevanceCheck) {
       return null;
     }
 
@@ -350,7 +251,11 @@ const extractDataFromUrl = async (
     const [lang, location, meta] = await getDocumentMeta(data.content);
     data.iso3 = location?.location?.country;
     data.language = lang?.lang;
-    // data.parsed_date = await getDate(data.raw_html);
+
+    //USE NLP API TO GE ARTICLE DATE IF DATE EXTRACTION FROM DOM IS NULL
+    if (data.postedDate == null) {
+      data.parsed_date = await getDate(data.raw_html);
+    }
 
     return data;
   } catch (error) {
