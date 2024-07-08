@@ -79,8 +79,12 @@ const extractDataFromUrl = async (
               By.css(config["title_2.element.project_page.css_selector"])
             )
             .getText()) ||
-            ( await await driver.findElement(By.css('section.innerBannerNoImage__JX6zS.scrolledBanner__XJxL5 .title__n-lM8')))
-          || null;
+          (await await driver.findElement(
+            By.css(
+              "section.innerBannerNoImage__JX6zS.scrolledBanner__XJxL5 .title__n-lM8"
+            )
+          )) ||
+          null;
 
         data.postedDateStr =
           (await driver
@@ -243,7 +247,6 @@ const extractDataFromUrl = async (
           data.content += text + "\n";
         }
         data.html_content = data.content;
-
       } catch (error) {
         console.error("Error extracting Medium post metadata:", error);
       }
@@ -296,12 +299,8 @@ const extractDataFromUrl = async (
       $(
         "section.featured-stories.recent-news.featured-card-container"
       ).remove();
-      $(
-        "div.country-switcher-ajax-wrapper"
-      ).remove();
-      $(
-        "div.related-publications"
-      ).remove();
+      $("div.country-switcher-ajax-wrapper").remove();
+      $("div.related-publications").remove();
 
       // Remove unwanted tags from anywhere in the document
       $("header, footer, script, style, meta, iframe").remove();
@@ -311,19 +310,13 @@ const extractDataFromUrl = async (
         .find("header, footer, script, style, meta, iframe, noscript")
         .replaceWith(" ");
       $("body")
-        .find(
-          "div.dialog-off-canvas-main-canvas.layout-container"
-        )
+        .find("div.dialog-off-canvas-main-canvas.layout-container")
         .replaceWith(" ");
-        $("body")
-        .find(
-          "div.dialog-off-canvas-main-canvas.mega-wrapper"
-        )
+      $("body")
+        .find("div.dialog-off-canvas-main-canvas.mega-wrapper")
         .replaceWith(" ");
-        $("body")
-        .find(
-          "div.dialog-off-canvas-main-canvas.footer"
-        )
+      $("body")
+        .find("div.dialog-off-canvas-main-canvas.footer")
         .replaceWith(" ");
 
       $("body").find("a.skip-link").replaceWith(" ");
@@ -331,7 +324,10 @@ const extractDataFromUrl = async (
       let content;
 
       // Extract the cleaned text content from the body
-      if(['blog','publications'].includes(data.article_type)){
+      if (
+        ["blog", "publications"].includes(data.article_type) ||
+        $("body article").length > 0
+      ) {
         content = $("body article").text().trim();
       } else {
         content = $("body").text().trim();
