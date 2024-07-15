@@ -223,3 +223,37 @@ exports.embedDocument = async (id) => {
     throw Error(error);
   }
 };
+
+
+exports.getIso3 = async (url) => {
+  let body = {
+    token: API_TOKEN,
+    url
+  };
+
+  try {
+    const response = await fetch(`${NLP_API_URL}/api/inspect`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      console.error(
+        "Network response was not ok: ",
+        response.statusText,
+        errorMessage
+      );
+      throw new Error("Network response was not ok ");
+    }
+
+    const { iso3 } = await response.json();
+    return iso3;
+  } catch (error) {
+    console.error("Error:", error);
+    return null;
+  }
+};

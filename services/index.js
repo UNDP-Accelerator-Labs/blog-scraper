@@ -4,7 +4,8 @@ const {
   extractPdfContent,
   article_types,
   getDocumentMeta,
-  getDate
+  getDate,
+  getIso3
 } = require("./utils");
 const { searchTerms, checkSearchTerm } = require('./searchTerm')
 
@@ -17,3 +18,4 @@ exports.checkSearchTerm = checkSearchTerm
 
 exports.getDocumentMeta = getDocumentMeta;
 exports.getDate = getDate;
+exports.getIso3 = getIso3;

@@ -5,6 +5,7 @@ const {
   getDocumentMeta,
   article_types,
   getDate,
+  getIso3
 } = include("services/");
 const executePythonScriptAndGetMetadata = require("./executePython");
 const { By, until } = require("selenium-webdriver");
@@ -249,7 +250,8 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck = false) => 
 
     // Extract document meta
     const [lang, location, meta] = await getDocumentMeta(data.content);
-    data.iso3 = location?.location?.country;
+    const iso3_b = await getIso3(url);
+    data.iso3 = iso3_b ?? location?.location?.country;
     data.language = lang?.lang;
 
     //USE NLP API TO GE ARTICLE DATE IF DATE EXTRACTION FROM DOM IS NULL
