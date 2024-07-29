@@ -200,7 +200,7 @@ exports.embedDocument = async (id) => {
   };
 
   try {
-    const response = await fetch(`${NLP_API_URL}/embed/add`, {
+    const response = await fetch(`${NLP_API_URL}/api/embed/add`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
