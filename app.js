@@ -186,47 +186,47 @@ if(process.env.APP_ID === 'ce_rave'){
 
 } else{
 
-  cron.schedule("0 19 * * 5", () => {
+  cron.schedule("0 0 * * 0", () => {
     extractBlogUrl({ startIndex: 0, delimeter: 25 });
   });
   
-  cron.schedule("0 2 * * 6", () => {
+  cron.schedule("0 12 * * 0", () => {
     extractBlogUrl({ startIndex: 26, delimeter: 51 });
   });
   
-  cron.schedule("0 9 * * 6", () => {
+  cron.schedule("0 0 * * 1", () => {
     extractBlogUrl({ startIndex: 52, delimeter: 77 });
   });
   
-  cron.schedule("0 16 * * 6", () => {
+  cron.schedule("0 0 * * 2", () => {
     extractBlogUrl({ startIndex: 78, delimeter: 103 });
   });
   
-  cron.schedule("0 23 * * 6", () => {
+  cron.schedule("0 0 * * 3", () => {
     extractBlogUrl({ startIndex: 104, delimeter: 129 });
   });
   
-  cron.schedule("0 6 * * 7", () => {
+  cron.schedule("0 0 * * 4", () => {
     extractBlogUrl({ startIndex: 130, delimeter: 155 });
   });
   
-  cron.schedule("0 13 * * 7", () => {
-    extractBlogUrl({ startIndex: 156, delimeter: 183 });
+  cron.schedule("0 0 * * 5", () => {
+    extractBlogUrl({ startIndex: 156, delimeter: 182 });
   });
   
   // Create the cron job to update toolkit content twice a month
-  cron.schedule("0 0 1,15 * *", async () => {
-    console.log("Running scrapper...");
-    try {
-      routes.cron.scrapper();
-      console.log("Scrapper started successfully.");
-    } catch (error) {
-      console.error("Error occurred while running scrapper:", error);
-    }
-  });
+  // cron.schedule("0 12 * * 3", async () => {
+  //   console.log("Running scrapper...");
+  //   try {
+  //     routes.cron.scrapper();
+  //     console.log("Scrapper started successfully.");
+  //   } catch (error) {
+  //     console.error("Error occurred while running scrapper:", error);
+  //   }
+  // });
   
   // Create the cron job to update acclab medium content weekly
-  cron.schedule("0 * * * 4", async () => {
+  cron.schedule("0 12 * * 5", async () => {
     try {
       routes.cron.medium_posts();
       console.log("Medium Scrapper started successfully.");
@@ -235,7 +235,7 @@ if(process.env.APP_ID === 'ce_rave'){
     }
   });
   
-  cron.schedule("0 * * * 5", async () => {
+  cron.schedule("0 0 * * 6", async () => {
     try {
       acclab_publications();
       console.log("Official webpage Scrapper started successfully.");

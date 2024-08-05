@@ -13,7 +13,7 @@ const saveQuery = (
   parsed_date
 ) => ({
   text: `
-    INSERT INTO articles (url, language, title, posted_date, article_type, posted_date_str, relevance, iso3, parsed_date)
+    INSERT INTO public.articles (url, language, title, posted_date, article_type, posted_date_str, iso3, parsed_date, relevance)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     RETURNING *
 `,
@@ -24,9 +24,9 @@ const saveQuery = (
     postedDate,
     article_type,
     posted_date_str,
-    relevance,
     iso3,
-    parsed_date
+    parsed_date,
+    relevance,
   ],
 });
 

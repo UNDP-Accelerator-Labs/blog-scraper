@@ -51,6 +51,7 @@ await driver.manage().window().maximize();
     let esp = 0;
     let urls = [];
     let cards = [];
+    let iteration_count = 0
 
     try {
       // Define a function to scroll an element into view using JavaScript
@@ -67,6 +68,7 @@ await driver.manage().window().maximize();
         let viewMoreButton = await getButton();
 
         if (!viewMoreButton || esp > 5) break; // Exit the loop if the button is not found
+        if(iteration_count > 20 ) break;
 
         try {
           await scrollIntoView(viewMoreButton);
@@ -76,10 +78,13 @@ await driver.manage().window().maximize();
 
           // Get all the <a> tags within the content cards
           cards = await driver.findElements(By.className("content-card"));
+
+          iteration_count += 1 // stop after 20 iterations. These are the most recent lists.
         } catch (e) {
           console.log("err ", e);
           viewMoreButton = await getButton();
           esp += 1;
+          iteration_count += 1
         }
       }
 

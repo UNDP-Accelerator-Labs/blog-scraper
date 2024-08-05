@@ -42,8 +42,8 @@ const config = {
     "content.elements.medium_post.css_selector" : '.gq.gr.gs.gt.gu p',
     "content_url.elements.medium_post.css_selector" : '.gq.gr.gs.gt.gu a',
 
-    "title.element.blog.classname" : "article-title",
-    "posted_date_str.element.blog.classname" : 'posted-date',
+    "title.element.blog.classname" : "h2.article-title",
+    "posted_date_str.element.blog.classname" : 'h6.posted-date',
     "country_name.element.blog.css_selector" : '.site-title a',
     "content.elements.blog.css_selector" : ".coh-inline-element.m-content.coh-wysiwyg",
     "content_url.elements.blog.css_selector" : ".coh-inline-element.m-content.coh-wysiwyg a",

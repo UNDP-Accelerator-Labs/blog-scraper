@@ -6,29 +6,45 @@ const saveDataToDatabase = async (_kwarq) => {
   const { data, id, defaultDB } = _kwarq;
   if (!data)
     return console.log(
-      "Skipping saving record. Content is not relevant to Accelerator lab."
+      "Skipping saving record. Content is not relevant to Accelerator lab. URL: "
+      + data?.url 
     );
   try {
     let db = defaultDB ?? DB.blog;
     let embedding_id;
+
     await db.tx(async (t) => {
       const batch = [];
 
       if (id == null || isNaN(id)) {
         // Insert new record
-        const record = await t.oneOrNone(
-          saveQuery(
+        const record = await t.one(
+          `INSERT INTO articles (
+            url, 
+            language, 
+            title, 
+            posted_date, 
+            article_type, 
+            posted_date_str, 
+            iso3, 
+            parsed_date, 
+            relevance
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+             RETURNING *`,
+          [
             data.url,
             data.language,
             data.articleTitle,
             data.postedDate,
             data.article_type,
             data.postedDateStr,
-            "2",
             data.iso3,
-            data.parsed_date
-          )
+            data.parsed_date,
+            data.relevance  || 2
+          ]
         );
+
         batch.push(
           t.any(
             `
@@ -73,7 +89,7 @@ const saveDataToDatabase = async (_kwarq) => {
               data.article_type,
               data.postedDateStr,
               data.iso3 || null,
-              "2"
+              2
             )
           )
         );

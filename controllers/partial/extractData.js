@@ -18,6 +18,7 @@ const extractTitle = async (driver, selectors) => {
       const element = await driver.findElement(By.css(selector));
       return await element.getText();
     } catch (error) {
+      console.log('selectors error ', error)
       // continue to the next selector
     }
   }
@@ -191,12 +192,12 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck = false) => 
       }
     } else if (article_types.some((p) => url.includes(p))) {
       try {
-        data.articleTitle = await extractTitle(driver, [
-          By.className(config["title.element.blog.classname"]),
+        data.articleTitle = await extractTitle(driver, 
+          [ config["title.element.blog.classname"],
         ]);
 
         data.postedDateStr = await extractTitle(driver, [
-          By.className(config["posted_date_str.element.blog.classname"]),
+          config["posted_date_str.element.blog.classname"],
         ]);
         data.postedDate = extractPostedDate(data.postedDateStr);
       } catch (error) {
@@ -251,7 +252,7 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck = false) => 
     // Extract document meta
     const [lang, location, meta] = await getDocumentMeta(data.content);
     const iso3_b = await getIso3(url);
-    if(!iso3_b && data.url.include('/acceleratorlabs/')){
+    if(!iso3_b && data.url.includes('/acceleratorlabs/')){
       iso3_b = 'NUL' //Url matches Global network page.
     }
     data.iso3 = iso3_b ?? location?.location?.country;

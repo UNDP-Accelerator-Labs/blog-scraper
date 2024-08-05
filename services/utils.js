@@ -47,7 +47,7 @@ exports.evaluateArticleType = async (url) => {
 };
 
 exports.extractLanguageFromUrl = (url) => {
-  const urlParts = url.split("/");
+  const urlParts = url?.split("/");
   const languageIndex = urlParts.indexOf(config["baseUrl.basic"]) + 1;
 
   if (languageIndex >= urlParts.length) {
