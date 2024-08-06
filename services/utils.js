@@ -138,6 +138,7 @@ exports.getDocumentMeta = async (content) => {
     return [maxLanguage, maxConfidenceEntity, data];
   } catch (error) {
     console.error("Error:", error);
+    console.error("Input: ", body);
     return [null, null, null];
   }
 };
@@ -187,6 +188,7 @@ exports.getDate = async (_kwarq) => {
     return date;
   } catch (error) {
     console.error("Error:", error);
+    console.error("Input: ", body);
     return null;
   }
 };
@@ -220,6 +222,8 @@ exports.embedDocument = async (id) => {
 
     return console.log("Embedding successfully added");
   } catch (error) {
+    console.error("Error: ", error);
+    console.error("Input: ",  body);
     throw Error(error);
   }
 };
@@ -254,6 +258,7 @@ exports.getIso3 = async (url) => {
     return iso3;
   } catch (error) {
     console.error("Error:", error);
+    console.error("Input: ", body);
     return null;
   }
 };

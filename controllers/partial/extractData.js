@@ -240,6 +240,10 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck = false) => 
       let content = ["blog", "publications"].includes(data.article_type) || $("body article").length > 0
         ? $("body article").text().trim()
         : $("body").text().trim();
+
+      content = content.replace(/Skip to main content/g, ' ');
+      content = content.replace(/<iframe.*?<\/iframe>/g, '');
+  
       data.html_content = content;
       data.content = content;
     }
@@ -249,9 +253,13 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck = false) => 
       return null;
     }
 
+    if(!data?.content?.length > 0){
+      console.log(' No content could be extracted. Url: ', url)
+    }
+    
     // Extract document meta
-    const [lang, location, meta] = await getDocumentMeta(data.content);
-    const iso3_b = await getIso3(url);
+    const [lang, location, meta] = data?.content ?? await getDocumentMeta(data.content);
+    const iso3_b = url ?? await getIso3(url);
     if(!iso3_b && data.url.includes('/acceleratorlabs/')){
       iso3_b = 'NUL' //Url matches Global network page.
     }
