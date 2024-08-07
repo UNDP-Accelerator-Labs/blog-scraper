@@ -37,11 +37,11 @@ exports.evaluateArticleType = async (url) => {
     url.includes("docs.goo")
   ) {
     return "document";
-  } else if (url.includes("/speeches")) {
+  } else if (url.includes("/speeches/")) {
     return "speeches";
-  } else if (url.includes("/event")) {
+  } else if (url.includes("/event/")) {
     return "event";
-  } else if (url.includes("/project")) {
+  } else if (url.includes("/project/")) {
     return "project";
   } else return "webpage";
 };

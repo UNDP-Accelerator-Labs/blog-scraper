@@ -29,7 +29,7 @@ const cleanup = async (conn, req, res) => {
         if (
           [
             "blog",
-            "events",
+            "event",
             "news",
             "press-releases",
             "speeches",
