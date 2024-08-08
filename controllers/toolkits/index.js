@@ -1,4 +1,4 @@
-const { app: tk_scrap, scrapper } = require('./scraper')
+const { get_toolkit_data, toolkit_scrapper } = require('./scraper')
 
-exports.tk_scrap = tk_scrap;
-exports.scrapper = scrapper;
+exports.get_toolkit_data = get_toolkit_data;
+exports.toolkit_scrapper = toolkit_scrapper;

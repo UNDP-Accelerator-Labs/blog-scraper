@@ -28,7 +28,7 @@ const toolkit_list = [
   },
 ];
 
-exports.app = async (req, res) => {
+exports.get_toolkit_data = async (req, res) => {
   try {
     const matches = await this.scrapper();
     res.json(matches);
@@ -38,7 +38,7 @@ exports.app = async (req, res) => {
   }
 };
 
-exports.scrapper = async () => {
+exports.toolkit_scrapper = async () => {
   const matches = [];
   try {
     const responses = await Promise.all(

@@ -2,16 +2,22 @@ const { sqlregex } = include("middleware/search");
 
 const theWhereClause = (country, type, language, iso3) => {
   let whereClause = "";
+  const hq = ["USA", "NUL", "CAN", "GBR"];
   if (country) {
-    if (Array.isArray(country) && country.length ) {
+    if (Array.isArray(country) && country.length) {
+      if (country.find((p) => p == "HQ")) {
+        country = country.flatMap((item) => (item === "HQ" ? hq : item));
+      }
       whereClause += ` AND iso3 IN ('${country.join("','")}')`;
-    } else if (typeof country === "string") {
+    } else if (typeof country === "string" && country !== "HQ") {
       whereClause += ` AND iso3 = '${country}'`;
+    } else if (country === "HQ") {
+      whereClause += ` AND iso3 IN ('${hq.join("','")}')`;
     }
   }
 
   if (type) {
-    if (Array.isArray(type) && type.length ) {
+    if (Array.isArray(type) && type.length) {
       whereClause += ` AND article_type IN ('${type.join("','")}')`;
     } else if (typeof type === "string") {
       whereClause += ` AND article_type = '${type}'`;
@@ -26,12 +32,16 @@ const theWhereClause = (country, type, language, iso3) => {
     }
   }
 
-  if(iso3 && iso3.length && Array.isArray(iso3)){
+  if (iso3 && iso3.length && Array.isArray(iso3)) {
     whereClause += ` AND iso3 IN ('${iso3.join("','")}')`;
   }
 
-  whereClause += ` AND article_type != 'toolkit' AND relevance > 1`;
-  
+  whereClause += `
+    AND (article_type = 'blog' OR article_type = 'publications')
+    AND iso3 IS NOT NULL
+    AND relevance > 1
+  `;
+
   return whereClause;
 };
 
@@ -69,34 +79,41 @@ exports.searchBlogQuery = (
 
   return {
     text: `
-      WITH search_results AS (
-        SELECT a.url, a.article_type, a.title, a.iso3, a.posted_date, a.posted_date_str, a.parsed_date, a.language, a.created_at,
-          regexp_replace(${textColumn}, E'\\n', ' ', 'g') AS content
-        FROM articles a
-        JOIN article_content b ON b.article_id = a.id 
-        JOIN article_html_content c ON c.article_id = a.id
-        WHERE TRUE
-        ${searchTextCondition}
-        ${whereClause}
-        ORDER BY 
-            CASE
-                WHEN posted_date IS NOT NULL THEN posted_date
-                WHEN parsed_date IS NOT NULL THEN parsed_date
-                ELSE '1970-01-01'
-            END DESC
-        LIMIT $1 OFFSET $2
-      ),
-      total_count AS (
-        SELECT COUNT(*) AS total_records
-        FROM articles
-        WHERE TRUE
-        ${searchTextCondition}
-        ${whereClause}
-      )
-      SELECT sr.*, tc.total_records, (CEIL(tc.total_records::numeric / $1)) AS total_pages, ${"$3"}  AS current_page
-      FROM search_results sr
-      CROSS JOIN total_count tc;
-    `,
+    WITH search_results AS (
+      SELECT a.url, a.article_type, a.title, a.iso3, a.posted_date, a.posted_date_str, a.parsed_date, a.language, a.created_at, c.html_content,
+          regexp_replace(
+              regexp_replace(${textColumn}, E'\\n', ' ', 'g'),
+              E'<iframe[^>]*>.*?</iframe>',
+              '',
+              'gi'
+          ) AS content
+      FROM articles a
+      JOIN article_content b ON b.article_id = a.id 
+      JOIN article_html_content c ON c.article_id = a.id
+      WHERE TRUE
+      ${searchTextCondition}
+      ${whereClause}
+      ORDER BY 
+          CASE
+              WHEN posted_date IS NOT NULL THEN posted_date
+              WHEN parsed_date IS NOT NULL THEN parsed_date
+              ELSE '1970-01-01'
+          END DESC
+      LIMIT $1 OFFSET $2
+  ),
+  total_count AS (
+      SELECT COUNT(*) AS total_records
+      FROM articles a
+      JOIN article_content b ON b.article_id = a.id 
+      JOIN article_html_content c ON c.article_id = a.id
+      WHERE TRUE
+      ${searchTextCondition}
+      ${whereClause}
+  )
+  SELECT sr.*, tc.total_records, (CEIL(tc.total_records::numeric / $1)) AS total_pages, ${"$3"}  AS current_page
+  FROM search_results sr
+  CROSS JOIN total_count tc;
+  `,
     values,
   };
 };
@@ -162,39 +179,53 @@ exports.statsQuery = (searchText, country, type, language, iso3) => {
 
   return {
     text: `
-        WITH search_results AS (
-          SELECT a.url, a.article_type, a.title, a.posted_date, a.posted_date_str, a.created_at, a.iso3
-          FROM articles a
-          JOIN article_content b ON b.article_id = a.id 
-          JOIN article_html_content c ON c.article_id = a.id
-          WHERE TRUE
-            ${searchTextCondition}
-            ${whereClause}
-        ),
-        total_country_count AS (
-          SELECT iso3, COUNT(*) AS count
-          FROM search_results
-          GROUP BY iso3
-        ),
-        total_null_country_count AS (
-          SELECT COUNT(*) AS count
-          FROM search_results
-        ),
-        total_article_type_count AS (
-          SELECT article_type, COUNT(*) AS count
-          FROM search_results
-          GROUP BY article_type
-        ),
-        total_count AS (
-          SELECT COUNT(*) AS total_records
-          FROM search_results
-        )
-        SELECT 
-          (SELECT COUNT(DISTINCT iso3) FROM total_country_count) AS distinct_country_count,
-          (SELECT count FROM total_null_country_count) AS null_country_count,
-          (SELECT COUNT(DISTINCT article_type) FROM total_article_type_count) AS distinct_article_type_count,
-          (SELECT total_records FROM total_count) AS total_records;
-      `,
+    WITH search_results AS (
+      SELECT a.url, a.article_type, a.title, a.posted_date, a.posted_date_str, a.created_at, a.iso3
+      FROM articles a
+      JOIN article_content b ON b.article_id = a.id 
+      JOIN article_html_content c ON c.article_id = a.id
+      WHERE TRUE
+        ${searchTextCondition}
+        ${whereClause}
+    ),
+    total_country_count AS (
+      SELECT iso3, COUNT(*) AS count
+      FROM search_results
+      WHERE iso3 IS NOT NULL
+      GROUP BY iso3
+    ),
+    total_null_country_count AS (
+      SELECT COUNT(*) AS count
+      FROM search_results
+      WHERE iso3 IS NULL
+    ),
+    total_article_type_count AS (
+      SELECT article_type, COUNT(*) AS count
+      FROM search_results
+      GROUP BY article_type
+    ),
+    total_blogs AS (
+      SELECT COUNT(*) AS count
+      FROM search_results
+      WHERE article_type = 'blog'
+    ),
+    total_publications AS (
+      SELECT COUNT(*) AS count
+      FROM search_results
+      WHERE article_type = 'publications'
+    ),
+    total_count AS (
+      SELECT COUNT(*) AS total_records
+      FROM search_results
+    )
+    SELECT 
+      (SELECT COUNT(*) FROM total_country_count) AS distinct_country_count,
+      (SELECT count FROM total_null_country_count) AS null_country_count,
+      (SELECT COUNT(*) FROM total_article_type_count) AS distinct_article_type_count,
+      (SELECT total_records FROM total_count) AS total_records,
+      (SELECT count FROM total_blogs) AS total_blogs,
+      (SELECT count FROM total_publications) AS total_publications;
+    `,
   };
 };
 

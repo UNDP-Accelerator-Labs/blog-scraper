@@ -21,9 +21,7 @@ const { getVersionString } = include("middleware");
 const port = process.env.PORT || 3000;
 
 const { extractBlogUrl } = require("./controllers/blog/scrapper/extract-url");
-const updateDbRecord = require("./controllers/blog/scrapper/updateBlog");
 const acclab_publications = require("./controllers/blog/scrapper/acclabs");
-const { extract_ce } = require("./controllers");
 const verifyToken = include("/middleware/verifyJwt");
 const routes = include("routes/");
 const app = express();
@@ -80,60 +78,12 @@ app.get("/version", (req, res) => {
     });
 });
 
-//DEFINE EXTERNAL API ENDPOINTS
-app.get("/blogs/:page_content_limit/:page", verifyToken, routes.api.blog);
-app.get("/blogs/cleanup", verifyToken, routes.api.cleanup);
-app.get("/blogs/medium", verifyToken, routes.cron.medium_posts);
-app.get("/toolkit/scrap", verifyToken, routes.api.toolkit);
+//BLOG DATA APIs
+app.get("/blogs", verifyToken, routes.api.browse_data);
+app.get("/blogs/stats", verifyToken, routes.api.get_blog_stats);
+
 app.post("/get-webpage-content", verifyToken, routes.api.getWebContent);
 
-app.get("/rave/circular-economy/:page_content_limit/:page", verifyToken, routes.api.get_ce_rave);
-
-
-//DEFINE SROUTES TO INITIATE SCRAPPER
-app.post("/initialize", verifyToken, (req, res) => {
-  const { startIndex, delimeter } = req.body;
-  if (
-    typeof startIndex === "number" &&
-    typeof delimeter === "number" &&
-    startIndex < delimeter
-  ) {
-    extractBlogUrl({ startIndex, delimeter });
-  } else extractBlogUrl();
-
-  res.send("The blog extract as started!");
-});
-
-app.post("/update-record", verifyToken, (req, res) => {
-  const { startIndex, delimeter } = req.body;
-  if (
-    typeof startIndex === "number" &&
-    typeof delimeter === "number" &&
-    startIndex < delimeter
-  ) {
-    updateDbRecord({ startIndex, delimeter });
-  } else updateDbRecord();
-
-  res.send("Updates to articles records has started!");
-});
-
-app.post("/scrap/rave/circular-economy", verifyToken, (req, res) => {
-  const { startIndex, delimeter } = req.body;
-  if (
-    typeof startIndex === "number" &&
-    typeof delimeter === "number" &&
-    startIndex < delimeter
-  ) {
-    extract_ce({ startIndex, delimeter });
-  } else extract_ce();
-
-  res.send("Rave circular economy scrapping has started!");
-});
-
-app.post("/acclab-content", verifyToken, (req, res) => {
-  acclab_publications();
-  res.send("Acclab publications scrapping has started!");
-});
 
 //DEFINE ERROR HANDLING ENDPOINTS
 app.use((req, res, next) => {
@@ -147,105 +97,55 @@ app.use((err, req, res, next) => {
 
 /* 
 To prevent memory issues on Azure web service, 
-the cron job will split over weekends, 
-running from Friday 7 PM to Sunday 11 PM.
-With 183 country/language page instances on UNDP websites, 
-the cron job runs 7 times over the weekend 
-to ensure every page is checked.
-It runs every Friday from 7 PM at 7-hour intervals.
+the cron job will split over the week.
 */
 
-if(process.env.APP_ID === 'ce_rave'){
-  cron.schedule("0 * * * 4", () => {
-    extract_ce({ startIndex: 0, delimeter: 25 });
-  });
-  
-  cron.schedule("0 * * * 5", () => {
-    extract_ce({ startIndex: 26, delimeter: 51 });
-  });
-  
-  cron.schedule("0 * * * 6", () => {
-    extract_ce({ startIndex: 52, delimeter: 77 });
-  });
-  
-  cron.schedule("0 * * * 7", () => {
-    extract_ce({ startIndex: 78, delimeter: 103 });
-  });
-  
-  cron.schedule("0 * * * 1", () => {
-    extract_ce({ startIndex: 104, delimeter: 129 });
-  });
-  
-  cron.schedule("0 * * * 2", () => {
-    extract_ce({ startIndex: 130, delimeter: 155 });
-  });
-  
-  cron.schedule("0 * * * 3", () => {
-    extract_ce({ startIndex: 156, delimeter: 183 });
-  });
+cron.schedule("0 0 * * 0", () => {
+  extractBlogUrl({ startIndex: 0, delimeter: 25 });
+});
 
-} else{
+cron.schedule("0 12 * * 0", () => {
+  extractBlogUrl({ startIndex: 26, delimeter: 51 });
+});
 
-  cron.schedule("0 0 * * 0", () => {
-    extractBlogUrl({ startIndex: 0, delimeter: 25 });
-  });
-  
-  cron.schedule("0 12 * * 0", () => {
-    extractBlogUrl({ startIndex: 26, delimeter: 51 });
-  });
-  
-  cron.schedule("0 0 * * 1", () => {
-    extractBlogUrl({ startIndex: 52, delimeter: 77 });
-  });
-  
-  cron.schedule("0 0 * * 2", () => {
-    extractBlogUrl({ startIndex: 78, delimeter: 103 });
-  });
-  
-  cron.schedule("0 0 * * 3", () => {
-    extractBlogUrl({ startIndex: 104, delimeter: 129 });
-  });
-  
-  cron.schedule("0 0 * * 4", () => {
-    extractBlogUrl({ startIndex: 130, delimeter: 155 });
-  });
-  
-  cron.schedule("0 0 * * 5", () => {
-    extractBlogUrl({ startIndex: 156, delimeter: 182 });
-  });
-  
-  // Create the cron job to update toolkit content twice a month
-  // cron.schedule("0 12 * * 3", async () => {
-  //   console.log("Running scrapper...");
-  //   try {
-  //     routes.cron.scrapper();
-  //     console.log("Scrapper started successfully.");
-  //   } catch (error) {
-  //     console.error("Error occurred while running scrapper:", error);
-  //   }
-  // });
-  
-  // Create the cron job to update acclab medium content weekly
-  cron.schedule("0 12 * * 5", async () => {
-    try {
-      routes.cron.medium_posts();
-      console.log("Medium Scrapper started successfully.");
-    } catch (error) {
-      console.error("Error occurred while running Medium scrapper:", error);
-    }
-  });
-  
-  cron.schedule("0 0 * * 6", async () => {
-    try {
-      acclab_publications();
-      console.log("Official webpage Scrapper started successfully.");
-    } catch (error) {
-      console.error("Error occurred while running Medium scrapper:", error);
-    }
-  });
-}
+cron.schedule("0 0 * * 1", () => {
+  extractBlogUrl({ startIndex: 52, delimeter: 77 });
+});
 
+cron.schedule("0 0 * * 2", () => {
+  extractBlogUrl({ startIndex: 78, delimeter: 103 });
+});
 
+cron.schedule("0 0 * * 3", () => {
+  extractBlogUrl({ startIndex: 104, delimeter: 129 });
+});
+
+cron.schedule("0 0 * * 4", () => {
+  extractBlogUrl({ startIndex: 130, delimeter: 155 });
+});
+
+cron.schedule("0 0 * * 5", () => {
+  extractBlogUrl({ startIndex: 156, delimeter: 182 });
+});
+
+// Create the cron job to update acclab medium content weekly
+cron.schedule("0 12 * * 5", async () => {
+  try {
+    routes.cron.scrap_medium_posts();
+    console.log("Medium Scrapper started successfully.");
+  } catch (error) {
+    console.error("Error occurred while running Medium scrapper:", error);
+  }
+});
+
+cron.schedule("0 0 * * 6", async () => {
+  try {
+    acclab_publications();
+    console.log("Official webpage Scrapper started successfully.");
+  } catch (error) {
+    console.error("Error occurred while running Medium scrapper:", error);
+  }
+});
 
 app.listen(port, () => {
   console.log(`app listening on port ${port}`);

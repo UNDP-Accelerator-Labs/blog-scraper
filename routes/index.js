@@ -1,9 +1,10 @@
 const {
-  bg_scrap,
-  tk_scrap,
-  scrapper,
+  browse_data,
+  get_blog_stats,
+  get_toolkit_data,
+  toolkit_scrapper,
   cleanup,
-  medium_posts,
+  scrap_medium_posts,
   getWebContent,
   get_ce_rave,
 } = include("/controllers");
@@ -14,11 +15,17 @@ if (!exports.cron) {
   exports.cron = {};
 }
 
-exports.api.blog = bg_scrap;
-exports.api.toolkit = tk_scrap;
-exports.api.cleanup = cleanup;
-exports.api.getWebContent = getWebContent;
+exports.api.browse_data = browse_data;
+exports.api.get_blog_stats = get_blog_stats;
+
 exports.api.get_ce_rave = get_ce_rave;
 
-exports.cron.medium_posts = medium_posts;
-exports.cron.scrapper = scrapper;
+exports.api.get_toolkit_data = get_toolkit_data;
+
+exports.api.cleanup = cleanup;
+
+exports.api.getWebContent = getWebContent;
+
+
+exports.cron.scrap_medium_posts = scrap_medium_posts;
+exports.cron.toolkit_scrapper = toolkit_scrapper;

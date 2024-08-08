@@ -8,9 +8,11 @@ const extractAndSaveData = require("./save");
 const { config } = include('/config');
 
 const searchForKeywords = async (_kwarq) => {
-  const { url, driver, defaultTerms, defaultDB, ignoreRelevanceCheck } = _kwarq;
+  const { url, driver, defaultDB } = _kwarq;
 
-  let keywords = defaultTerms ?? searchTerms["en"];
+  const ignoreRelevanceCheck = process.env.IGNORE_RELEVANCE_CHECK == 'true'
+
+  let keywords = [];
   let lang = await extractLanguageFromUrl(url);
 
   let countryName = null;
@@ -21,8 +23,11 @@ const searchForKeywords = async (_kwarq) => {
     typeSeachText = null;
   newurls = [];
 
-  if (lang !== null) {
+  if (lang !== null && process.env.USE_URL_LANGUAGE == 'true') {
     keywords = (await searchTerms[lang]) || searchTerms["en"];
+  }
+  if(keywords.length <= 0 && process.env.USE_DEFAULT_KEYWORDS == 'true'){
+    keywords = searchTerms['default']
   }
 
   for (let i = 0; i < keywords.length; i++) {

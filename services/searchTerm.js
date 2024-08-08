@@ -1,4 +1,4 @@
-exports.searchTerms = {
+const keywords = {
   en: [
     "accelerator lab",
     "innovation-acclab",
@@ -59,3 +59,6 @@ exports.checkSearchTerm = (content) => {
 
   return foundTerms;
 };
+
+const { SEARCH_TERMS } = process.env
+exports.searchTerms = SEARCH_TERMS ? JSON.parse(SEARCH_TERMS) : keywords

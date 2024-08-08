@@ -5,7 +5,7 @@ const extractAndSaveData = require("../scrapper/save");
 const { DB } = include("db");
 const { checkUrlQuery } = require("../scrapper/scrap-query");
 
-const medium_posts = async () => {
+exports.scrap_medium_posts = async () => {
   const baseurls = [
     "https://acclabs.medium.com/",
   ];
@@ -66,4 +66,3 @@ const medium_posts = async () => {
   console.log("Scrapping completed.")
 };
 
-module.exports = medium_posts;

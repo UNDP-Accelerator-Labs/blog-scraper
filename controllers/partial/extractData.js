@@ -258,8 +258,8 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck = false) => 
     }
     
     // Extract document meta
-    const [lang, location, meta] = data?.content ?? await getDocumentMeta(data.content);
-    const iso3_b = url ?? await getIso3(url);
+    const [lang, location, meta] = data?.content ? await getDocumentMeta(data.content) : [null, null, null];
+    const iso3_b = url ? await getIso3(url) : null;
     if(!iso3_b && data.url.includes('/acceleratorlabs/')){
       iso3_b = 'NUL' //Url matches Global network page.
     }
@@ -273,6 +273,9 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck = false) => 
         data.parsed_date = date;
         data.postedDate = date;
       }
+    }
+    else if(data.postedDate){
+      data.parsed_date = data.postedDate;
     }
 
     return data;
