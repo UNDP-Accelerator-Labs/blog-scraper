@@ -3,7 +3,7 @@ const extractDataFromUrl = require("../../partial/extractData");
 const saveDataToDatabase = require("../../partial/saveData");
 
 const getWebContent = async (req, res) => {
-  const { url, embed_data } = req.body;
+  const { url, embed_data, nlp_token } = req.body;
 
   // Setup WebDriver
   let driver;
@@ -17,8 +17,7 @@ const getWebContent = async (req, res) => {
   try {
     // Extract data from URL
     const data = await extractDataFromUrl(driver, url, true);
-    if (embed_data) {
-        //TODO: INTEGRATE EMBED NLP API
+    if (embed_data && process.env.NLP_WRITE_TOKEN === nlp_token) {
       // Save data to database
       await saveDataToDatabase({data});
     }
