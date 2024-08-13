@@ -32,7 +32,10 @@ app.use((req, res, next) => {
   res.locals.nonce = crypto.randomBytes(32).toString("hex");
   next();
 });
-app.use(helmet(csp_config));
+
+if(process.env.NODE_ENV == 'production'){
+  app.use(helmet(csp_config));
+}
 app.use(function (req, res, next) {
   res.setHeader("Access-Control-Allow-Origin", "same-origin");
   next();

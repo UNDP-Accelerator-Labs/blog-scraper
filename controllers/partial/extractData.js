@@ -259,7 +259,7 @@ const extractDataFromUrl = async (driver, url, ignoreRelevanceCheck = false) => 
     
     // Extract document meta
     const [lang, location, meta] = data?.content ? await getDocumentMeta(data.content) : [null, null, null];
-    const iso3_b = url ? await getIso3(url) : null;
+    let iso3_b = url ? await getIso3(url) : null;
     if(!iso3_b && data.url.includes('/acceleratorlabs/')){
       iso3_b = 'NUL' //Url matches Global network page.
     }
