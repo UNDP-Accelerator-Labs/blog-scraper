@@ -33,11 +33,11 @@ app.use((req, res, next) => {
   next();
 });
 
-if(process.env.NODE_ENV == 'production'){
+if (process.env.NODE_ENV == "production") {
   app.use(helmet(csp_config));
 }
 app.use(function (req, res, next) {
-  res.setHeader("Access-Control-Allow-Origin", "same-origin");
+  res.setHeader("Access-Control-Allow-Origin", "*");
   next();
 });
 
@@ -86,7 +86,6 @@ app.get("/blogs", verifyToken, routes.api.browse_data);
 app.get("/blogs/stats", verifyToken, routes.api.get_blog_stats);
 
 app.post("/get-webpage-content", verifyToken, routes.api.getWebContent);
-
 
 //DEFINE ERROR HANDLING ENDPOINTS
 app.use((req, res, next) => {
