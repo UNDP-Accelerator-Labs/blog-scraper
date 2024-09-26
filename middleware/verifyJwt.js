@@ -1,7 +1,7 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
-const { APP_SECRET } = process.env;
+const { APP_SECRET, APP_CRED } = process.env;
 
 // Verify Token middleware
 const verifyToken = (req, res, next) => {
@@ -14,7 +14,7 @@ const verifyToken = (req, res, next) => {
   const isLocalhost =
     `${reqHost}`.startsWith("localhost:") || `${reqHost}` === "localhost";
 
-  if (token == APP_SECRET) {
+  if (token == APP_CRED) {
     return next();
   } else {
     let tobj;
