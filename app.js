@@ -83,7 +83,7 @@ app.get("/version", (req, res) => {
 
 //BLOG DATA APIs
 app.get("/blogs", verifyToken, routes.api.browse_data);
-app.get("/articles", verifyToken, routes.api.get_articles);
+app.get("/articles", routes.api.get_articles);
 app.get("/blogs/stats", verifyToken, routes.api.get_blog_stats);
 
 app.post("/get-webpage-content", verifyToken, routes.api.getWebContent);
