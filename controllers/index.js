@@ -3,7 +3,8 @@ const {
   get_stats,
   cleanup,
   getWebContent,
-  scrap_medium_posts
+  scrap_medium_posts,
+  get_articles,
 } = require("./blog");
 const { get_toolkit_data, toolkit_scrapper } = require("./toolkits");
 
@@ -18,4 +19,4 @@ exports.cleanup = cleanup;
 exports.scrap_medium_posts = scrap_medium_posts;
 
 exports.getWebContent = getWebContent;
-
+exports.get_articles = get_articles;

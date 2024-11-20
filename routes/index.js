@@ -7,6 +7,7 @@ const {
   scrap_medium_posts,
   getWebContent,
   get_ce_rave,
+  get_articles,
 } = include("/controllers");
 if (!exports.api) {
   exports.api = {};
@@ -25,7 +26,7 @@ exports.api.get_toolkit_data = get_toolkit_data;
 exports.api.cleanup = cleanup;
 
 exports.api.getWebContent = getWebContent;
-
+exports.api.get_articles = get_articles;
 
 exports.cron.scrap_medium_posts = scrap_medium_posts;
 exports.cron.toolkit_scrapper = toolkit_scrapper;

@@ -80,7 +80,7 @@ exports.searchBlogQuery = (
   return {
     text: `
     WITH search_results AS (
-      SELECT a.url, a.article_type, a.title, a.iso3, a.posted_date, a.posted_date_str, a.parsed_date, a.language, a.created_at, c.html_content,
+      SELECT a.id, a.url, a.article_type, a.title, a.iso3, a.posted_date, a.posted_date_str, a.parsed_date, a.language, a.created_at, c.html_content,
           regexp_replace(
               regexp_replace(${textColumn}, E'\\n', ' ', 'g'),
               E'<iframe[^>]*>.*?</iframe>',

@@ -223,16 +223,15 @@ exports.embedDocument = async (id) => {
     return console.log("Embedding successfully added");
   } catch (error) {
     console.error("Error: ", error);
-    console.error("Input: ",  body);
+    console.error("Input: ", body);
     throw Error(error);
   }
 };
 
-
 exports.getIso3 = async (url) => {
   let body = {
     token: API_TOKEN,
-    url
+    url,
   };
 
   try {
