@@ -1,21 +1,38 @@
 const { DB } = include("db/");
 
 exports.get_articles = async (req, res) => {
-  const { id, url } = req.query;
+  const { id, url, pinboard } = req.query;
+
+  // Normalize `id` and `url` into arrays
+  let idList = id ? (Array.isArray(id) ? id : [id]).map(Number) : [];
+  let urlList = url ? (Array.isArray(url) ? url : [url]) : [];
+
+  if (pinboard && +pinboard) {
+    idList = await DB.general.any(
+      `
+      SELECT a.pad FROM pinboard_contributions a
+      JOIN pinboards b
+      ON a.pinboard = b.id
+      WHERE b.id = $1
+      AND a.db = 5
+      `,
+      [pinboard]
+    );
+
+    idList = idList.map((row) => row.pad);
+  }
 
   // Ensure at least one of `id` or `url` is provided
   if (
     (!id || (Array.isArray(id) && id.length === 0)) &&
-    (!url || (Array.isArray(url) && url.length === 0))
+    (!url || (Array.isArray(url) && url.length === 0)) &&
+    idList.length === 0 &&
+    urlList.length === 0
   ) {
     return res
       .status(400)
       .json({ error: "At least one 'id' or 'url' must be provided." });
   }
-
-  // Normalize `id` and `url` into arrays
-  const idList = id ? (Array.isArray(id) ? id : [id]).map(Number) : [];
-  const urlList = url ? (Array.isArray(url) ? url : [url]) : [];
 
   try {
     const results = await DB.blog.any(
