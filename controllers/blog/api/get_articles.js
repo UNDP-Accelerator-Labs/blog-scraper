@@ -53,7 +53,34 @@ exports.get_articles = async (req, res) => {
       [idList, urlList]
     );
 
-    return res.status(200).json(results);
+    // Extract IDs from the first query results
+    const articleIds = results.map((item) => item.id);
+
+    // Fetch related data using the extracted IDs
+    const relatedData = await DB.general.any(
+      `
+      SELECT id as pinboard_id, title, b.pad as article_id
+      FROM pinboards a
+      JOIN pinboard_contributions b ON b.pinboard = a.id
+      WHERE b.pad = ANY ($1::int[])
+        AND a.status >= 1
+      `,
+      [articleIds]
+    );
+
+    // Merge the related data into the first query results
+    const mergedResults = results.map((item) => {
+      // Find matching related data by article_id
+      const relatedItems = relatedData.filter(
+        (rel) => rel.article_id === item.id
+      );
+      return {
+        ...item,
+        pinboards: relatedItems,
+      };
+    });
+
+    return res.status(200).json(mergedResults);
   } catch (err) {
     console.error("Database query failed:", err);
     return res.status(500).json({ error: "An unexpected error occurred." });
