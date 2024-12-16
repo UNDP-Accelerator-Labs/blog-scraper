@@ -6,9 +6,21 @@ const saveDataToDatabase = async (_kwarq) => {
   const { data, id, defaultDB } = _kwarq;
   if (!data)
     return console.log(
-      "Skipping saving record. Content is not relevant to Accelerator lab. URL: "
-      + data?.url 
+      "Skipping saving record. Content is not relevant to Accelerator lab. URL: " +
+        data?.url
     );
+
+  if (
+    (data.parsed_date && new Date(data.parsed_date) < new Date("2019-01-01")) ||
+    (data.postedDate && new Date(data.postedDate) < new Date("2019-01-01"))
+  ) {
+    console.log(
+      "Skipping saving record. Content is not relevant to Accelerator Lab. Date is before Acclabs. URL: " +
+        data?.url
+    );
+    return;
+  }
+
   try {
     let db = defaultDB ?? DB.blog;
     let embedding_id;
@@ -41,7 +53,7 @@ const saveDataToDatabase = async (_kwarq) => {
             data.postedDateStr,
             data.iso3,
             data.parsed_date,
-            data.relevance  || 2
+            data.relevance || 2,
           ]
         );
 
@@ -75,7 +87,7 @@ const saveDataToDatabase = async (_kwarq) => {
           )
         );
 
-        embedding_id = record?.id
+        embedding_id = record?.id;
       } else {
         // Update existing record
         batch.push(
@@ -126,25 +138,25 @@ const saveDataToDatabase = async (_kwarq) => {
             [id, data.raw_html]
           )
         );
-        
-        embedding_id = id
+
+        embedding_id = id;
       }
 
       return t.batch(batch).catch((err) => console.log(err));
     });
     console.log("Saving record successful.");
 
-     // Embed document using the NLP API
-     if(embedding_id){
+    // Embed document using the NLP API
+    if (embedding_id) {
       embedDocument(embedding_id)
-       .then(() => {
-         console.log('Document embedded successfully.');
-       })
-       .catch((error) => {
-         console.error('Error executing function:', error);
-         //Todo: what happens when a document embedding fails? 
-       });
-     }
+        .then(() => {
+          console.log("Document embedded successfully.");
+        })
+        .catch((error) => {
+          console.error("Error executing function:", error);
+          //Todo: what happens when a document embedding fails?
+        });
+    }
   } catch (error) {
     console.error("Error saving data to database:", error);
   }
