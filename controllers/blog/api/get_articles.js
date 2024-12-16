@@ -104,25 +104,15 @@ exports.get_articles = async (req, res) => {
         (rel) => rel.article_id === item.id
       );
       return {
+        totalRecords,
+        page: page ? parseInt(page, 10) : 1,
+        limit: limit ? parseInt(limit, 10) : mergedResults.length,
         ...item,
         pinboards: relatedItems,
       };
     });
 
-    let response = {
-      data: mergedResults,
-    };
-
-    if (+pinboard) {
-      response = {
-        totalRecords,
-        page: page ? parseInt(page, 10) : 1,
-        limit: limit ? parseInt(limit, 10) : mergedResults.length,
-        ...response,
-      };
-    }
-
-    return res.status(200).json(response);
+    return res.status(200).json(mergedResults);
   } catch (err) {
     console.error("Database query failed:", err);
     return res.status(500).json({ error: "An unexpected error occurred." });
