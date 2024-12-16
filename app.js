@@ -33,9 +33,9 @@ app.use((req, res, next) => {
   next();
 });
 
-if (process.env.NODE_ENV == "production") {
-  app.use(helmet(csp_config));
-}
+// if (process.env.NODE_ENV == "production") {
+//   app.use(helmet(csp_config));
+// }
 app.use(function (req, res, next) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   next();
@@ -46,7 +46,13 @@ app.use("/scripts", express.static(path.join(__dirname, "./node_modules")));
 app.use("/config", express.static(path.join(__dirname, "./config")));
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
-app.use(xss());
+const options = {
+  allowedKeys: ["referer"],
+  allowedAttributes: {
+    referer: ["&"],
+  },
+};
+app.use(xss(options));
 
 const cookie = {
   domain: process.env.NODE_ENV === "production" ? app_base_host : undefined,
