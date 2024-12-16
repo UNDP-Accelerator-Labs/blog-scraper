@@ -1,13 +1,41 @@
 const { DB } = include("db/");
 
 exports.get_articles = async (req, res) => {
-  const { id, url, pinboard } = req.query;
+  const { id, url, pinboard, page, limit } = req.query;
 
   // Normalize `id` and `url` into arrays
   let idList = id ? (Array.isArray(id) ? id : [id]).map(Number) : [];
   let urlList = url ? (Array.isArray(url) ? url : [url]) : [];
+  let pagination = {};
+  let totalRecords = 0;
 
   if (pinboard && +pinboard) {
+    // Handle pagination parameters
+    const pageNum = parseInt(page, 10) || 1;
+    const pageLimit = parseInt(limit, 10) || 10;
+    const offset = (pageNum - 1) * pageLimit;
+
+    pagination = { limit: pageLimit, offset };
+
+    // Fetch total count of records
+    totalRecords = await DB.general
+      .one(
+        `
+      SELECT COUNT(*) AS total
+      FROM pinboard_contributions a
+      JOIN pinboards b
+      ON a.pinboard = b.id
+      WHERE b.id = $1 AND a.db = 5
+      `,
+        [pinboard]
+      )
+      .then((row) => parseInt(row.total, 10));
+
+    if (!totalRecords)
+      return res
+        .status(200)
+        .json({ message: "No related articles found", data: [] });
+
     idList = await DB.general.any(
       `
       SELECT a.pad FROM pinboard_contributions a
@@ -15,8 +43,9 @@ exports.get_articles = async (req, res) => {
       ON a.pinboard = b.id
       WHERE b.id = $1
       AND a.db = 5
+      ${page && limit ? `LIMIT $2 OFFSET $3` : ""}
       `,
-      [pinboard]
+      page && limit ? [pinboard, pageLimit, offset] : [pinboard]
     );
 
     idList = idList.map((row) => row.pad);
@@ -80,7 +109,20 @@ exports.get_articles = async (req, res) => {
       };
     });
 
-    return res.status(200).json(mergedResults);
+    let response = {
+      data: mergedResults,
+    };
+
+    if (+pinboard) {
+      response = {
+        totalRecords,
+        page: page ? parseInt(page, 10) : 1,
+        limit: limit ? parseInt(limit, 10) : mergedResults.length,
+        ...response,
+      };
+    }
+
+    return res.status(200).json(response);
   } catch (err) {
     console.error("Database query failed:", err);
     return res.status(500).json({ error: "An unexpected error occurred." });
