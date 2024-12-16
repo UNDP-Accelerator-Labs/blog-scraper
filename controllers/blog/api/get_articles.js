@@ -104,9 +104,9 @@ exports.get_articles = async (req, res) => {
         (rel) => rel.article_id === item.id
       );
       return {
-        totalRecords,
+        totalRecords: totalRecords ? totalRecords : results?.length,
         page: page ? parseInt(page, 10) : 1,
-        limit: limit ? parseInt(limit, 10) : mergedResults.length,
+        limit: limit ? parseInt(limit, 10) : results?.length,
         ...item,
         pinboards: relatedItems,
       };
