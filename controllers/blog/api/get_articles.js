@@ -43,9 +43,9 @@ exports.get_articles = async (req, res) => {
       ON a.pinboard = b.id
       WHERE b.id = $1
       AND a.db = 5
-      ${page && limit ? `LIMIT $2 OFFSET $3` : ""}
+      ${limit ? `LIMIT $2 OFFSET $3` : ""}
       `,
-      page && limit ? [pinboard, pageLimit, offset] : [pinboard]
+      limit ? [pinboard, pageLimit, offset] : [pinboard]
     );
 
     idList = idList.map((row) => row.pad);
@@ -111,6 +111,22 @@ exports.get_articles = async (req, res) => {
         pinboards: relatedItems,
       };
     });
+
+    // HACK: DELETE FROM PINBOARD TABLE IDS THAT DOES NOT EXIST IN BLOG DB
+    if (pinboard && idList && idList.length > articleIds.length) {
+      const unrelatedIds = idList.filter((item) => !articleIds.includes(item));
+      if (unrelatedIds.length) {
+        await DB.general.any(
+          `
+          DELETE FROM pinboard_contributions a
+          WHERE a.pinboard = $1
+          AND a.pad = ANY ($2::int[])
+          AND a.db = 5
+          `,
+          [pinboard, unrelatedIds]
+        );
+      }
+    }
 
     return res.status(200).json(mergedResults);
   } catch (err) {
