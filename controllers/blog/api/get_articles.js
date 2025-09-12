@@ -49,6 +49,7 @@ exports.get_articles = async (req, res) => {
     );
 
     idList = idList.map((row) => row.pad);
+    console.log("idList", idList);
   }
 
   // Ensure at least one of `id` or `url` is provided
@@ -74,14 +75,14 @@ exports.get_articles = async (req, res) => {
               'gi'
           ) AS content
       FROM articles a
-      JOIN article_content b ON b.article_id = a.id 
-      JOIN article_html_content c ON c.article_id = a.id
+      LEFT JOIN article_content b ON b.article_id = a.id 
+      LEFT JOIN article_html_content c ON c.article_id = a.id
       WHERE (array_length($1::int[], 1) > 0 AND a.id = ANY ($1::int[]))
-         OR (array_length($2::text[], 1) > 0 AND a.url = ANY ($2::text[]))
+        
       `,
       [idList, urlList]
     );
-
+    console.log("results", results.length);
     // Extract IDs from the first query results
     const articleIds = results.map((item) => item.id);
 
