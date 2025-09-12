@@ -1,6 +1,6 @@
 doc2python==0.0.7
 docx2python~=2.0.0
-numpy==1.16.2
+# numpy==1.16.2   # removed: system package provides numpy or pin a newer version if needed
 pandas~=1.1.0
 pikepdf~=6.2.0
 python_dateutil~=2.8.0
