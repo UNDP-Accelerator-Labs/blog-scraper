@@ -113,20 +113,20 @@ exports.get_articles = async (req, res) => {
     });
 
     // HACK: DELETE FROM PINBOARD TABLE IDS THAT DOES NOT EXIST IN BLOG DB
-    if (pinboard && idList && idList.length > articleIds.length) {
-      const unrelatedIds = idList.filter((item) => !articleIds.includes(item));
-      if (unrelatedIds.length) {
-        await DB.general.any(
-          `
-          DELETE FROM pinboard_contributions a
-          WHERE a.pinboard = $1
-          AND a.pad = ANY ($2::int[])
-          AND a.db = 5
-          `,
-          [pinboard, unrelatedIds]
-        );
-      }
-    }
+    // if (pinboard && idList && idList.length > articleIds.length) {
+    //   const unrelatedIds = idList.filter((item) => !articleIds.includes(item));
+    //   if (unrelatedIds.length) {
+    //     await DB.general.any(
+    //       `
+    //       DELETE FROM pinboard_contributions a
+    //       WHERE a.pinboard = $1
+    //       AND a.pad = ANY ($2::int[])
+    //       AND a.db = 5
+    //       `,
+    //       [pinboard, unrelatedIds]
+    //     );
+    //   }
+    // }
 
     return res.status(200).json(mergedResults);
   } catch (err) {
