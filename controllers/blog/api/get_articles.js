@@ -49,7 +49,6 @@ exports.get_articles = async (req, res) => {
     );
 
     idList = idList.map((row) => row.pad);
-    console.log("idList", idList);
   }
 
   // Ensure at least one of `id` or `url` is provided
@@ -82,7 +81,6 @@ exports.get_articles = async (req, res) => {
       `,
       [idList, urlList]
     );
-    console.log("results", results.length);
     // Extract IDs from the first query results
     const articleIds = results.map((item) => item.id);
 
