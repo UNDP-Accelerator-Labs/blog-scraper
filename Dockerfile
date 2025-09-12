@@ -1,5 +1,5 @@
 # Use the official Node.js image as a base
-FROM node:16-slim
+FROM node:16-bullseye-slim
 
 # Install essential packages
 RUN apt-get update \
