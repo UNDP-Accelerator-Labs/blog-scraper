@@ -1,10 +1,11 @@
+const { lab } = require("d3");
 const { searchBlogQuery } = require("./query");
 const { DB } = include("db/");
 const { sqlregex } = include("middleware/search");
 
 exports.main = async (kwargs) => {
   const conn = kwargs.connection ? kwargs.connection : DB.conn;
-  const { req, page, page_content_limit, iso3 } = kwargs || {};
+  const { req, page, page_content_limit, iso3, lab_relevance } = kwargs || {};
 
   let { search, country, type, language, bureau } = req.query || {};
   const searchText = search || "";
@@ -20,7 +21,8 @@ exports.main = async (kwargs) => {
           type,
           page_content_limit,
           language,
-          iso3
+          iso3,
+          lab_relevance
         )
       )
       .then(async (results) => {

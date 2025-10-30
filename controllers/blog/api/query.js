@@ -1,6 +1,6 @@
 const { sqlregex } = include("middleware/search");
 
-const theWhereClause = (country, type, language, iso3) => {
+const theWhereClause = (country, type, language, iso3, lab_relevance) => {
   let whereClause = "";
   const hq = ["USA", "NUL", "CAN", "GBR"];
   if (country) {
@@ -36,10 +36,15 @@ const theWhereClause = (country, type, language, iso3) => {
     whereClause += ` AND iso3 IN ('${iso3.join("','")}')`;
   }
 
+  if (lab_relevance === "true" || lab_relevance === true) {
+    whereClause += ` AND relevance >= 2`;
+  } else {
+    whereClause += ` AND relevance > 1`;
+  }
+
   whereClause += `
     AND (article_type = 'blog' OR article_type = 'publications')
     AND iso3 IS NOT NULL
-    AND relevance > 1
   `;
 
   return whereClause;
@@ -69,9 +74,16 @@ exports.searchBlogQuery = (
   type,
   page_content_limit,
   language,
-  iso3
+  iso3,
+  lab_relevance
 ) => {
-  let whereClause = theWhereClause(country, type, language, iso3);
+  let whereClause = theWhereClause(
+    country,
+    type,
+    language,
+    iso3,
+    lab_relevance
+  );
   let values = [page_content_limit, (page - 1) * page_content_limit, +page];
 
   let searchTextCondition = searchTextConditionFn(searchText);
@@ -118,8 +130,21 @@ exports.searchBlogQuery = (
   };
 };
 
-exports.articleGroup = (searchText, country, type, language, iso3) => {
-  let whereClause = theWhereClause(country, type, language, iso3);
+exports.articleGroup = (
+  searchText,
+  country,
+  type,
+  language,
+  iso3,
+  lab_relevance
+) => {
+  let whereClause = theWhereClause(
+    country,
+    type,
+    language,
+    iso3,
+    lab_relevance
+  );
   let searchTextCondition = searchTextConditionFn(searchText);
 
   return {
@@ -136,8 +161,21 @@ exports.articleGroup = (searchText, country, type, language, iso3) => {
   };
 };
 
-exports.languageGroup = (searchText, country, type, language, iso3) => {
-  let whereClause = theWhereClause(country, type, language, iso3);
+exports.languageGroup = (
+  searchText,
+  country,
+  type,
+  language,
+  iso3,
+  lab_relevance
+) => {
+  let whereClause = theWhereClause(
+    country,
+    type,
+    language,
+    iso3,
+    lab_relevance
+  );
   let searchTextCondition = searchTextConditionFn(searchText);
 
   return {
@@ -155,8 +193,21 @@ exports.languageGroup = (searchText, country, type, language, iso3) => {
   };
 };
 
-exports.countryGroup = (searchText, country, type, language, iso3) => {
-  let whereClause = theWhereClause(country, type, language, iso3);
+exports.countryGroup = (
+  searchText,
+  country,
+  type,
+  language,
+  iso3,
+  lab_relevance
+) => {
+  let whereClause = theWhereClause(
+    country,
+    type,
+    language,
+    iso3,
+    lab_relevance
+  );
   let searchTextCondition = searchTextConditionFn(searchText);
 
   return {
@@ -173,8 +224,21 @@ exports.countryGroup = (searchText, country, type, language, iso3) => {
   };
 };
 
-exports.statsQuery = (searchText, country, type, language, iso3) => {
-  let whereClause = theWhereClause(country, type, language, iso3);
+exports.statsQuery = (
+  searchText,
+  country,
+  type,
+  language,
+  iso3,
+  lab_relevance
+) => {
+  let whereClause = theWhereClause(
+    country,
+    type,
+    language,
+    iso3,
+    lab_relevance
+  );
   let searchTextCondition = searchTextConditionFn(searchText);
 
   return {
@@ -229,8 +293,21 @@ exports.statsQuery = (searchText, country, type, language, iso3) => {
   };
 };
 
-exports.extractGeoQuery = (searchText, country, type, language, iso3) => {
-  let whereClause = theWhereClause(country, type, language, iso3);
+exports.extractGeoQuery = (
+  searchText,
+  country,
+  type,
+  language,
+  iso3,
+  lab_relevance
+) => {
+  let whereClause = theWhereClause(
+    country,
+    type,
+    language,
+    iso3,
+    lab_relevance
+  );
   let searchTextCondition = searchTextConditionFn(searchText);
 
   return {

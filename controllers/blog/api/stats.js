@@ -4,7 +4,7 @@ const { DB } = include("db/");
 exports.main = async (kwargs) => {
   const conn = kwargs.connection ? kwargs.connection : DB.conn;
   const { req, iso3 } = kwargs || {};
-  let { search, country, type, language } = req.query || {};
+  let { search, country, type, language, lab_relevance } = req.query || {};
 
   return conn
     .tx((t) => {
@@ -12,7 +12,16 @@ exports.main = async (kwargs) => {
 
       batch.push(
         t
-          .any(statsQuery(search?.trim(), country, type, language, iso3))
+          .any(
+            statsQuery(
+              search?.trim(),
+              country,
+              type,
+              language,
+              iso3,
+              lab_relevance
+            )
+          )
           .then(async (results) => results)
           .catch((err) => console.log(err))
       );
