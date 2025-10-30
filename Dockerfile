@@ -53,6 +53,8 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --no-cache-dir -U pip
+# ensure a pip version that tolerates textract's metadata and have build tools
+RUN pip3 install --no-cache-dir "pip<24.1" setuptools wheel
 
 RUN echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | \
     tee -a /etc/apt/sources.list.d/google.list
