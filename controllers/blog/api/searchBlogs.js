@@ -1,4 +1,3 @@
-const { lab } = require("d3");
 const { searchBlogQuery } = require("./query");
 const { DB } = include("db/");
 const { sqlregex } = include("middleware/search");
